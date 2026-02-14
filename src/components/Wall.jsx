@@ -1,7 +1,7 @@
 import { palette } from "../lib/palette";
 import WallCard from "./WallCard";
 
-export default function Wall({ submissions, loading }) {
+export default function Wall({ submissions, loading, isAdmin, onFeedback }) {
   if (loading) {
     return (
       <div style={{ textAlign: "center", padding: 60, color: palette.textMuted }}>
@@ -32,7 +32,7 @@ export default function Wall({ submissions, loading }) {
   return (
     <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
       {submissions.map((sub) => (
-        <WallCard key={sub.id} submission={sub} />
+        <WallCard key={sub.id} submission={sub} isAdmin={isAdmin} onFeedback={onFeedback} />
       ))}
     </div>
   );

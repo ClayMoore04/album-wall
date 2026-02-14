@@ -7,10 +7,11 @@ import AlbumPreview from "./AlbumPreview";
 export default function SubmitForm({ onSubmit }) {
   const [selectedAlbum, setSelectedAlbum] = useState(null);
   const [name, setName] = useState("");
+  const [email, setEmail] = useState("");
   const [note, setNote] = useState("");
   const [submitting, setSubmitting] = useState(false);
 
-  const canSubmit = selectedAlbum && name.trim();
+  const canSubmit = selectedAlbum && name.trim() && email.trim();
 
   const handleSubmit = async () => {
     if (!canSubmit) return;
@@ -22,6 +23,7 @@ export default function SubmitForm({ onSubmit }) {
       spotify_url: selectedAlbum.spotifyUrl,
       spotify_id: selectedAlbum.id,
       submitted_by: name.trim(),
+      email: email.trim(),
       note: note.trim(),
     });
     setSubmitting(false);
@@ -49,6 +51,20 @@ export default function SubmitForm({ onSubmit }) {
           value={name}
           onChange={(e) => setName(e.target.value)}
           placeholder="So Daniel knows who sent this"
+          style={inputStyle}
+        />
+      </div>
+
+      {/* Email */}
+      <div style={{ marginBottom: 16 }}>
+        <label style={labelStyle}>
+          Your email <span style={{ color: palette.coral }}>*</span>
+        </label>
+        <input
+          type="email"
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
+          placeholder="So Daniel can let you know what he thinks"
           style={inputStyle}
         />
       </div>

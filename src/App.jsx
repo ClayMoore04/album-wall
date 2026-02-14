@@ -7,17 +7,29 @@ import SubmitForm from "./components/SubmitForm";
 import ThankYou from "./components/ThankYou";
 import Wall from "./components/Wall";
 
+const ADMIN_PASSWORD = import.meta.env.VITE_ADMIN_PASSWORD;
+
 export default function App() {
   const [view, setView] = useState("submit");
   const [submissions, setSubmissions] = useState([]);
   const [loading, setLoading] = useState(true);
   const [justSubmitted, setJustSubmitted] = useState(false);
+  const [isAdmin, setIsAdmin] = useState(false);
 
-  // Fetch submissions from Supabase
+  // Check for admin mode via URL param
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const adminParam = params.get("admin");
+    if (adminParam && ADMIN_PASSWORD && adminParam === ADMIN_PASSWORD) {
+      setIsAdmin(true);
+      setView("wall");
+    }
+  }, []);
+
+  // Fetch submissions + realtime
   useEffect(() => {
     loadSubmissions();
 
-    // Realtime subscription
     if (!supabase) return;
     const channel = supabase
       .channel("submissions-realtime")
@@ -26,6 +38,15 @@ export default function App() {
         { event: "INSERT", schema: "public", table: "submissions" },
         (payload) => {
           setSubmissions((prev) => [payload.new, ...prev]);
+        }
+      )
+      .on(
+        "postgres_changes",
+        { event: "UPDATE", schema: "public", table: "submissions" },
+        (payload) => {
+          setSubmissions((prev) =>
+            prev.map((s) => (s.id === payload.new.id ? payload.new : s))
+          );
         }
       )
       .subscribe();
@@ -57,7 +78,6 @@ export default function App() {
 
   const addSubmission = async (submission) => {
     if (!supabase) {
-      // Fallback: just add to local state
       setSubmissions((prev) => [
         { ...submission, id: Date.now(), created_at: new Date().toISOString() },
         ...prev,
@@ -69,11 +89,46 @@ export default function App() {
     try {
       const { error } = await supabase.from("submissions").insert([submission]);
       if (error) throw error;
-      // Realtime will handle adding to the list
     } catch (e) {
       console.error("Failed to save submission:", e);
     }
     setJustSubmitted(true);
+  };
+
+  const handleFeedback = async (submissionId, feedback, email, albumName, artistName) => {
+    if (!supabase) return;
+
+    try {
+      // Update submission in Supabase
+      const { error } = await supabase
+        .from("submissions")
+        .update({
+          daniel_feedback: feedback,
+          feedback_at: new Date().toISOString(),
+        })
+        .eq("id", submissionId);
+
+      if (error) throw error;
+
+      // Send email notification
+      if (email) {
+        await fetch("/api/send-feedback-email", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "x-admin-key": ADMIN_PASSWORD,
+          },
+          body: JSON.stringify({
+            email,
+            albumName,
+            artistName,
+            feedback,
+          }),
+        });
+      }
+    } catch (e) {
+      console.error("Failed to send feedback:", e);
+    }
   };
 
   return (
@@ -112,11 +167,27 @@ export default function App() {
         }}
       >
         <Header />
-        <TabToggle
-          view={view}
-          setView={setView}
-          count={submissions.length}
-        />
+
+        {/* Admin indicator */}
+        {isAdmin && (
+          <div
+            style={{
+              textAlign: "center",
+              marginBottom: 12,
+              padding: "6px 12px",
+              background: "rgba(29,185,84,0.1)",
+              border: `1px solid rgba(29,185,84,0.3)`,
+              borderRadius: 8,
+              fontSize: 12,
+              fontFamily: "'Space Mono', monospace",
+              color: palette.accent,
+            }}
+          >
+            Admin mode — you can reply to submissions
+          </div>
+        )}
+
+        <TabToggle view={view} setView={setView} count={submissions.length} />
 
         {view === "submit" ? (
           justSubmitted ? (
@@ -131,7 +202,12 @@ export default function App() {
             <SubmitForm onSubmit={addSubmission} />
           )
         ) : (
-          <Wall submissions={submissions} loading={loading} />
+          <Wall
+            submissions={submissions}
+            loading={loading}
+            isAdmin={isAdmin}
+            onFeedback={handleFeedback}
+          />
         )}
       </div>
     </div>
