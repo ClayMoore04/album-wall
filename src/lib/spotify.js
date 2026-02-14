@@ -1,13 +1,13 @@
-export async function searchAlbums(query) {
+export async function searchAlbums(query, signal) {
   if (!query.trim()) return [];
 
   const res = await fetch(
-    `/api/spotify-search?q=${encodeURIComponent(query.trim())}`
+    `/api/spotify-search?q=${encodeURIComponent(query.trim())}`,
+    { signal }
   );
 
   if (!res.ok) {
-    console.error("Spotify search failed:", res.status);
-    return [];
+    throw new Error(`Spotify search failed: ${res.status}`);
   }
 
   return res.json();

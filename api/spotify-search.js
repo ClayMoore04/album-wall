@@ -1,8 +1,10 @@
 let cachedToken = null;
 let tokenExpiry = 0;
 
-async function getToken() {
-  if (cachedToken && Date.now() < tokenExpiry) return cachedToken;
+async function getToken(forceRefresh = false) {
+  if (!forceRefresh && cachedToken && Date.now() < tokenExpiry) {
+    return cachedToken;
+  }
 
   const clientId = process.env.SPOTIFY_CLIENT_ID;
   const clientSecret = process.env.SPOTIFY_CLIENT_SECRET;
@@ -16,7 +18,8 @@ async function getToken() {
     headers: {
       "Content-Type": "application/x-www-form-urlencoded",
       Authorization:
-        "Basic " + Buffer.from(clientId + ":" + clientSecret).toString("base64"),
+        "Basic " +
+        Buffer.from(clientId + ":" + clientSecret).toString("base64"),
     },
     body: "grant_type=client_credentials",
   });
@@ -31,6 +34,14 @@ async function getToken() {
   return cachedToken;
 }
 
+async function spotifySearch(query, token) {
+  const res = await fetch(
+    `https://api.spotify.com/v1/search?type=album&limit=6&q=${encodeURIComponent(query)}`,
+    { headers: { Authorization: `Bearer ${token}` } }
+  );
+  return res;
+}
+
 export default async function handler(req, res) {
   const { q } = req.query;
 
@@ -39,14 +50,14 @@ export default async function handler(req, res) {
   }
 
   try {
-    const token = await getToken();
+    let token = await getToken();
+    let spotifyRes = await spotifySearch(q, token);
 
-    const spotifyRes = await fetch(
-      `https://api.spotify.com/v1/search?type=album&limit=5&q=${encodeURIComponent(q)}`,
-      {
-        headers: { Authorization: `Bearer ${token}` },
-      }
-    );
+    // If token expired, refresh and retry once
+    if (spotifyRes.status === 401) {
+      token = await getToken(true);
+      spotifyRes = await spotifySearch(q, token);
+    }
 
     if (!spotifyRes.ok) {
       throw new Error(`Spotify API error: ${spotifyRes.status}`);

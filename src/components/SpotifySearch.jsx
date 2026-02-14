@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import { searchAlbums } from "../lib/spotify";
 import { palette } from "../lib/palette";
 import { inputStyle, labelStyle } from "../lib/styles";
@@ -7,26 +7,54 @@ export default function SpotifySearch({ onSelect }) {
   const [query, setQuery] = useState("");
   const [results, setResults] = useState([]);
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
   const [open, setOpen] = useState(false);
   const containerRef = useRef(null);
+  const abortRef = useRef(null);
+  const requestIdRef = useRef(0);
 
-  // Debounced search
+  // Debounced search with abort + stale-request guard
   useEffect(() => {
     if (!query.trim()) {
       setResults([]);
       setOpen(false);
+      setLoading(false);
+      setError(null);
       return;
     }
 
-    const timer = setTimeout(async () => {
-      setLoading(true);
-      const albums = await searchAlbums(query);
-      setResults(albums);
-      setOpen(albums.length > 0);
-      setLoading(false);
-    }, 300);
+    setLoading(true);
+    setError(null);
 
-    return () => clearTimeout(timer);
+    const timer = setTimeout(async () => {
+      // Abort any in-flight request
+      if (abortRef.current) abortRef.current.abort();
+      const controller = new AbortController();
+      abortRef.current = controller;
+
+      // Track this request so stale responses are ignored
+      const id = ++requestIdRef.current;
+
+      try {
+        const albums = await searchAlbums(query, controller.signal);
+        // Only update if this is still the latest request
+        if (id !== requestIdRef.current) return;
+        setResults(albums);
+        setOpen(albums.length > 0);
+        if (albums.length === 0) setError("No albums found");
+      } catch (e) {
+        if (e.name === "AbortError") return;
+        if (id !== requestIdRef.current) return;
+        setResults([]);
+        setError("Search failed — try again");
+      } finally {
+        if (id === requestIdRef.current) setLoading(false);
+      }
+    }, 450);
+
+    return () => {
+      clearTimeout(timer);
+    };
   }, [query]);
 
   // Close dropdown on outside click
@@ -40,40 +68,60 @@ export default function SpotifySearch({ onSelect }) {
     return () => document.removeEventListener("mousedown", handleClick);
   }, []);
 
-  const handleSelect = (album) => {
-    onSelect(album);
-    setQuery("");
-    setResults([]);
-    setOpen(false);
-  };
+  const handleSelect = useCallback(
+    (album) => {
+      onSelect(album);
+      setQuery("");
+      setResults([]);
+      setOpen(false);
+      setError(null);
+    },
+    [onSelect]
+  );
 
   return (
     <div ref={containerRef} style={{ position: "relative", marginBottom: 16 }}>
       <label style={labelStyle}>
-        Search Spotify{" "}
-        <span style={{ color: palette.coral }}>*</span>
+        Search Spotify <span style={{ color: palette.coral }}>*</span>
       </label>
-      <input
-        type="text"
-        value={query}
-        onChange={(e) => setQuery(e.target.value)}
-        onFocus={() => results.length > 0 && setOpen(true)}
-        onKeyDown={(e) => e.key === "Escape" && setOpen(false)}
-        placeholder="Search for an album..."
-        style={inputStyle}
-      />
-      {loading && (
+      <div style={{ position: "relative" }}>
+        <input
+          type="text"
+          value={query}
+          onChange={(e) => setQuery(e.target.value)}
+          onFocus={() => results.length > 0 && setOpen(true)}
+          onKeyDown={(e) => e.key === "Escape" && setOpen(false)}
+          placeholder="Search for an album..."
+          style={inputStyle}
+        />
+        {loading && (
+          <div
+            style={{
+              position: "absolute",
+              right: 14,
+              top: "50%",
+              transform: "translateY(-50%)",
+              fontSize: 12,
+              color: palette.accent,
+              fontFamily: "'Space Mono', monospace",
+            }}
+          >
+            searching...
+          </div>
+        )}
+      </div>
+
+      {/* Error message */}
+      {error && !loading && !open && query.trim() && (
         <div
           style={{
-            position: "absolute",
-            right: 14,
-            top: 38,
+            marginTop: 6,
             fontSize: 12,
             color: palette.textMuted,
             fontFamily: "'Space Mono', monospace",
           }}
         >
-          ...
+          {error}
         </div>
       )}
 
@@ -91,6 +139,8 @@ export default function SpotifySearch({ onSelect }) {
             borderRadius: 12,
             overflow: "hidden",
             zIndex: 100,
+            maxHeight: 320,
+            overflowY: "auto",
             boxShadow: "0 8px 32px rgba(0,0,0,0.5)",
           }}
         >
