@@ -6,6 +6,7 @@ import TabToggle from "./components/TabToggle";
 import SubmitForm from "./components/SubmitForm";
 import ThankYou from "./components/ThankYou";
 import Wall from "./components/Wall";
+import Stats from "./components/Stats";
 
 const ADMIN_PASSWORD = import.meta.env.VITE_ADMIN_PASSWORD;
 
@@ -147,6 +148,32 @@ export default function App() {
       }
     } catch (e) {
       console.error("Failed to send feedback:", e);
+    }
+  };
+
+  const handleListened = async (submissionId, listened) => {
+    if (!supabase) return;
+    try {
+      const { error } = await supabase
+        .from("submissions")
+        .update({ listened })
+        .eq("id", submissionId);
+      if (error) throw error;
+    } catch (e) {
+      console.error("Failed to update listened:", e);
+    }
+  };
+
+  const handleRate = async (submissionId, rating) => {
+    if (!supabase) return;
+    try {
+      const { error } = await supabase
+        .from("submissions")
+        .update({ rating })
+        .eq("id", submissionId);
+      if (error) throw error;
+    } catch (e) {
+      console.error("Failed to update rating:", e);
     }
   };
 
@@ -410,14 +437,18 @@ export default function App() {
           ) : (
             <SubmitForm onSubmit={addSubmission} />
           )
-        ) : (
+        ) : view === "wall" ? (
           <Wall
             submissions={submissions}
             loading={loading}
             isAdmin={isAdmin}
             onFeedback={handleFeedback}
             onDelete={handleDelete}
+            onListened={handleListened}
+            onRate={handleRate}
           />
+        ) : (
+          <Stats submissions={submissions} />
         )}
       </div>
     </div>

@@ -12,6 +12,9 @@ CREATE TABLE submissions (
   note             TEXT DEFAULT '',
   daniel_feedback  TEXT DEFAULT '',
   feedback_at      TIMESTAMPTZ,
+  tags             TEXT[] DEFAULT '{}',
+  listened         BOOLEAN DEFAULT false,
+  rating           SMALLINT,
   created_at       TIMESTAMPTZ DEFAULT NOW()
 );
 
@@ -47,3 +50,6 @@ ALTER PUBLICATION supabase_realtime ADD TABLE submissions;
 -- ALTER TABLE submissions ADD COLUMN feedback_at TIMESTAMPTZ;
 -- CREATE POLICY "Anyone can update submissions" ON submissions FOR UPDATE USING (true) WITH CHECK (true);
 -- CREATE POLICY "Anyone can delete submissions" ON submissions FOR DELETE USING (true);
+-- ALTER TABLE submissions ADD COLUMN tags TEXT[] DEFAULT '{}';
+-- ALTER TABLE submissions ADD COLUMN listened BOOLEAN DEFAULT false;
+-- ALTER TABLE submissions ADD COLUMN rating SMALLINT;

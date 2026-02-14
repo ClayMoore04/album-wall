@@ -2,8 +2,9 @@ import { palette } from "../lib/palette";
 
 export default function TabToggle({ view, setView, count }) {
   const tabs = [
-    { key: "submit", label: "Submit a Rec", icon: "🎵" },
-    { key: "wall", label: `The Wall (${count})`, icon: "🧱" },
+    { key: "submit", label: "Submit", icon: "🎵" },
+    { key: "wall", label: `Wall (${count})`, icon: "🧱" },
+    { key: "stats", label: "Stats", icon: "📊" },
   ];
 
   return (

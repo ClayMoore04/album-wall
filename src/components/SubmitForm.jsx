@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { palette } from "../lib/palette";
 import { inputStyle, labelStyle } from "../lib/styles";
+import { TAGS } from "../lib/tags";
 import SpotifySearch from "./SpotifySearch";
 import AlbumPreview from "./AlbumPreview";
 
@@ -9,7 +10,14 @@ export default function SubmitForm({ onSubmit }) {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [note, setNote] = useState("");
+  const [selectedTags, setSelectedTags] = useState([]);
   const [submitting, setSubmitting] = useState(false);
+
+  const toggleTag = (tag) => {
+    setSelectedTags((prev) =>
+      prev.includes(tag) ? prev.filter((t) => t !== tag) : [...prev, tag]
+    );
+  };
 
   const canSubmit = selectedAlbum && name.trim() && email.trim();
 
@@ -25,6 +33,7 @@ export default function SubmitForm({ onSubmit }) {
       submitted_by: name.trim(),
       email: email.trim(),
       note: note.trim(),
+      tags: selectedTags,
     });
     setSubmitting(false);
   };
@@ -82,6 +91,41 @@ export default function SubmitForm({ onSubmit }) {
           rows={3}
           style={{ ...inputStyle, resize: "vertical", minHeight: 80 }}
         />
+      </div>
+
+      {/* Tags */}
+      <div style={{ marginBottom: 28 }}>
+        <label style={labelStyle}>
+          Vibes <span style={{ color: palette.textDim }}>(optional)</span>
+        </label>
+        <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
+          {TAGS.map((tag) => {
+            const active = selectedTags.includes(tag);
+            return (
+              <button
+                key={tag}
+                type="button"
+                onClick={() => toggleTag(tag)}
+                style={{
+                  padding: "6px 14px",
+                  borderRadius: 20,
+                  border: active
+                    ? `1px solid ${palette.accent}`
+                    : `1px solid ${palette.border}`,
+                  background: active ? "rgba(29,185,84,0.15)" : "transparent",
+                  color: active ? palette.accent : palette.textMuted,
+                  fontSize: 12,
+                  fontWeight: 600,
+                  fontFamily: "'Space Mono', monospace",
+                  cursor: "pointer",
+                  transition: "all 0.15s",
+                }}
+              >
+                {tag}
+              </button>
+            );
+          })}
+        </div>
       </div>
 
       {/* Submit */}
