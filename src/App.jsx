@@ -15,6 +15,9 @@ export default function App() {
   const [loading, setLoading] = useState(true);
   const [justSubmitted, setJustSubmitted] = useState(false);
   const [isAdmin, setIsAdmin] = useState(false);
+  const [showAdminLogin, setShowAdminLogin] = useState(false);
+  const [adminInput, setAdminInput] = useState("");
+  const [adminError, setAdminError] = useState(false);
 
   // Check for admin mode via URL param
   useEffect(() => {
@@ -25,6 +28,22 @@ export default function App() {
       setView("wall");
     }
   }, []);
+
+  const handleAdminLogin = () => {
+    if (adminInput === ADMIN_PASSWORD) {
+      setIsAdmin(true);
+      setShowAdminLogin(false);
+      setAdminInput("");
+      setAdminError(false);
+      setView("wall");
+    } else {
+      setAdminError(true);
+    }
+  };
+
+  const handleAdminLogout = () => {
+    setIsAdmin(false);
+  };
 
   // Fetch submissions + realtime
   useEffect(() => {
@@ -182,6 +201,180 @@ export default function App() {
           padding: "32px 20px 80px",
         }}
       >
+        {/* Admin button - top right */}
+        <div style={{ display: "flex", justifyContent: "flex-end", marginBottom: -28 }}>
+          {isAdmin ? (
+            <button
+              onClick={handleAdminLogout}
+              style={{
+                padding: "6px 14px",
+                border: `1px solid rgba(29,185,84,0.3)`,
+                borderRadius: 8,
+                fontSize: 11,
+                fontWeight: 600,
+                fontFamily: "'Space Mono', monospace",
+                cursor: "pointer",
+                background: "rgba(29,185,84,0.1)",
+                color: palette.accent,
+                transition: "all 0.2s",
+              }}
+            >
+              Admin ✓ (logout)
+            </button>
+          ) : (
+            <button
+              onClick={() => setShowAdminLogin(true)}
+              style={{
+                padding: "6px 14px",
+                border: `1px solid ${palette.border}`,
+                borderRadius: 8,
+                fontSize: 11,
+                fontWeight: 600,
+                fontFamily: "'Space Mono', monospace",
+                cursor: "pointer",
+                background: "transparent",
+                color: palette.textDim,
+                transition: "all 0.2s",
+              }}
+            >
+              Admin
+            </button>
+          )}
+        </div>
+
+        {/* Admin login modal */}
+        {showAdminLogin && (
+          <div
+            style={{
+              position: "fixed",
+              top: 0,
+              left: 0,
+              right: 0,
+              bottom: 0,
+              background: "rgba(0,0,0,0.7)",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              zIndex: 200,
+            }}
+            onClick={(e) => {
+              if (e.target === e.currentTarget) {
+                setShowAdminLogin(false);
+                setAdminInput("");
+                setAdminError(false);
+              }
+            }}
+          >
+            <div
+              style={{
+                background: palette.surface,
+                border: `1px solid ${palette.border}`,
+                borderRadius: 16,
+                padding: 28,
+                width: "100%",
+                maxWidth: 340,
+                margin: "0 20px",
+              }}
+            >
+              <div
+                style={{
+                  fontSize: 18,
+                  fontWeight: 700,
+                  marginBottom: 4,
+                }}
+              >
+                Admin Login
+              </div>
+              <div
+                style={{
+                  fontSize: 12,
+                  color: palette.textMuted,
+                  fontFamily: "'Space Mono', monospace",
+                  marginBottom: 20,
+                }}
+              >
+                Enter the admin password
+              </div>
+              <input
+                type="password"
+                value={adminInput}
+                onChange={(e) => {
+                  setAdminInput(e.target.value);
+                  setAdminError(false);
+                }}
+                onKeyDown={(e) => e.key === "Enter" && handleAdminLogin()}
+                placeholder="Password"
+                autoFocus
+                style={{
+                  width: "100%",
+                  padding: "12px 14px",
+                  background: palette.bg,
+                  border: `1px solid ${adminError ? palette.coral : palette.border}`,
+                  borderRadius: 10,
+                  color: palette.text,
+                  fontSize: 14,
+                  fontFamily: "'Syne', sans-serif",
+                  outline: "none",
+                  boxSizing: "border-box",
+                  marginBottom: adminError ? 6 : 16,
+                }}
+              />
+              {adminError && (
+                <div
+                  style={{
+                    fontSize: 12,
+                    color: palette.coral,
+                    fontFamily: "'Space Mono', monospace",
+                    marginBottom: 12,
+                  }}
+                >
+                  Wrong password
+                </div>
+              )}
+              <div style={{ display: "flex", gap: 8 }}>
+                <button
+                  onClick={handleAdminLogin}
+                  style={{
+                    flex: 1,
+                    padding: "12px",
+                    border: "none",
+                    borderRadius: 10,
+                    fontSize: 13,
+                    fontWeight: 700,
+                    fontFamily: "'Space Mono', monospace",
+                    cursor: "pointer",
+                    background: palette.accent,
+                    color: "#000",
+                  }}
+                >
+                  Login
+                </button>
+                <button
+                  onClick={() => {
+                    setShowAdminLogin(false);
+                    setAdminInput("");
+                    setAdminError(false);
+                  }}
+                  style={{
+                    flex: 1,
+                    padding: "12px",
+                    border: `1px solid ${palette.border}`,
+                    borderRadius: 10,
+                    fontSize: 13,
+                    fontWeight: 600,
+                    fontFamily: "'Space Mono', monospace",
+                    cursor: "pointer",
+                    background: "transparent",
+                    color: palette.textMuted,
+                  }}
+                >
+                  Cancel
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+
         <Header />
 
         {/* Admin indicator */}
