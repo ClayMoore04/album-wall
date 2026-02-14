@@ -36,7 +36,7 @@ async function getToken(forceRefresh = false) {
 
 async function spotifySearch(query, token) {
   const res = await fetch(
-    `https://api.spotify.com/v1/search?type=album&limit=6&q=${encodeURIComponent(query)}`,
+    `https://api.spotify.com/v1/search?type=album&market=US&limit=6&q=${encodeURIComponent(query)}`,
     { headers: { Authorization: `Bearer ${token}` } }
   );
   return res;
@@ -60,7 +60,9 @@ export default async function handler(req, res) {
     }
 
     if (!spotifyRes.ok) {
-      throw new Error(`Spotify API error: ${spotifyRes.status}`);
+      const errorBody = await spotifyRes.text();
+      console.error("Spotify API response:", spotifyRes.status, errorBody);
+      throw new Error(`Spotify API error: ${spotifyRes.status} - ${errorBody}`);
     }
 
     const data = await spotifyRes.json();
