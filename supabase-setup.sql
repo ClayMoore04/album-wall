@@ -31,6 +31,10 @@ CREATE POLICY "Anyone can update submissions"
   USING (true)
   WITH CHECK (true);
 
+CREATE POLICY "Anyone can delete submissions"
+  ON submissions FOR DELETE
+  USING (true);
+
 -- Enable realtime for live Wall updates
 ALTER PUBLICATION supabase_realtime ADD TABLE submissions;
 
@@ -42,3 +46,4 @@ ALTER PUBLICATION supabase_realtime ADD TABLE submissions;
 -- ALTER TABLE submissions ADD COLUMN daniel_feedback TEXT DEFAULT '';
 -- ALTER TABLE submissions ADD COLUMN feedback_at TIMESTAMPTZ;
 -- CREATE POLICY "Anyone can update submissions" ON submissions FOR UPDATE USING (true) WITH CHECK (true);
+-- CREATE POLICY "Anyone can delete submissions" ON submissions FOR DELETE USING (true);

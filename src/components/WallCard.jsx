@@ -2,11 +2,12 @@ import { useState } from "react";
 import { palette, getColor } from "../lib/palette";
 import { inputStyle } from "../lib/styles";
 
-export default function WallCard({ submission, isAdmin, onFeedback }) {
+export default function WallCard({ submission, isAdmin, onFeedback, onDelete }) {
   const sub = submission;
   const [replying, setReplying] = useState(false);
   const [feedbackText, setFeedbackText] = useState("");
   const [sending, setSending] = useState(false);
+  const [confirmDelete, setConfirmDelete] = useState(false);
 
   const handleSendFeedback = async () => {
     if (!feedbackText.trim()) return;
@@ -185,28 +186,103 @@ export default function WallCard({ submission, isAdmin, onFeedback }) {
         </div>
       )}
 
-      {/* Admin reply UI */}
-      {isAdmin && !sub.daniel_feedback && (
+      {/* Admin controls */}
+      {isAdmin && (
         <div style={{ padding: "0 16px 16px" }}>
-          {replying ? (
-            <div>
-              <textarea
-                value={feedbackText}
-                onChange={(e) => setFeedbackText(e.target.value)}
-                placeholder="What did you think of this album?"
-                rows={2}
+          {/* Reply UI (only if no feedback yet) */}
+          {!sub.daniel_feedback && (
+            <>
+              {replying ? (
+                <div style={{ marginBottom: 8 }}>
+                  <textarea
+                    value={feedbackText}
+                    onChange={(e) => setFeedbackText(e.target.value)}
+                    placeholder="What did you think of this album?"
+                    rows={2}
+                    style={{
+                      ...inputStyle,
+                      resize: "vertical",
+                      minHeight: 60,
+                      fontSize: 13,
+                      marginBottom: 8,
+                    }}
+                  />
+                  <div style={{ display: "flex", gap: 8 }}>
+                    <button
+                      onClick={handleSendFeedback}
+                      disabled={!feedbackText.trim() || sending}
+                      style={{
+                        padding: "8px 16px",
+                        border: "none",
+                        borderRadius: 8,
+                        fontSize: 12,
+                        fontWeight: 700,
+                        fontFamily: "'Space Mono', monospace",
+                        cursor: !feedbackText.trim() ? "not-allowed" : "pointer",
+                        background: !feedbackText.trim()
+                          ? palette.border
+                          : palette.accent,
+                        color: !feedbackText.trim() ? palette.textDim : "#000",
+                        transition: "all 0.2s",
+                      }}
+                    >
+                      {sending ? "Sending..." : "Send Feedback"}
+                    </button>
+                    <button
+                      onClick={() => {
+                        setReplying(false);
+                        setFeedbackText("");
+                      }}
+                      style={{
+                        padding: "8px 16px",
+                        border: `1px solid ${palette.border}`,
+                        borderRadius: 8,
+                        fontSize: 12,
+                        fontWeight: 600,
+                        fontFamily: "'Space Mono', monospace",
+                        cursor: "pointer",
+                        background: "transparent",
+                        color: palette.textMuted,
+                      }}
+                    >
+                      Cancel
+                    </button>
+                  </div>
+                </div>
+              ) : null}
+            </>
+          )}
+
+          {/* Action buttons row */}
+          <div style={{ display: "flex", gap: 8 }}>
+            {!sub.daniel_feedback && !replying && (
+              <button
+                onClick={() => setReplying(true)}
                 style={{
-                  ...inputStyle,
-                  resize: "vertical",
-                  minHeight: 60,
-                  fontSize: 13,
-                  marginBottom: 8,
+                  padding: "8px 16px",
+                  border: `1px solid ${palette.border}`,
+                  borderRadius: 8,
+                  fontSize: 12,
+                  fontWeight: 600,
+                  fontFamily: "'Space Mono', monospace",
+                  cursor: "pointer",
+                  background: "transparent",
+                  color: palette.textMuted,
+                  transition: "all 0.2s",
                 }}
-              />
-              <div style={{ display: "flex", gap: 8 }}>
+              >
+                Reply to {sub.submitted_by}
+              </button>
+            )}
+
+            {/* Delete button */}
+            {confirmDelete ? (
+              <>
                 <button
-                  onClick={handleSendFeedback}
-                  disabled={!feedbackText.trim() || sending}
+                  onClick={() => {
+                    onDelete(sub.id);
+                    setConfirmDelete(false);
+                  }}
                   style={{
                     padding: "8px 16px",
                     border: "none",
@@ -214,21 +290,16 @@ export default function WallCard({ submission, isAdmin, onFeedback }) {
                     fontSize: 12,
                     fontWeight: 700,
                     fontFamily: "'Space Mono', monospace",
-                    cursor: !feedbackText.trim() ? "not-allowed" : "pointer",
-                    background: !feedbackText.trim()
-                      ? palette.border
-                      : palette.accent,
-                    color: !feedbackText.trim() ? palette.textDim : "#000",
+                    cursor: "pointer",
+                    background: palette.coral,
+                    color: "#fff",
                     transition: "all 0.2s",
                   }}
                 >
-                  {sending ? "Sending..." : "Send Feedback"}
+                  Confirm Delete
                 </button>
                 <button
-                  onClick={() => {
-                    setReplying(false);
-                    setFeedbackText("");
-                  }}
+                  onClick={() => setConfirmDelete(false)}
                   style={{
                     padding: "8px 16px",
                     border: `1px solid ${palette.border}`,
@@ -243,27 +314,27 @@ export default function WallCard({ submission, isAdmin, onFeedback }) {
                 >
                   Cancel
                 </button>
-              </div>
-            </div>
-          ) : (
-            <button
-              onClick={() => setReplying(true)}
-              style={{
-                padding: "8px 16px",
-                border: `1px solid ${palette.border}`,
-                borderRadius: 8,
-                fontSize: 12,
-                fontWeight: 600,
-                fontFamily: "'Space Mono', monospace",
-                cursor: "pointer",
-                background: "transparent",
-                color: palette.textMuted,
-                transition: "all 0.2s",
-              }}
-            >
-              Reply to {sub.submitted_by}
-            </button>
-          )}
+              </>
+            ) : (
+              <button
+                onClick={() => setConfirmDelete(true)}
+                style={{
+                  padding: "8px 16px",
+                  border: `1px solid rgba(255,107,107,0.3)`,
+                  borderRadius: 8,
+                  fontSize: 12,
+                  fontWeight: 600,
+                  fontFamily: "'Space Mono', monospace",
+                  cursor: "pointer",
+                  background: "transparent",
+                  color: palette.coral,
+                  transition: "all 0.2s",
+                }}
+              >
+                Delete
+              </button>
+            )}
+          </div>
         </div>
       )}
     </div>

@@ -131,6 +131,22 @@ export default function App() {
     }
   };
 
+  const handleDelete = async (submissionId) => {
+    if (!supabase) return;
+
+    try {
+      const { error } = await supabase
+        .from("submissions")
+        .delete()
+        .eq("id", submissionId);
+
+      if (error) throw error;
+      setSubmissions((prev) => prev.filter((s) => s.id !== submissionId));
+    } catch (e) {
+      console.error("Failed to delete submission:", e);
+    }
+  };
+
   return (
     <div
       style={{
@@ -183,7 +199,7 @@ export default function App() {
               color: palette.accent,
             }}
           >
-            Admin mode — you can reply to submissions
+            Admin mode — you can reply to and delete submissions
           </div>
         )}
 
@@ -207,6 +223,7 @@ export default function App() {
             loading={loading}
             isAdmin={isAdmin}
             onFeedback={handleFeedback}
+            onDelete={handleDelete}
           />
         )}
       </div>
