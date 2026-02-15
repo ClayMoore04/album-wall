@@ -4,6 +4,10 @@ import LandingPage from "./components/LandingPage";
 import SignUp from "./components/SignUp";
 import Login from "./components/Login";
 import Dashboard from "./components/Dashboard";
+import DiscoverPage from "./components/DiscoverPage";
+import RoomListPage from "./components/RoomListPage";
+import RoomJoinPage from "./components/RoomJoinPage";
+import RoomPage from "./components/RoomPage";
 import WallPage from "./components/WallPage";
 import SpotifyCallback from "./components/SpotifyCallback";
 
@@ -48,6 +52,10 @@ export default function App() {
           <Route path="/login" element={<Login />} />
           <Route path="/callback" element={<SpotifyCallback />} />
           <Route path="/dashboard" element={<Dashboard />} />
+          <Route path="/discover" element={<DiscoverPage />} />
+          <Route path="/rooms" element={<RoomListPage />} />
+          <Route path="/room/join/:inviteCode" element={<RoomJoinPage />} />
+          <Route path="/room/:roomId" element={<RoomPage />} />
           <Route path="/:slug" element={<WallPage />} />
           <Route path="/" element={<LandingPage />} />
         </Routes>

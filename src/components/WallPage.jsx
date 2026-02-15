@@ -5,6 +5,7 @@ import { useAuth } from "./AuthProvider";
 import { palette } from "../lib/palette";
 import Header from "./Header";
 import NavBar from "./NavBar";
+import FollowButton from "./FollowButton";
 import TabToggle from "./TabToggle";
 import SubmitForm from "./SubmitForm";
 import ThankYou from "./ThankYou";
@@ -23,6 +24,7 @@ export default function WallPage() {
   const [loading, setLoading] = useState(true);
   const [view, setView] = useState("submit");
   const [justSubmitted, setJustSubmitted] = useState(false);
+  const [followerCount, setFollowerCount] = useState(0);
 
   const isOwner = user && profile && user.id === profile.id;
   const ownerName = profile?.display_name || "Someone";
@@ -59,6 +61,13 @@ export default function WallPage() {
         setSubmissions(subs || []);
         setLoading(false);
       }
+
+      // Fetch follower count
+      const { count } = await supabase
+        .from("follows")
+        .select("*", { count: "exact", head: true })
+        .eq("following_id", prof.id);
+      if (!cancelled) setFollowerCount(count || 0);
 
       // Set page title
       document.title = `${prof.display_name}'s Album Wall`;
@@ -270,7 +279,16 @@ export default function WallPage() {
     <>
       <NavBar wallSlug={slug} isOwner={isOwner} />
 
-      <Header profile={profile} />
+      <Header profile={profile} followerCount={followerCount} />
+
+      {!isOwner && user && (
+        <div style={{ textAlign: "center", marginBottom: 16 }}>
+          <FollowButton
+            wallId={profile.id}
+            onCountChange={(delta) => setFollowerCount((c) => c + delta)}
+          />
+        </div>
+      )}
 
       {isOwner && (
         <div

@@ -18,6 +18,13 @@ export default function Login() {
 
     try {
       await signIn({ email, password });
+      // Check for pending room join redirect
+      const pendingJoin = sessionStorage.getItem("room_join_return");
+      if (pendingJoin) {
+        sessionStorage.removeItem("room_join_return");
+        navigate(`/room/join/${pendingJoin}`, { replace: true });
+        return;
+      }
       // Profile will load via onAuthStateChange — navigate after a tick
       setTimeout(() => {
         navigate("/dashboard");

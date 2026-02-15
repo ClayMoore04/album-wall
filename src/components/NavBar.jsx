@@ -29,8 +29,17 @@ export default function NavBar({ wallSlug, isOwner }) {
         marginBottom: -28,
       }}
     >
+      <Link
+        to="/discover"
+        style={{ ...linkStyle, border: "none", color: palette.textMuted }}
+      >
+        Discover
+      </Link>
       {user && profile ? (
         <>
+          <Link to="/rooms" style={linkStyle}>
+            Rooms
+          </Link>
           {isOwner ? (
             <Link to="/dashboard" style={linkStyle}>
               Dashboard

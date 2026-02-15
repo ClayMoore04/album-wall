@@ -3,6 +3,7 @@ import { useNavigate, Link } from "react-router-dom";
 import { supabase } from "../lib/supabase";
 import { useAuth } from "./AuthProvider";
 import { palette } from "../lib/palette";
+import ActivityFeed from "./ActivityFeed";
 
 export default function Dashboard() {
   const navigate = useNavigate();
@@ -12,6 +13,9 @@ export default function Dashboard() {
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
   const [stats, setStats] = useState({ total: 0, listened: 0 });
+  const [following, setFollowing] = useState([]);
+  const [discoverable, setDiscoverable] = useState(false);
+  const [roomCount, setRoomCount] = useState(0);
 
   useEffect(() => {
     if (!loading && !user) {
@@ -23,7 +27,10 @@ export default function Dashboard() {
     if (profile) {
       setDisplayName(profile.display_name);
       setBio(profile.bio || "");
+      setDiscoverable(profile.discoverable || false);
       loadStats(profile.id);
+      loadFollowing(user.id);
+      loadRoomCount(user.id);
     }
   }, [profile]);
 
@@ -39,6 +46,44 @@ export default function Dashboard() {
         listened: data.filter((s) => s.listened).length,
       });
     }
+  };
+
+  const loadFollowing = async (userId) => {
+    if (!supabase) return;
+    const { data } = await supabase
+      .from("follows")
+      .select("following_id, profiles!following_id(id, slug, display_name)")
+      .eq("follower_id", userId);
+    setFollowing(data || []);
+  };
+
+  const loadRoomCount = async (userId) => {
+    if (!supabase) return;
+    const { count } = await supabase
+      .from("room_members")
+      .select("*", { count: "exact", head: true })
+      .eq("user_id", userId);
+    setRoomCount(count || 0);
+  };
+
+  const handleUnfollow = async (followingId) => {
+    if (!supabase || !user) return;
+    await supabase
+      .from("follows")
+      .delete()
+      .eq("follower_id", user.id)
+      .eq("following_id", followingId);
+    setFollowing((prev) => prev.filter((f) => f.following_id !== followingId));
+  };
+
+  const handleDiscoverableToggle = async () => {
+    if (!supabase || !user) return;
+    const newVal = !discoverable;
+    setDiscoverable(newVal);
+    await supabase
+      .from("profiles")
+      .update({ discoverable: newVal })
+      .eq("id", user.id);
   };
 
   const handleSave = async () => {
@@ -205,6 +250,58 @@ export default function Dashboard() {
           />
         </div>
 
+        {/* Discoverable toggle */}
+        <div style={{ marginBottom: 20 }}>
+          <label
+            style={{
+              ...labelStyle,
+              display: "flex",
+              alignItems: "center",
+              gap: 10,
+              cursor: "pointer",
+              marginBottom: 0,
+            }}
+            onClick={handleDiscoverableToggle}
+          >
+            <div
+              style={{
+                width: 36,
+                height: 20,
+                borderRadius: 10,
+                background: discoverable ? palette.accent : palette.border,
+                position: "relative",
+                transition: "background 0.2s",
+                flexShrink: 0,
+              }}
+            >
+              <div
+                style={{
+                  width: 16,
+                  height: 16,
+                  borderRadius: 8,
+                  background: "#fff",
+                  position: "absolute",
+                  top: 2,
+                  left: discoverable ? 18 : 2,
+                  transition: "left 0.2s",
+                }}
+              />
+            </div>
+            List on Discovery
+          </label>
+          <div
+            style={{
+              fontSize: 11,
+              color: palette.textDim,
+              fontFamily: "'Space Mono', monospace",
+              marginTop: 4,
+              marginLeft: 46,
+            }}
+          >
+            Let others find your wall on the Discover page
+          </div>
+        </div>
+
         <button
           onClick={handleSave}
           disabled={saving}
@@ -225,6 +322,152 @@ export default function Dashboard() {
           {saving ? "Saving..." : saved ? "Saved!" : "Save Changes"}
         </button>
       </div>
+
+      {/* Collaborative Rooms */}
+      <div
+        style={{
+          background: palette.cardBg,
+          border: `1px solid ${palette.border}`,
+          borderRadius: 12,
+          padding: 20,
+          marginTop: 24,
+        }}
+      >
+        <div
+          style={{
+            display: "flex",
+            justifyContent: "space-between",
+            alignItems: "center",
+          }}
+        >
+          <h2 style={{ fontSize: 16, fontWeight: 700, margin: 0 }}>
+            Collaborative Rooms
+          </h2>
+          <Link
+            to="/rooms"
+            style={{
+              fontSize: 12,
+              fontWeight: 600,
+              fontFamily: "'Space Mono', monospace",
+              color: palette.accent,
+              textDecoration: "none",
+            }}
+          >
+            {roomCount > 0
+              ? `${roomCount} room${roomCount !== 1 ? "s" : ""}`
+              : "Create one"}
+            {" \u2192"}
+          </Link>
+        </div>
+        <p
+          style={{
+            fontSize: 12,
+            color: palette.textMuted,
+            fontFamily: "'Space Mono', monospace",
+            margin: "8px 0 0",
+          }}
+        >
+          Build collaborative playlists with friends in real time.
+        </p>
+      </div>
+
+      {/* Following */}
+      <div
+        style={{
+          background: palette.cardBg,
+          border: `1px solid ${palette.border}`,
+          borderRadius: 12,
+          padding: 20,
+          marginTop: 24,
+        }}
+      >
+        <h2 style={{ fontSize: 16, fontWeight: 700, margin: "0 0 16px" }}>
+          Following
+        </h2>
+        {following.length === 0 ? (
+          <p
+            style={{
+              fontSize: 12,
+              color: palette.textMuted,
+              fontFamily: "'Space Mono', monospace",
+              margin: 0,
+            }}
+          >
+            You're not following any walls yet.{" "}
+            <Link
+              to="/discover"
+              style={{ color: palette.accent, textDecoration: "none" }}
+            >
+              Discover walls
+            </Link>
+          </p>
+        ) : (
+          <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+            {following.map((f) => (
+              <div
+                key={f.following_id}
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "space-between",
+                  padding: "8px 12px",
+                  background: palette.surface,
+                  borderRadius: 8,
+                  border: `1px solid ${palette.border}`,
+                }}
+              >
+                <Link
+                  to={`/${f.profiles.slug}`}
+                  style={{
+                    color: palette.text,
+                    textDecoration: "none",
+                    fontSize: 14,
+                    fontWeight: 600,
+                  }}
+                >
+                  {f.profiles.display_name}
+                </Link>
+                <button
+                  onClick={() => handleUnfollow(f.following_id)}
+                  style={{
+                    padding: "4px 10px",
+                    border: `1px solid ${palette.border}`,
+                    borderRadius: 6,
+                    background: "transparent",
+                    color: palette.textMuted,
+                    fontSize: 10,
+                    fontWeight: 600,
+                    fontFamily: "'Space Mono', monospace",
+                    cursor: "pointer",
+                  }}
+                >
+                  Unfollow
+                </button>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+
+      {/* Activity Feed */}
+      {following.length > 0 && (
+        <div
+          style={{
+            background: palette.cardBg,
+            border: `1px solid ${palette.border}`,
+            borderRadius: 12,
+            padding: 20,
+            marginTop: 24,
+          }}
+        >
+          <h2 style={{ fontSize: 16, fontWeight: 700, margin: "0 0 16px" }}>
+            Activity Feed
+          </h2>
+          <ActivityFeed
+            followedWallIds={following.map((f) => f.following_id)}
+          />
+        </div>
+      )}
     </div>
   );
 }

@@ -35,7 +35,14 @@ export default function LandingPage() {
         </p>
 
         {user && profile ? (
-          <div style={{ display: "flex", gap: 12, justifyContent: "center" }}>
+          <div
+            style={{
+              display: "flex",
+              gap: 12,
+              justifyContent: "center",
+              flexWrap: "wrap",
+            }}
+          >
             <Link
               to={`/${profile.slug}`}
               style={{
@@ -54,7 +61,7 @@ export default function LandingPage() {
               Go to My Wall
             </Link>
             <Link
-              to="/dashboard"
+              to="/discover"
               style={{
                 display: "inline-block",
                 padding: "14px 28px",
@@ -67,11 +74,18 @@ export default function LandingPage() {
                 color: palette.textMuted,
               }}
             >
-              Dashboard
+              Discover Walls
             </Link>
           </div>
         ) : (
-          <div style={{ display: "flex", gap: 12, justifyContent: "center" }}>
+          <div
+            style={{
+              display: "flex",
+              gap: 12,
+              justifyContent: "center",
+              flexWrap: "wrap",
+            }}
+          >
             <Link
               to="/signup"
               style={{
@@ -90,7 +104,7 @@ export default function LandingPage() {
               Create Your Wall
             </Link>
             <Link
-              to="/login"
+              to="/discover"
               style={{
                 display: "inline-block",
                 padding: "14px 28px",
@@ -103,7 +117,7 @@ export default function LandingPage() {
                 color: palette.textMuted,
               }}
             >
-              Log In
+              Discover Walls
             </Link>
           </div>
         )}

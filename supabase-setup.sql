@@ -88,6 +88,128 @@ CREATE POLICY "Wall owner can delete"
 ALTER PUBLICATION supabase_realtime ADD TABLE submissions;
 
 -- ============================================================
+-- 3. FOLLOWS TABLE (social — follow other walls)
+-- ============================================================
+
+CREATE TABLE follows (
+  id           BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+  follower_id  UUID NOT NULL REFERENCES profiles(id) ON DELETE CASCADE,
+  following_id UUID NOT NULL REFERENCES profiles(id) ON DELETE CASCADE,
+  created_at   TIMESTAMPTZ DEFAULT NOW(),
+  UNIQUE(follower_id, following_id),
+  CHECK (follower_id <> following_id)
+);
+
+CREATE INDEX idx_follows_follower ON follows(follower_id);
+CREATE INDEX idx_follows_following ON follows(following_id);
+
+ALTER TABLE follows ENABLE ROW LEVEL SECURITY;
+
+CREATE POLICY "Public read follows" ON follows FOR SELECT USING (true);
+CREATE POLICY "Users can follow" ON follows FOR INSERT WITH CHECK (auth.uid() = follower_id);
+CREATE POLICY "Users can unfollow" ON follows FOR DELETE USING (auth.uid() = follower_id);
+
+-- ============================================================
+-- 4. WALL DISCOVERY (opt-in listing)
+-- ============================================================
+
+ALTER TABLE profiles ADD COLUMN discoverable BOOLEAN DEFAULT false;
+
+CREATE OR REPLACE FUNCTION get_discoverable_walls()
+RETURNS TABLE (
+  id UUID, slug TEXT, display_name TEXT, bio TEXT,
+  follower_count BIGINT, submission_count BIGINT
+) AS $$
+BEGIN
+  RETURN QUERY
+  SELECT p.id, p.slug, p.display_name, p.bio,
+    COALESCE((SELECT COUNT(*) FROM follows f WHERE f.following_id = p.id), 0) AS follower_count,
+    COALESCE((SELECT COUNT(*) FROM submissions s WHERE s.wall_id = p.id), 0) AS submission_count
+  FROM profiles p WHERE p.discoverable = true
+  ORDER BY follower_count DESC, submission_count DESC;
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER;
+
+-- ============================================================
+-- 5. COLLABORATIVE ROOMS (shared playlists)
+-- ============================================================
+
+CREATE TABLE rooms (
+  id          UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+  name        TEXT NOT NULL,
+  created_by  UUID NOT NULL REFERENCES profiles(id) ON DELETE CASCADE,
+  invite_code TEXT UNIQUE NOT NULL DEFAULT encode(gen_random_bytes(6), 'hex'),
+  created_at  TIMESTAMPTZ DEFAULT NOW()
+);
+
+ALTER TABLE rooms ENABLE ROW LEVEL SECURITY;
+
+CREATE POLICY "Members can read room" ON rooms FOR SELECT
+  USING (id IN (SELECT room_id FROM room_members WHERE user_id = auth.uid()));
+CREATE POLICY "Auth users can create rooms" ON rooms FOR INSERT
+  WITH CHECK (auth.uid() = created_by);
+CREATE POLICY "Creator can update room" ON rooms FOR UPDATE
+  USING (auth.uid() = created_by);
+CREATE POLICY "Creator can delete room" ON rooms FOR DELETE
+  USING (auth.uid() = created_by);
+
+CREATE TABLE room_members (
+  id        BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+  room_id   UUID NOT NULL REFERENCES rooms(id) ON DELETE CASCADE,
+  user_id   UUID NOT NULL REFERENCES profiles(id) ON DELETE CASCADE,
+  joined_at TIMESTAMPTZ DEFAULT NOW(),
+  UNIQUE(room_id, user_id)
+);
+
+ALTER TABLE room_members ENABLE ROW LEVEL SECURITY;
+
+CREATE POLICY "Members can read members" ON room_members FOR SELECT
+  USING (room_id IN (SELECT room_id FROM room_members WHERE user_id = auth.uid()));
+CREATE POLICY "Users can join room" ON room_members FOR INSERT
+  WITH CHECK (auth.uid() = user_id);
+CREATE POLICY "Users can leave room" ON room_members FOR DELETE
+  USING (auth.uid() = user_id);
+
+CREATE TABLE room_tracks (
+  id            BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+  room_id       UUID NOT NULL REFERENCES rooms(id) ON DELETE CASCADE,
+  album_name    TEXT NOT NULL,
+  artist_name   TEXT NOT NULL,
+  album_art_url TEXT,
+  spotify_url   TEXT,
+  spotify_id    TEXT,
+  type          TEXT DEFAULT 'album',
+  added_by      UUID NOT NULL REFERENCES profiles(id) ON DELETE CASCADE,
+  created_at    TIMESTAMPTZ DEFAULT NOW()
+);
+
+CREATE INDEX idx_room_tracks_room ON room_tracks(room_id);
+
+ALTER TABLE room_tracks ENABLE ROW LEVEL SECURITY;
+
+CREATE POLICY "Members can read tracks" ON room_tracks FOR SELECT
+  USING (room_id IN (SELECT room_id FROM room_members WHERE user_id = auth.uid()));
+CREATE POLICY "Members can add tracks" ON room_tracks FOR INSERT
+  WITH CHECK (auth.uid() = added_by AND room_id IN (SELECT room_id FROM room_members WHERE user_id = auth.uid()));
+CREATE POLICY "Members can remove tracks" ON room_tracks FOR DELETE
+  USING (room_id IN (SELECT room_id FROM room_members WHERE user_id = auth.uid()));
+
+ALTER PUBLICATION supabase_realtime ADD TABLE room_tracks;
+ALTER PUBLICATION supabase_realtime ADD TABLE room_members;
+
+CREATE OR REPLACE FUNCTION join_room_by_invite(code TEXT)
+RETURNS UUID AS $$
+DECLARE target_room_id UUID;
+BEGIN
+  SELECT id INTO target_room_id FROM rooms WHERE invite_code = code;
+  IF target_room_id IS NULL THEN RAISE EXCEPTION 'Invalid invite code'; END IF;
+  INSERT INTO room_members (room_id, user_id) VALUES (target_room_id, auth.uid())
+    ON CONFLICT (room_id, user_id) DO NOTHING;
+  RETURN target_room_id;
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER;
+
+-- ============================================================
 -- MIGRATION: If you already have the old single-user table,
 -- run the migration endpoint (POST /api/migrate-daniel) first,
 -- then run these SQL statements manually:

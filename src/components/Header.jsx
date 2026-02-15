@@ -1,6 +1,6 @@
 import { palette } from "../lib/palette";
 
-export default function Header({ profile }) {
+export default function Header({ profile, followerCount }) {
   return (
     <header style={{ textAlign: "center", marginBottom: 40 }}>
       <div
@@ -42,6 +42,18 @@ export default function Header({ profile }) {
       >
         {profile?.bio || "Search for your favorite album on Spotify and tell me why I need to hear it."}
       </p>
+      {followerCount > 0 && (
+        <div
+          style={{
+            marginTop: 8,
+            fontSize: 11,
+            fontFamily: "'Space Mono', monospace",
+            color: palette.textDim,
+          }}
+        >
+          {followerCount} follower{followerCount !== 1 ? "s" : ""}
+        </div>
+      )}
     </header>
   );
 }
