@@ -132,8 +132,11 @@ $$ LANGUAGE plpgsql SECURITY DEFINER;
 
 -- ============================================================
 -- 5. COLLABORATIVE ROOMS (shared playlists)
+-- Tables must be created before policies since rooms policies
+-- reference room_members via subqueries.
 -- ============================================================
 
+-- 5a. Create all tables first
 CREATE TABLE rooms (
   id          UUID DEFAULT gen_random_uuid() PRIMARY KEY,
   name        TEXT NOT NULL,
@@ -142,17 +145,6 @@ CREATE TABLE rooms (
   created_at  TIMESTAMPTZ DEFAULT NOW()
 );
 
-ALTER TABLE rooms ENABLE ROW LEVEL SECURITY;
-
-CREATE POLICY "Members can read room" ON rooms FOR SELECT
-  USING (id IN (SELECT room_id FROM room_members WHERE user_id = auth.uid()));
-CREATE POLICY "Auth users can create rooms" ON rooms FOR INSERT
-  WITH CHECK (auth.uid() = created_by);
-CREATE POLICY "Creator can update room" ON rooms FOR UPDATE
-  USING (auth.uid() = created_by);
-CREATE POLICY "Creator can delete room" ON rooms FOR DELETE
-  USING (auth.uid() = created_by);
-
 CREATE TABLE room_members (
   id        BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
   room_id   UUID NOT NULL REFERENCES rooms(id) ON DELETE CASCADE,
@@ -160,15 +152,6 @@ CREATE TABLE room_members (
   joined_at TIMESTAMPTZ DEFAULT NOW(),
   UNIQUE(room_id, user_id)
 );
-
-ALTER TABLE room_members ENABLE ROW LEVEL SECURITY;
-
-CREATE POLICY "Members can read members" ON room_members FOR SELECT
-  USING (room_id IN (SELECT room_id FROM room_members WHERE user_id = auth.uid()));
-CREATE POLICY "Users can join room" ON room_members FOR INSERT
-  WITH CHECK (auth.uid() = user_id);
-CREATE POLICY "Users can leave room" ON room_members FOR DELETE
-  USING (auth.uid() = user_id);
 
 CREATE TABLE room_tracks (
   id            BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
@@ -185,7 +168,27 @@ CREATE TABLE room_tracks (
 
 CREATE INDEX idx_room_tracks_room ON room_tracks(room_id);
 
+-- 5b. Enable RLS on all tables
+ALTER TABLE rooms ENABLE ROW LEVEL SECURITY;
+ALTER TABLE room_members ENABLE ROW LEVEL SECURITY;
 ALTER TABLE room_tracks ENABLE ROW LEVEL SECURITY;
+
+-- 5c. Add policies (now that all tables exist)
+CREATE POLICY "Members can read room" ON rooms FOR SELECT
+  USING (id IN (SELECT room_id FROM room_members WHERE user_id = auth.uid()));
+CREATE POLICY "Auth users can create rooms" ON rooms FOR INSERT
+  WITH CHECK (auth.uid() = created_by);
+CREATE POLICY "Creator can update room" ON rooms FOR UPDATE
+  USING (auth.uid() = created_by);
+CREATE POLICY "Creator can delete room" ON rooms FOR DELETE
+  USING (auth.uid() = created_by);
+
+CREATE POLICY "Members can read members" ON room_members FOR SELECT
+  USING (room_id IN (SELECT room_id FROM room_members WHERE user_id = auth.uid()));
+CREATE POLICY "Users can join room" ON room_members FOR INSERT
+  WITH CHECK (auth.uid() = user_id);
+CREATE POLICY "Users can leave room" ON room_members FOR DELETE
+  USING (auth.uid() = user_id);
 
 CREATE POLICY "Members can read tracks" ON room_tracks FOR SELECT
   USING (room_id IN (SELECT room_id FROM room_members WHERE user_id = auth.uid()));
