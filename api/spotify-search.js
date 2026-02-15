@@ -34,29 +34,32 @@ async function getToken(forceRefresh = false) {
   return cachedToken;
 }
 
-async function spotifySearch(query, token) {
+async function spotifySearch(query, token, type = "album") {
   const res = await fetch(
-    `https://api.spotify.com/v1/search?type=album&market=US&limit=6&q=${encodeURIComponent(query)}`,
+    `https://api.spotify.com/v1/search?type=${type}&market=US&limit=6&q=${encodeURIComponent(query)}`,
     { headers: { Authorization: `Bearer ${token}` } }
   );
   return res;
 }
 
 export default async function handler(req, res) {
-  const { q } = req.query;
+  const { q, type = "album" } = req.query;
 
   if (!q) {
     return res.status(400).json({ error: "Missing query parameter 'q'" });
   }
 
+  // Only allow album or track
+  const searchType = type === "track" ? "track" : "album";
+
   try {
     let token = await getToken();
-    let spotifyRes = await spotifySearch(q, token);
+    let spotifyRes = await spotifySearch(q, token, searchType);
 
     // If token expired, refresh and retry once
     if (spotifyRes.status === 401) {
       token = await getToken(true);
-      spotifyRes = await spotifySearch(q, token);
+      spotifyRes = await spotifySearch(q, token, searchType);
     }
 
     if (!spotifyRes.ok) {
@@ -67,16 +70,31 @@ export default async function handler(req, res) {
 
     const data = await spotifyRes.json();
 
-    const albums = (data.albums?.items || []).map((a) => ({
-      id: a.id,
-      name: a.name,
-      artist: a.artists.map((ar) => ar.name).join(", "),
-      imageUrl: a.images?.[1]?.url || a.images?.[0]?.url || "",
-      spotifyUrl: a.external_urls?.spotify || "",
-    }));
+    let results = [];
+
+    if (searchType === "album") {
+      results = (data.albums?.items || []).map((a) => ({
+        id: a.id,
+        type: "album",
+        name: a.name,
+        artist: a.artists.map((ar) => ar.name).join(", "),
+        imageUrl: a.images?.[1]?.url || a.images?.[0]?.url || "",
+        spotifyUrl: a.external_urls?.spotify || "",
+      }));
+    } else {
+      results = (data.tracks?.items || []).map((t) => ({
+        id: t.id,
+        type: "track",
+        name: t.name,
+        artist: t.artists.map((ar) => ar.name).join(", "),
+        imageUrl: t.album?.images?.[1]?.url || t.album?.images?.[0]?.url || "",
+        spotifyUrl: t.external_urls?.spotify || "",
+        albumName: t.album?.name || "",
+      }));
+    }
 
     res.setHeader("Cache-Control", "s-maxage=300, stale-while-revalidate");
-    return res.json(albums);
+    return res.json(results);
   } catch (e) {
     console.error("Spotify search error:", e);
     return res.status(500).json({ error: "Failed to search Spotify" });

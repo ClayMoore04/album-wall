@@ -1,8 +1,8 @@
-export async function searchAlbums(query, signal) {
+export async function searchSpotify(query, type = "album", signal) {
   if (!query.trim()) return [];
 
   const res = await fetch(
-    `/api/spotify-search?q=${encodeURIComponent(query.trim())}`,
+    `/api/spotify-search?q=${encodeURIComponent(query.trim())}&type=${type}`,
     { signal }
   );
 
@@ -12,3 +12,7 @@ export async function searchAlbums(query, signal) {
 
   return res.json();
 }
+
+// Backwards compatible alias
+export const searchAlbums = (query, signal) =>
+  searchSpotify(query, "album", signal);

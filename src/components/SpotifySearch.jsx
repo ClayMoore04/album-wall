@@ -1,10 +1,11 @@
 import { useState, useEffect, useRef, useCallback } from "react";
-import { searchAlbums } from "../lib/spotify";
+import { searchSpotify } from "../lib/spotify";
 import { palette } from "../lib/palette";
 import { inputStyle, labelStyle } from "../lib/styles";
 
 export default function SpotifySearch({ onSelect }) {
   const [query, setQuery] = useState("");
+  const [searchType, setSearchType] = useState("album");
   const [results, setResults] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
@@ -27,21 +28,21 @@ export default function SpotifySearch({ onSelect }) {
     setError(null);
 
     const timer = setTimeout(async () => {
-      // Abort any in-flight request
       if (abortRef.current) abortRef.current.abort();
       const controller = new AbortController();
       abortRef.current = controller;
 
-      // Track this request so stale responses are ignored
       const id = ++requestIdRef.current;
 
       try {
-        const albums = await searchAlbums(query, controller.signal);
-        // Only update if this is still the latest request
+        const items = await searchSpotify(query, searchType, controller.signal);
         if (id !== requestIdRef.current) return;
-        setResults(albums);
-        setOpen(albums.length > 0);
-        if (albums.length === 0) setError("No albums found");
+        setResults(items);
+        setOpen(items.length > 0);
+        if (items.length === 0)
+          setError(
+            searchType === "album" ? "No albums found" : "No songs found"
+          );
       } catch (e) {
         if (e.name === "AbortError") return;
         if (id !== requestIdRef.current) return;
@@ -55,7 +56,7 @@ export default function SpotifySearch({ onSelect }) {
     return () => {
       clearTimeout(timer);
     };
-  }, [query]);
+  }, [query, searchType]);
 
   // Close dropdown on outside click
   useEffect(() => {
@@ -69,8 +70,8 @@ export default function SpotifySearch({ onSelect }) {
   }, []);
 
   const handleSelect = useCallback(
-    (album) => {
-      onSelect(album);
+    (item) => {
+      onSelect(item);
       setQuery("");
       setResults([]);
       setOpen(false);
@@ -79,11 +80,53 @@ export default function SpotifySearch({ onSelect }) {
     [onSelect]
   );
 
+  const toggleStyle = (active) => ({
+    padding: "5px 14px",
+    borderRadius: 8,
+    border: "none",
+    fontSize: 12,
+    fontWeight: 600,
+    fontFamily: "'Space Mono', monospace",
+    cursor: "pointer",
+    background: active ? palette.accent : "transparent",
+    color: active ? "#000" : palette.textMuted,
+    transition: "all 0.15s",
+  });
+
   return (
     <div ref={containerRef} style={{ position: "relative", marginBottom: 16 }}>
       <label style={labelStyle}>
         Search Spotify <span style={{ color: palette.coral }}>*</span>
       </label>
+
+      {/* Album / Song toggle */}
+      <div
+        style={{
+          display: "inline-flex",
+          gap: 2,
+          background: palette.surface,
+          borderRadius: 10,
+          padding: 3,
+          marginBottom: 8,
+          border: `1px solid ${palette.border}`,
+        }}
+      >
+        <button
+          type="button"
+          onClick={() => setSearchType("album")}
+          style={toggleStyle(searchType === "album")}
+        >
+          Albums
+        </button>
+        <button
+          type="button"
+          onClick={() => setSearchType("track")}
+          style={toggleStyle(searchType === "track")}
+        >
+          Songs
+        </button>
+      </div>
+
       <div style={{ position: "relative" }}>
         <input
           type="text"
@@ -91,7 +134,11 @@ export default function SpotifySearch({ onSelect }) {
           onChange={(e) => setQuery(e.target.value)}
           onFocus={() => results.length > 0 && setOpen(true)}
           onKeyDown={(e) => e.key === "Escape" && setOpen(false)}
-          placeholder="Search for an album..."
+          placeholder={
+            searchType === "album"
+              ? "Search for an album..."
+              : "Search for a song..."
+          }
           style={inputStyle}
         />
         {loading && (
@@ -144,10 +191,10 @@ export default function SpotifySearch({ onSelect }) {
             boxShadow: "0 8px 32px rgba(0,0,0,0.5)",
           }}
         >
-          {results.map((album) => (
+          {results.map((item) => (
             <button
-              key={album.id}
-              onClick={() => handleSelect(album)}
+              key={`${item.type}-${item.id}`}
+              onClick={() => handleSelect(item)}
               style={{
                 display: "flex",
                 alignItems: "center",
@@ -169,14 +216,14 @@ export default function SpotifySearch({ onSelect }) {
                 (e.currentTarget.style.background = "transparent")
               }
             >
-              {album.imageUrl ? (
+              {item.imageUrl ? (
                 <img
-                  src={album.imageUrl}
+                  src={item.imageUrl}
                   alt=""
                   style={{
                     width: 48,
                     height: 48,
-                    borderRadius: 6,
+                    borderRadius: item.type === "track" ? 4 : 6,
                     objectFit: "cover",
                     flexShrink: 0,
                   }}
@@ -186,7 +233,7 @@ export default function SpotifySearch({ onSelect }) {
                   style={{
                     width: 48,
                     height: 48,
-                    borderRadius: 6,
+                    borderRadius: item.type === "track" ? 4 : 6,
                     background: palette.border,
                     flexShrink: 0,
                   }}
@@ -195,15 +242,42 @@ export default function SpotifySearch({ onSelect }) {
               <div style={{ minWidth: 0, flex: 1 }}>
                 <div
                   style={{
-                    fontSize: 14,
-                    fontWeight: 700,
-                    fontFamily: "'Syne', sans-serif",
-                    whiteSpace: "nowrap",
-                    overflow: "hidden",
-                    textOverflow: "ellipsis",
+                    display: "flex",
+                    alignItems: "center",
+                    gap: 6,
                   }}
                 >
-                  {album.name}
+                  <div
+                    style={{
+                      fontSize: 14,
+                      fontWeight: 700,
+                      fontFamily: "'Syne', sans-serif",
+                      whiteSpace: "nowrap",
+                      overflow: "hidden",
+                      textOverflow: "ellipsis",
+                    }}
+                  >
+                    {item.name}
+                  </div>
+                  <span
+                    style={{
+                      flexShrink: 0,
+                      fontSize: 9,
+                      fontWeight: 700,
+                      fontFamily: "'Space Mono', monospace",
+                      textTransform: "uppercase",
+                      padding: "1px 5px",
+                      borderRadius: 3,
+                      background:
+                        item.type === "track"
+                          ? "rgba(255,107,107,0.15)"
+                          : "rgba(29,185,84,0.15)",
+                      color:
+                        item.type === "track" ? palette.coral : palette.accent,
+                    }}
+                  >
+                    {item.type === "track" ? "Song" : "Album"}
+                  </span>
                 </div>
                 <div
                   style={{
@@ -215,7 +289,10 @@ export default function SpotifySearch({ onSelect }) {
                     textOverflow: "ellipsis",
                   }}
                 >
-                  {album.artist}
+                  {item.artist}
+                  {item.type === "track" && item.albumName
+                    ? ` · ${item.albumName}`
+                    : ""}
                 </div>
               </div>
             </button>

@@ -53,14 +53,43 @@ export default function AlbumPreview({ album, onClear }) {
       <div style={{ flex: 1, minWidth: 0 }}>
         <div
           style={{
-            fontSize: 15,
-            fontWeight: 700,
-            whiteSpace: "nowrap",
-            overflow: "hidden",
-            textOverflow: "ellipsis",
+            display: "flex",
+            alignItems: "center",
+            gap: 6,
           }}
         >
-          {album.name}
+          <div
+            style={{
+              fontSize: 15,
+              fontWeight: 700,
+              whiteSpace: "nowrap",
+              overflow: "hidden",
+              textOverflow: "ellipsis",
+            }}
+          >
+            {album.name}
+          </div>
+          {album.type && (
+            <span
+              style={{
+                flexShrink: 0,
+                fontSize: 9,
+                fontWeight: 700,
+                fontFamily: "'Space Mono', monospace",
+                textTransform: "uppercase",
+                padding: "1px 5px",
+                borderRadius: 3,
+                background:
+                  album.type === "track"
+                    ? "rgba(255,107,107,0.15)"
+                    : "rgba(29,185,84,0.15)",
+                color:
+                  album.type === "track" ? palette.coral : palette.accent,
+              }}
+            >
+              {album.type === "track" ? "Song" : "Album"}
+            </span>
+          )}
         </div>
         <div
           style={{
