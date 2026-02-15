@@ -24,6 +24,19 @@ CREATE POLICY "Users can insert own profile"
 CREATE POLICY "Users can update own profile"
   ON profiles FOR UPDATE USING (auth.uid() = id);
 
+-- Function to create a profile during signup (bypasses RLS since
+-- the auth session may not be fully established yet after signUp)
+CREATE OR REPLACE FUNCTION create_profile(
+  user_id UUID,
+  user_slug TEXT,
+  user_display_name TEXT
+) RETURNS void AS $$
+BEGIN
+  INSERT INTO profiles (id, slug, display_name)
+  VALUES (user_id, user_slug, user_display_name);
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER;
+
 -- ============================================================
 -- 2. SUBMISSIONS TABLE (updated for multi-account)
 -- ============================================================

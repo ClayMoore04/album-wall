@@ -64,13 +64,14 @@ export function AuthProvider({ children }) {
     if (authError) throw authError;
 
     const userId = authData.user.id;
-    const { error: profileError } = await supabase.from("profiles").insert([
-      {
-        id: userId,
-        slug,
-        display_name: displayName,
-      },
-    ]);
+
+    // Use the create_profile RPC (SECURITY DEFINER) to bypass RLS,
+    // since the session may not be fully established after signUp.
+    const { error: profileError } = await supabase.rpc("create_profile", {
+      user_id: userId,
+      user_slug: slug,
+      user_display_name: displayName,
+    });
     if (profileError) throw profileError;
 
     const newProfile = { id: userId, slug, display_name: displayName, bio: "" };
