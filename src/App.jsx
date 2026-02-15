@@ -7,10 +7,15 @@ import SubmitForm from "./components/SubmitForm";
 import ThankYou from "./components/ThankYou";
 import Wall from "./components/Wall";
 import Stats from "./components/Stats";
+import PlaylistBuilder from "./components/PlaylistBuilder";
+import SpotifyCallback from "./components/SpotifyCallback";
 
 const ADMIN_PASSWORD = import.meta.env.VITE_ADMIN_PASSWORD;
 
 export default function App() {
+  // Handle /callback route for Spotify OAuth
+  const isCallback = window.location.pathname === "/callback";
+
   const [view, setView] = useState("submit");
   const [submissions, setSubmissions] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -423,32 +428,45 @@ export default function App() {
           </div>
         )}
 
-        <TabToggle view={view} setView={setView} count={submissions.length} />
-
-        {view === "submit" ? (
-          justSubmitted ? (
-            <ThankYou
-              onAnother={() => setJustSubmitted(false)}
-              onViewWall={() => {
-                setJustSubmitted(false);
-                setView("wall");
-              }}
-            />
-          ) : (
-            <SubmitForm onSubmit={addSubmission} />
-          )
-        ) : view === "wall" ? (
-          <Wall
-            submissions={submissions}
-            loading={loading}
-            isAdmin={isAdmin}
-            onFeedback={handleFeedback}
-            onDelete={handleDelete}
-            onListened={handleListened}
-            onRate={handleRate}
+        {isCallback ? (
+          <SpotifyCallback
+            onComplete={() => {
+              window.history.replaceState({}, "", "/");
+              setView("playlist");
+            }}
           />
         ) : (
-          <Stats submissions={submissions} />
+          <>
+            <TabToggle view={view} setView={setView} count={submissions.length} />
+
+            {view === "submit" ? (
+              justSubmitted ? (
+                <ThankYou
+                  onAnother={() => setJustSubmitted(false)}
+                  onViewWall={() => {
+                    setJustSubmitted(false);
+                    setView("wall");
+                  }}
+                />
+              ) : (
+                <SubmitForm onSubmit={addSubmission} />
+              )
+            ) : view === "wall" ? (
+              <Wall
+                submissions={submissions}
+                loading={loading}
+                isAdmin={isAdmin}
+                onFeedback={handleFeedback}
+                onDelete={handleDelete}
+                onListened={handleListened}
+                onRate={handleRate}
+              />
+            ) : view === "playlist" ? (
+              <PlaylistBuilder submissions={submissions} />
+            ) : (
+              <Stats submissions={submissions} />
+            )}
+          </>
         )}
       </div>
     </div>

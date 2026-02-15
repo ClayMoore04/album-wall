@@ -4,6 +4,7 @@ export default function TabToggle({ view, setView, count }) {
   const tabs = [
     { key: "submit", label: "Submit", icon: "🎵" },
     { key: "wall", label: `Wall (${count})`, icon: "🧱" },
+    { key: "playlist", label: "Playlist", icon: "🎧" },
     { key: "stats", label: "Stats", icon: "📊" },
   ];
 
