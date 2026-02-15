@@ -6,7 +6,8 @@ import WallCard from "./WallCard";
 export default function Wall({
   submissions,
   loading,
-  isAdmin,
+  isOwner,
+  ownerName,
   onFeedback,
   onDelete,
   onListened,
@@ -258,7 +259,8 @@ export default function Wall({
           <WallCard
             key={sub.id}
             submission={sub}
-            isAdmin={isAdmin}
+            isOwner={isOwner}
+            ownerName={ownerName}
             onFeedback={onFeedback}
             onDelete={onDelete}
             onListened={onListened}

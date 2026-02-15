@@ -1,7 +1,7 @@
 import { palette } from "../lib/palette";
 import { secondaryBtnStyle } from "../lib/styles";
 
-export default function ThankYou({ onAnother, onViewWall }) {
+export default function ThankYou({ onAnother, onViewWall, ownerName = "They" }) {
   return (
     <div
       style={{
@@ -23,7 +23,7 @@ export default function ThankYou({ onAnother, onViewWall }) {
           marginBottom: 32,
         }}
       >
-        Daniel will listen to the whole album and
+        {ownerName} will listen to the whole album and
         <br />
         get back to you with thoughts.
       </p>

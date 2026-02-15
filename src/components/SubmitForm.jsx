@@ -5,7 +5,7 @@ import { TAGS } from "../lib/tags";
 import SpotifySearch from "./SpotifySearch";
 import AlbumPreview from "./AlbumPreview";
 
-export default function SubmitForm({ onSubmit }) {
+export default function SubmitForm({ onSubmit, ownerName = "them" }) {
   const [selectedAlbum, setSelectedAlbum] = useState(null);
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
@@ -59,7 +59,7 @@ export default function SubmitForm({ onSubmit }) {
           type="text"
           value={name}
           onChange={(e) => setName(e.target.value)}
-          placeholder="So Daniel knows who sent this"
+          placeholder={`So ${ownerName} knows who sent this`}
           style={inputStyle}
         />
       </div>
@@ -73,7 +73,7 @@ export default function SubmitForm({ onSubmit }) {
           type="email"
           value={email}
           onChange={(e) => setEmail(e.target.value)}
-          placeholder="So Daniel can let you know what he thinks"
+          placeholder={`So ${ownerName} can let you know what they think`}
           style={inputStyle}
         />
       </div>
@@ -148,7 +148,7 @@ export default function SubmitForm({ onSubmit }) {
           transform: submitting ? "scale(0.98)" : "scale(1)",
         }}
       >
-        {submitting ? "Sending..." : "Send to Daniel 🎧"}
+        {submitting ? "Sending..." : `Send to ${ownerName} 🎧`}
       </button>
 
       <style>{`

@@ -1,6 +1,6 @@
 import { palette } from "../lib/palette";
 
-export default function Header() {
+export default function Header({ profile }) {
   return (
     <header style={{ textAlign: "center", marginBottom: 40 }}>
       <div
@@ -17,7 +17,7 @@ export default function Header() {
           opacity: 0.8,
         }}
       >
-        <span style={{ fontSize: 16 }}>💿</span> Daniel's Album Wall
+        <span style={{ fontSize: 16 }}>💿</span> {profile?.display_name || "Album"}'s Album Wall
       </div>
       <h1
         style={{
@@ -40,8 +40,7 @@ export default function Header() {
           fontFamily: "'Space Mono', monospace",
         }}
       >
-        Search for your favorite album on Spotify and tell me why I need to hear
-        it.
+        {profile?.bio || "Search for your favorite album on Spotify and tell me why I need to hear it."}
       </p>
     </header>
   );

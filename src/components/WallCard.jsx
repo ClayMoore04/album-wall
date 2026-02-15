@@ -30,7 +30,7 @@ function StarRating({ rating, interactive, onRate }) {
   );
 }
 
-export default function WallCard({ submission, isAdmin, onFeedback, onDelete, onListened, onRate }) {
+export default function WallCard({ submission, isOwner, ownerName = "Owner", onFeedback, onDelete, onListened, onRate }) {
   const sub = submission;
   const [replying, setReplying] = useState(false);
   const [feedbackText, setFeedbackText] = useState("");
@@ -178,7 +178,7 @@ export default function WallCard({ submission, isAdmin, onFeedback, onDelete, on
           </div>
 
           {/* Star rating (public) */}
-          {sub.rating && !isAdmin && (
+          {sub.rating && !isOwner && (
             <div style={{ marginTop: 6 }}>
               <StarRating rating={sub.rating} interactive={false} />
             </div>
@@ -242,7 +242,7 @@ export default function WallCard({ submission, isAdmin, onFeedback, onDelete, on
       </div>
 
       {/* Daniel's feedback */}
-      {sub.daniel_feedback && (
+      {sub.owner_feedback && (
         <div
           style={{
             margin: "0 16px 16px",
@@ -263,7 +263,7 @@ export default function WallCard({ submission, isAdmin, onFeedback, onDelete, on
               marginBottom: 6,
             }}
           >
-            Daniel's take
+            {ownerName}'s take
           </div>
           <div
             style={{
@@ -272,13 +272,13 @@ export default function WallCard({ submission, isAdmin, onFeedback, onDelete, on
               color: palette.text,
             }}
           >
-            "{sub.daniel_feedback}"
+            "{sub.owner_feedback}"
           </div>
         </div>
       )}
 
       {/* Admin controls */}
-      {isAdmin && (
+      {isOwner && (
         <div style={{ padding: "0 16px 16px" }}>
           {/* Listened + Rating controls */}
           <div
@@ -321,7 +321,7 @@ export default function WallCard({ submission, isAdmin, onFeedback, onDelete, on
           </div>
 
           {/* Reply UI (only if no feedback yet) */}
-          {!sub.daniel_feedback && (
+          {!sub.owner_feedback && (
             <>
               {replying ? (
                 <div style={{ marginBottom: 8 }}>
@@ -386,7 +386,7 @@ export default function WallCard({ submission, isAdmin, onFeedback, onDelete, on
 
           {/* Action buttons row */}
           <div style={{ display: "flex", gap: 8 }}>
-            {!sub.daniel_feedback && !replying && (
+            {!sub.owner_feedback && !replying && (
               <button
                 onClick={() => setReplying(true)}
                 style={{

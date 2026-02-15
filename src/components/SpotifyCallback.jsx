@@ -1,8 +1,10 @@
 import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { exchangeCodeForToken } from "../lib/spotifyAuth";
 import { palette } from "../lib/palette";
 
-export default function SpotifyCallback({ onComplete }) {
+export default function SpotifyCallback() {
+  const navigate = useNavigate();
   const [status, setStatus] = useState("connecting");
   const [error, setError] = useState(null);
 
@@ -10,6 +12,8 @@ export default function SpotifyCallback({ onComplete }) {
     const params = new URLSearchParams(window.location.search);
     const code = params.get("code");
     const authError = params.get("error");
+    // Preserve the slug from state if available
+    const returnSlug = sessionStorage.getItem("spotify_return_slug") || "";
 
     if (authError) {
       setStatus("error");
@@ -27,17 +31,20 @@ export default function SpotifyCallback({ onComplete }) {
       try {
         await exchangeCodeForToken(code);
         setStatus("success");
-        // Clean up the URL
-        window.history.replaceState({}, "", "/");
-        // Notify parent after a brief moment
-        setTimeout(() => onComplete(), 1500);
+        setTimeout(() => {
+          if (returnSlug) {
+            navigate(`/${returnSlug}`);
+          } else {
+            navigate("/");
+          }
+        }, 1500);
       } catch (e) {
         console.error("Spotify callback error:", e);
         setStatus("error");
         setError("Failed to connect to Spotify. Please try again.");
       }
     })();
-  }, [onComplete]);
+  }, [navigate]);
 
   return (
     <div
@@ -100,10 +107,7 @@ export default function SpotifyCallback({ onComplete }) {
             {error}
           </p>
           <button
-            onClick={() => {
-              window.history.replaceState({}, "", "/");
-              onComplete();
-            }}
+            onClick={() => navigate("/")}
             style={{
               padding: "10px 20px",
               border: `1px solid ${palette.border}`,

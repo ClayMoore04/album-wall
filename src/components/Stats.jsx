@@ -157,7 +157,7 @@ export default function Stats({ submissions }) {
       topRecommenders,
       tagBreakdown,
       ratingDist,
-      withFeedback: submissions.filter((s) => s.daniel_feedback).length,
+      withFeedback: submissions.filter((s) => s.owner_feedback).length,
     };
   }, [submissions]);
 
