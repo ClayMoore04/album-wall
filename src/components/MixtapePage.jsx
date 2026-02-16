@@ -37,6 +37,7 @@ export default function MixtapePage() {
   const [notesValue, setNotesValue] = useState("");
   const [tapeWarning, setTapeWarning] = useState(null);
   const [contributorName, setContributorName] = useState("");
+  const [copied, setCopied] = useState(false);
 
   // Export modal state
   const [showExportModal, setShowExportModal] = useState(false);
@@ -379,8 +380,28 @@ export default function MixtapePage() {
               {mixtape.profiles?.display_name || "Unknown"}
             </Link>
           </div>
-          {isOwner && (
-            <div style={{ marginTop: 10, display: "flex", gap: 8, justifyContent: "center" }}>
+          <div style={{ marginTop: 10, display: "flex", gap: 8, justifyContent: "center" }}>
+            <button
+              onClick={() => {
+                navigator.clipboard.writeText(window.location.href);
+                setCopied(true);
+                setTimeout(() => setCopied(false), 2000);
+              }}
+              style={{
+                padding: "4px 12px",
+                borderRadius: 6,
+                border: `1px solid ${palette.border}`,
+                background: "transparent",
+                color: copied ? palette.accent : palette.textMuted,
+                fontSize: 10,
+                fontFamily: "'Space Mono', monospace",
+                cursor: "pointer",
+                transition: "color 0.2s",
+              }}
+            >
+              {copied ? "Copied!" : "Copy link"}
+            </button>
+            {isOwner && (
               <button
                 onClick={handleDelete}
                 style={{
@@ -396,8 +417,8 @@ export default function MixtapePage() {
               >
                 Delete mixtape
               </button>
-            </div>
-          )}
+            )}
+          </div>
         </div>
 
         {/* Time Bar */}
@@ -927,7 +948,10 @@ export default function MixtapePage() {
                     </button>
                   ) : (
                     <button
-                      onClick={startSpotifyAuth}
+                      onClick={() => {
+                        sessionStorage.setItem("spotify_return_path", `/mixtape/${mixtapeId}`);
+                        startSpotifyAuth();
+                      }}
                       style={{
                         width: "100%",
                         padding: "14px",

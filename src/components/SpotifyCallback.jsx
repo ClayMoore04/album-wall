@@ -12,7 +12,8 @@ export default function SpotifyCallback() {
     const params = new URLSearchParams(window.location.search);
     const code = params.get("code");
     const authError = params.get("error");
-    // Preserve the slug from state if available
+    // Preserve the return destination from state if available
+    const returnPath = sessionStorage.getItem("spotify_return_path") || "";
     const returnSlug = sessionStorage.getItem("spotify_return_slug") || "";
 
     if (authError) {
@@ -31,8 +32,11 @@ export default function SpotifyCallback() {
       try {
         await exchangeCodeForToken(code);
         setStatus("success");
+        sessionStorage.removeItem("spotify_return_path");
         setTimeout(() => {
-          if (returnSlug) {
+          if (returnPath) {
+            navigate(returnPath);
+          } else if (returnSlug) {
             navigate(`/${returnSlug}`);
           } else {
             navigate("/");
