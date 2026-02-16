@@ -90,6 +90,7 @@ export default async function handler(req, res) {
         imageUrl: t.album?.images?.[1]?.url || t.album?.images?.[0]?.url || "",
         spotifyUrl: t.external_urls?.spotify || "",
         albumName: t.album?.name || "",
+        durationMs: t.duration_ms,
       }));
     }
 

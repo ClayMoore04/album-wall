@@ -40,6 +40,9 @@ export default function NavBar({ wallSlug, isOwner }) {
           <Link to="/rooms" style={linkStyle}>
             Rooms
           </Link>
+          <Link to="/mixtapes" style={linkStyle}>
+            Mixtapes
+          </Link>
           {isOwner ? (
             <Link to="/dashboard" style={linkStyle}>
               Dashboard

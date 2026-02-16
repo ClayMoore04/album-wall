@@ -3,9 +3,9 @@ import { searchSpotify } from "../lib/spotify";
 import { palette } from "../lib/palette";
 import { inputStyle, labelStyle } from "../lib/styles";
 
-export default function SpotifySearch({ onSelect }) {
+export default function SpotifySearch({ onSelect, forceType }) {
   const [query, setQuery] = useState("");
-  const [searchType, setSearchType] = useState("album");
+  const [searchType, setSearchType] = useState(forceType || "album");
   const [results, setResults] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
@@ -100,32 +100,34 @@ export default function SpotifySearch({ onSelect }) {
       </label>
 
       {/* Album / Song toggle */}
-      <div
-        style={{
-          display: "inline-flex",
-          gap: 2,
-          background: palette.surface,
-          borderRadius: 10,
-          padding: 3,
-          marginBottom: 8,
-          border: `1px solid ${palette.border}`,
-        }}
-      >
-        <button
-          type="button"
-          onClick={() => setSearchType("album")}
-          style={toggleStyle(searchType === "album")}
+      {!forceType && (
+        <div
+          style={{
+            display: "inline-flex",
+            gap: 2,
+            background: palette.surface,
+            borderRadius: 10,
+            padding: 3,
+            marginBottom: 8,
+            border: `1px solid ${palette.border}`,
+          }}
         >
-          Albums
-        </button>
-        <button
-          type="button"
-          onClick={() => setSearchType("track")}
-          style={toggleStyle(searchType === "track")}
-        >
-          Songs
-        </button>
-      </div>
+          <button
+            type="button"
+            onClick={() => setSearchType("album")}
+            style={toggleStyle(searchType === "album")}
+          >
+            Albums
+          </button>
+          <button
+            type="button"
+            onClick={() => setSearchType("track")}
+            style={toggleStyle(searchType === "track")}
+          >
+            Songs
+          </button>
+        </div>
+      )}
 
       <div style={{ position: "relative" }}>
         <input

@@ -213,6 +213,73 @@ END;
 $$ LANGUAGE plpgsql SECURITY DEFINER;
 
 -- ============================================================
+-- 6. MIXTAPES (personal time-constrained playlists)
+-- ============================================================
+
+-- 6a. Create tables
+CREATE TABLE mixtapes (
+  id          UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+  user_id     UUID NOT NULL REFERENCES profiles(id) ON DELETE CASCADE,
+  title       TEXT NOT NULL,
+  is_public   BOOLEAN DEFAULT true,
+  created_at  TIMESTAMPTZ DEFAULT NOW(),
+  updated_at  TIMESTAMPTZ DEFAULT NOW()
+);
+
+CREATE INDEX idx_mixtapes_user ON mixtapes(user_id);
+
+CREATE TABLE mixtape_tracks (
+  id            BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+  mixtape_id    UUID NOT NULL REFERENCES mixtapes(id) ON DELETE CASCADE,
+  position      SMALLINT NOT NULL,
+  track_name    TEXT NOT NULL,
+  artist_name   TEXT NOT NULL,
+  album_name    TEXT DEFAULT '',
+  album_art_url TEXT DEFAULT '',
+  spotify_url   TEXT DEFAULT '',
+  spotify_id    TEXT NOT NULL,
+  duration_ms   INTEGER NOT NULL,
+  liner_notes   VARCHAR(250) DEFAULT '',
+  created_at    TIMESTAMPTZ DEFAULT NOW()
+);
+
+CREATE INDEX idx_mixtape_tracks_mixtape ON mixtape_tracks(mixtape_id);
+
+-- 6b. Enable RLS
+ALTER TABLE mixtapes ENABLE ROW LEVEL SECURITY;
+ALTER TABLE mixtape_tracks ENABLE ROW LEVEL SECURITY;
+
+-- 6c. Mixtape policies
+CREATE POLICY "Public mixtapes are viewable" ON mixtapes
+  FOR SELECT USING (is_public = true OR auth.uid() = user_id);
+CREATE POLICY "Users can create own mixtapes" ON mixtapes
+  FOR INSERT WITH CHECK (auth.uid() = user_id);
+CREATE POLICY "Users can update own mixtapes" ON mixtapes
+  FOR UPDATE USING (auth.uid() = user_id);
+CREATE POLICY "Users can delete own mixtapes" ON mixtapes
+  FOR DELETE USING (auth.uid() = user_id);
+
+-- 6d. Mixtape track policies
+CREATE POLICY "Tracks viewable if mixtape is viewable" ON mixtape_tracks
+  FOR SELECT USING (
+    mixtape_id IN (
+      SELECT id FROM mixtapes WHERE is_public = true OR user_id = auth.uid()
+    )
+  );
+CREATE POLICY "Owner can add tracks" ON mixtape_tracks
+  FOR INSERT WITH CHECK (
+    mixtape_id IN (SELECT id FROM mixtapes WHERE user_id = auth.uid())
+  );
+CREATE POLICY "Owner can update tracks" ON mixtape_tracks
+  FOR UPDATE USING (
+    mixtape_id IN (SELECT id FROM mixtapes WHERE user_id = auth.uid())
+  );
+CREATE POLICY "Owner can delete tracks" ON mixtape_tracks
+  FOR DELETE USING (
+    mixtape_id IN (SELECT id FROM mixtapes WHERE user_id = auth.uid())
+  );
+
+-- ============================================================
 -- MIGRATION: If you already have the old single-user table,
 -- run the migration endpoint (POST /api/migrate-daniel) first,
 -- then run these SQL statements manually:

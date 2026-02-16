@@ -16,6 +16,7 @@ export default function Dashboard() {
   const [following, setFollowing] = useState([]);
   const [discoverable, setDiscoverable] = useState(false);
   const [roomCount, setRoomCount] = useState(0);
+  const [mixtapeCount, setMixtapeCount] = useState(0);
 
   useEffect(() => {
     if (!loading && !user) {
@@ -31,6 +32,7 @@ export default function Dashboard() {
       loadStats(profile.id);
       loadFollowing(user.id);
       loadRoomCount(user.id);
+      loadMixtapeCount(user.id);
     }
   }, [profile]);
 
@@ -64,6 +66,15 @@ export default function Dashboard() {
       .select("*", { count: "exact", head: true })
       .eq("user_id", userId);
     setRoomCount(count || 0);
+  };
+
+  const loadMixtapeCount = async (userId) => {
+    if (!supabase) return;
+    const { count } = await supabase
+      .from("mixtapes")
+      .select("*", { count: "exact", head: true })
+      .eq("user_id", userId);
+    setMixtapeCount(count || 0);
   };
 
   const handleUnfollow = async (followingId) => {
@@ -368,6 +379,54 @@ export default function Dashboard() {
           }}
         >
           Build collaborative playlists with friends in real time.
+        </p>
+      </div>
+
+      {/* Mixtapes */}
+      <div
+        style={{
+          background: palette.cardBg,
+          border: `1px solid ${palette.border}`,
+          borderRadius: 12,
+          padding: 20,
+          marginTop: 24,
+        }}
+      >
+        <div
+          style={{
+            display: "flex",
+            justifyContent: "space-between",
+            alignItems: "center",
+          }}
+        >
+          <h2 style={{ fontSize: 16, fontWeight: 700, margin: 0 }}>
+            Mixtapes
+          </h2>
+          <Link
+            to="/mixtapes"
+            style={{
+              fontSize: 12,
+              fontWeight: 600,
+              fontFamily: "'Space Mono', monospace",
+              color: palette.coral,
+              textDecoration: "none",
+            }}
+          >
+            {mixtapeCount > 0
+              ? `${mixtapeCount} tape${mixtapeCount !== 1 ? "s" : ""}`
+              : "Make one"}
+            {" \u2192"}
+          </Link>
+        </div>
+        <p
+          style={{
+            fontSize: 12,
+            color: palette.textMuted,
+            fontFamily: "'Space Mono', monospace",
+            margin: "8px 0 0",
+          }}
+        >
+          90 minutes. Liner notes. Export to Spotify.
         </p>
       </div>
 
