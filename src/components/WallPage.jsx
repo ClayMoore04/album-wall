@@ -70,7 +70,7 @@ export default function WallPage() {
       if (!cancelled) setFollowerCount(count || 0);
 
       // Set page title
-      document.title = `${prof.display_name}'s Album Wall`;
+      document.title = `${prof.display_name}'s Booth — The Booth`;
     })();
 
     return () => {

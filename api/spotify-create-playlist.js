@@ -59,7 +59,7 @@ export default async function handler(req, res) {
         method: "POST",
         body: JSON.stringify({
           name: playlist_name,
-          description: description || "Created from Album Wall",
+          description: description || "Created from The Booth",
           public: is_public !== false,
         }),
       }

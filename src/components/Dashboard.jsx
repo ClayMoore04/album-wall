@@ -189,7 +189,7 @@ export default function Dashboard() {
           marginBottom: 24,
         }}
       >
-        <div style={labelStyle}>Your Wall</div>
+        <div style={labelStyle}>Your Booth</div>
         <Link
           to={`/${profile.slug}`}
           style={{
@@ -200,7 +200,7 @@ export default function Dashboard() {
             textDecoration: "none",
           }}
         >
-          albumwall.vercel.app/{profile.slug}
+          thebooth.vercel.app/{profile.slug}
         </Link>
         <div
           style={{
@@ -255,7 +255,7 @@ export default function Dashboard() {
           <textarea
             value={bio}
             onChange={(e) => setBio(e.target.value)}
-            placeholder="Tell visitors about your wall..."
+            placeholder="Tell visitors about your booth..."
             rows={3}
             style={{ ...inputStyle, resize: "vertical", minHeight: 80 }}
           />
@@ -309,7 +309,7 @@ export default function Dashboard() {
               marginLeft: 46,
             }}
           >
-            Let others find your wall on the Discover page
+            Let others find your booth on the Discover page
           </div>
         </div>
 
@@ -457,7 +457,7 @@ export default function Dashboard() {
               to="/discover"
               style={{ color: palette.accent, textDecoration: "none" }}
             >
-              Discover walls
+              Discover booths
             </Link>
           </p>
         ) : (

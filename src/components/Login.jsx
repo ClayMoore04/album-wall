@@ -73,7 +73,7 @@ export default function Login() {
             fontSize: 13,
           }}
         >
-          Welcome back to your wall
+          Welcome back to the booth
         </p>
       </div>
 

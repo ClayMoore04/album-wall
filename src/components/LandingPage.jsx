@@ -8,7 +8,7 @@ export default function LandingPage() {
   return (
     <div style={{ maxWidth: 560, margin: "0 auto", padding: "80px 20px" }}>
       <div style={{ textAlign: "center" }}>
-        <div style={{ fontSize: 64, marginBottom: 20 }}>💿</div>
+        <div style={{ fontSize: 64, marginBottom: 20 }}>🎙</div>
         <h1
           style={{
             fontSize: "clamp(32px, 7vw, 48px)",
@@ -18,7 +18,7 @@ export default function LandingPage() {
             letterSpacing: "-0.02em",
           }}
         >
-          Album Wall<span style={{ color: palette.accent }}>.</span>
+          The Booth<span style={{ color: palette.coral }}>.</span>
         </h1>
         <p
           style={{
@@ -30,8 +30,8 @@ export default function LandingPage() {
             margin: "0 auto 40px",
           }}
         >
-          Get your own wall where friends can recommend albums. Listen, rate,
-          reply — and build playlists from the best picks.
+          Slide into the booth. Get album recommendations from friends,
+          build mixtapes, and share what you're listening to.
         </p>
 
         {user && profile ? (
@@ -58,7 +58,7 @@ export default function LandingPage() {
                 color: "#000",
               }}
             >
-              Go to My Wall
+              My Booth
             </Link>
             <Link
               to="/discover"
@@ -74,7 +74,7 @@ export default function LandingPage() {
                 color: palette.textMuted,
               }}
             >
-              Discover Walls
+              Discover
             </Link>
           </div>
         ) : (
@@ -101,7 +101,7 @@ export default function LandingPage() {
                 color: "#000",
               }}
             >
-              Create Your Wall
+              Slide In
             </Link>
             <Link
               to="/discover"
@@ -117,7 +117,7 @@ export default function LandingPage() {
                 color: palette.textMuted,
               }}
             >
-              Discover Walls
+              Discover
             </Link>
           </div>
         )}
@@ -140,19 +140,19 @@ export default function LandingPage() {
         >
           {[
             {
-              icon: "🎵",
-              title: "Create your wall",
-              desc: "Sign up and pick a unique URL for your wall.",
+              icon: "🎙",
+              title: "Set up your booth",
+              desc: "Sign up and pick a unique URL. Your booth, your rules.",
             },
             {
               icon: "🔗",
-              title: "Share your link",
-              desc: "Send your wall link to friends. No account needed to submit.",
+              title: "Invite people in",
+              desc: "Share your link. No account needed to slide in and drop a rec.",
             },
             {
-              icon: "🧱",
-              title: "Collect recommendations",
-              desc: "Friends search Spotify, pick an album, and drop it on your wall.",
+              icon: "💿",
+              title: "Collect the drops",
+              desc: "Friends search Spotify, pick an album, and drop it in your booth.",
             },
             {
               icon: "🎧",

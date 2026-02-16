@@ -61,7 +61,7 @@ export default function DiscoverPage() {
             textAlign: "center",
           }}
         >
-          Discover Walls<span style={{ color: palette.accent }}>.</span>
+          Discover<span style={{ color: palette.coral }}>.</span>
         </h1>
         <p
           style={{
@@ -72,7 +72,7 @@ export default function DiscoverPage() {
             marginBottom: 28,
           }}
         >
-          Find walls to follow and explore new music.
+          Find booths to follow and explore new music.
         </p>
 
         <div
@@ -152,8 +152,8 @@ export default function DiscoverPage() {
             }}
           >
             {search
-              ? "No walls match your search."
-              : "No discoverable walls yet. Be the first!"}
+              ? "No booths match your search."
+              : "No discoverable booths yet. Be the first!"}
           </div>
         ) : (
           <div

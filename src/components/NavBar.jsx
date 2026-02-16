@@ -6,17 +6,17 @@ export default function NavBar({ wallSlug, isOwner }) {
   const { user, profile, signOut } = useAuth();
 
   const linkStyle = {
-    padding: "6px 10px",
+    padding: "6px 12px",
     border: `1px solid ${palette.border}`,
     borderRadius: 8,
     fontSize: 10,
-    fontWeight: 600,
+    fontWeight: 700,
     fontFamily: "'Space Mono', monospace",
     textDecoration: "none",
-    color: palette.textDim,
+    color: palette.text,
     transition: "all 0.2s",
     cursor: "pointer",
-    background: "transparent",
+    background: palette.surface,
     whiteSpace: "nowrap",
   };
 
@@ -31,10 +31,7 @@ export default function NavBar({ wallSlug, isOwner }) {
         flexWrap: "wrap",
       }}
     >
-      <Link
-        to="/discover"
-        style={{ ...linkStyle, border: "none", color: palette.textMuted }}
-      >
+      <Link to="/discover" style={linkStyle}>
         Discover
       </Link>
       {user && profile ? (
@@ -51,7 +48,7 @@ export default function NavBar({ wallSlug, isOwner }) {
             </Link>
           ) : (
             <Link to={`/${profile.slug}`} style={linkStyle}>
-              My Wall
+              My Booth
             </Link>
           )}
           <button
@@ -77,7 +74,7 @@ export default function NavBar({ wallSlug, isOwner }) {
               fontSize: 10,
             }}
           >
-            Create Your Wall
+            Slide In
           </Link>
           <Link
             to="/login"

@@ -50,13 +50,13 @@ export default async function handler(req, res) {
         Authorization: `Bearer ${resendKey}`,
       },
       body: JSON.stringify({
-        from: `${name}'s Album Wall <onboarding@resend.dev>`,
+        from: `${name}'s Booth <onboarding@resend.dev>`,
         to: [email],
         subject: `${name} listened to ${albumName}! 🎧`,
         html: `
           <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; max-width: 480px; margin: 0 auto; padding: 32px 20px; color: #333;">
             <div style="text-align: center; margin-bottom: 24px;">
-              <span style="font-size: 48px;">💿</span>
+              <span style="font-size: 48px;">🎙</span>
             </div>
             <h1 style="font-size: 22px; text-align: center; margin: 0 0 8px;">
               ${name} has thoughts on your rec!
@@ -73,7 +73,7 @@ export default async function handler(req, res) {
               </p>
             </div>
             <p style="text-align: center; color: #999; font-size: 12px;">
-              Sent from ${name}'s Album Wall
+              Sent from ${name}'s Booth on The Booth
             </p>
           </div>
         `,

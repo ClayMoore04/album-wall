@@ -124,7 +124,7 @@ export default function SpotifyCallback() {
               color: palette.textMuted,
             }}
           >
-            Back to the Wall
+            Back to The Booth
           </button>
         </>
       )}

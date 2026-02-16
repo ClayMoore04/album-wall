@@ -2,7 +2,7 @@ import { palette } from "../lib/palette";
 
 export default function Header({ profile, followerCount }) {
   return (
-    <header style={{ textAlign: "center", marginBottom: 40 }}>
+    <header style={{ textAlign: "center", marginBottom: 40, paddingTop: 24 }}>
       <div
         style={{
           display: "inline-flex",
@@ -17,7 +17,7 @@ export default function Header({ profile, followerCount }) {
           opacity: 0.8,
         }}
       >
-        <span style={{ fontSize: 16 }}>💿</span> {profile?.display_name || "Album"}'s Album Wall
+        <span style={{ fontSize: 16 }}>🎙</span> {profile?.display_name || "Someone"}'s Booth
       </div>
       <h1
         style={{
@@ -28,7 +28,7 @@ export default function Header({ profile, followerCount }) {
           letterSpacing: "-0.02em",
         }}
       >
-        Drop me an album<span style={{ color: palette.accent }}>.</span>
+        Slide into the booth<span style={{ color: palette.coral }}>.</span>
       </h1>
       <p
         style={{

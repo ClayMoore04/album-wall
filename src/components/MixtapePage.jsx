@@ -237,7 +237,7 @@ export default function MixtapePage() {
         body: JSON.stringify({
           access_token: accessToken,
           playlist_name: playlistName,
-          description: `Mixtape: ${mixtape.title} — Created on Album Wall`,
+          description: `Mixtape: ${mixtape.title} — Created on The Booth`,
           is_public: isPublic,
           track_ids: tracks.map((t) => t.spotify_id),
         }),

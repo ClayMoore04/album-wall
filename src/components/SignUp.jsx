@@ -129,7 +129,7 @@ export default function SignUp() {
             marginBottom: 8,
           }}
         >
-          Create Your Wall
+          Set Up Your Booth
         </h1>
         <p
           style={{
@@ -226,7 +226,7 @@ export default function SignUp() {
                 marginTop: 4,
               }}
             >
-              albumwall.vercel.app/{slug}
+              thebooth.vercel.app/{slug}
             </div>
           )}
         </div>
@@ -288,7 +288,7 @@ export default function SignUp() {
             transition: "opacity 0.2s",
           }}
         >
-          {submitting ? "Creating..." : "Create My Wall"}
+          {submitting ? "Creating..." : "Open My Booth"}
         </button>
       </form>
 
