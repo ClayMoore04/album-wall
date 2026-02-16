@@ -6,10 +6,10 @@ export default function NavBar({ wallSlug, isOwner }) {
   const { user, profile, signOut } = useAuth();
 
   const linkStyle = {
-    padding: "6px 14px",
+    padding: "6px 10px",
     border: `1px solid ${palette.border}`,
     borderRadius: 8,
-    fontSize: 11,
+    fontSize: 10,
     fontWeight: 600,
     fontFamily: "'Space Mono', monospace",
     textDecoration: "none",
@@ -17,6 +17,7 @@ export default function NavBar({ wallSlug, isOwner }) {
     transition: "all 0.2s",
     cursor: "pointer",
     background: "transparent",
+    whiteSpace: "nowrap",
   };
 
   return (
@@ -25,8 +26,9 @@ export default function NavBar({ wallSlug, isOwner }) {
         display: "flex",
         justifyContent: "flex-end",
         alignItems: "center",
-        gap: 8,
+        gap: 5,
         marginBottom: -28,
+        flexWrap: "wrap",
       }}
     >
       <Link

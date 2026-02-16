@@ -14,6 +14,7 @@ export default function MixtapeTrackCard({
   isOwner,
   isFirst,
   isLast,
+  addedByName,
   onMoveUp,
   onMoveDown,
   onRemove,
@@ -123,6 +124,12 @@ export default function MixtapeTrackCard({
               <span style={{ color: palette.textDim }}>
                 {" "}
                 &middot; {track.album_name}
+              </span>
+            )}
+            {addedByName && (
+              <span style={{ color: palette.textDim }}>
+                {" "}
+                &middot; added by {addedByName}
               </span>
             )}
           </div>

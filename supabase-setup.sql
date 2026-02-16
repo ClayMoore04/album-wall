@@ -240,6 +240,7 @@ CREATE TABLE mixtape_tracks (
   spotify_id    TEXT NOT NULL,
   duration_ms   INTEGER NOT NULL,
   liner_notes   VARCHAR(250) DEFAULT '',
+  added_by_name TEXT DEFAULT '',
   created_at    TIMESTAMPTZ DEFAULT NOW()
 );
 
@@ -269,6 +270,10 @@ CREATE POLICY "Tracks viewable if mixtape is viewable" ON mixtape_tracks
 CREATE POLICY "Owner can add tracks" ON mixtape_tracks
   FOR INSERT WITH CHECK (
     mixtape_id IN (SELECT id FROM mixtapes WHERE user_id = auth.uid())
+  );
+CREATE POLICY "Anyone can add tracks to public mixtapes" ON mixtape_tracks
+  FOR INSERT WITH CHECK (
+    mixtape_id IN (SELECT id FROM mixtapes WHERE is_public = true)
   );
 CREATE POLICY "Owner can update tracks" ON mixtape_tracks
   FOR UPDATE USING (

@@ -36,6 +36,7 @@ export default function MixtapePage() {
   const [editingNotesId, setEditingNotesId] = useState(null);
   const [notesValue, setNotesValue] = useState("");
   const [tapeWarning, setTapeWarning] = useState(null);
+  const [contributorName, setContributorName] = useState("");
 
   // Export modal state
   const [showExportModal, setShowExportModal] = useState(false);
@@ -93,7 +94,7 @@ export default function MixtapePage() {
   // Add track
   const handleAddTrack = useCallback(
     async (item) => {
-      if (!supabase || !user || !mixtapeId) return;
+      if (!supabase || !mixtapeId) return;
 
       const newTotalMs = totalMs + (item.durationMs || 0);
       if (newTotalMs > MAX_DURATION_MS) {
@@ -117,6 +118,7 @@ export default function MixtapePage() {
           spotify_url: item.spotifyUrl || "",
           spotify_id: item.id,
           duration_ms: item.durationMs || 0,
+          added_by_name: isOwner ? "" : contributorName.trim(),
         })
         .select()
         .single();
@@ -125,7 +127,7 @@ export default function MixtapePage() {
         setTracks((prev) => [...prev, data]);
       }
     },
-    [mixtapeId, user, tracks.length, totalMs]
+    [mixtapeId, tracks.length, totalMs, isOwner, contributorName]
   );
 
   // Remove track
@@ -469,33 +471,52 @@ export default function MixtapePage() {
           </div>
         )}
 
-        {/* Search (owner only) */}
-        {isOwner && (
+        {/* Search — open to everyone */}
+        <div
+          style={{
+            background: palette.cardBg,
+            border: `1px solid ${palette.border}`,
+            borderRadius: 14,
+            padding: 20,
+            marginBottom: 20,
+          }}
+        >
           <div
             style={{
-              background: palette.cardBg,
-              border: `1px solid ${palette.border}`,
-              borderRadius: 14,
-              padding: 20,
-              marginBottom: 20,
+              fontSize: 12,
+              fontWeight: 600,
+              fontFamily: "'Space Mono', monospace",
+              color: palette.textMuted,
+              letterSpacing: 1,
+              textTransform: "uppercase",
+              marginBottom: 12,
             }}
           >
-            <div
+            Add a track
+          </div>
+          {!isOwner && (
+            <input
+              type="text"
+              value={contributorName}
+              onChange={(e) => setContributorName(e.target.value)}
+              placeholder="Your name..."
               style={{
-                fontSize: 12,
-                fontWeight: 600,
-                fontFamily: "'Space Mono', monospace",
-                color: palette.textMuted,
-                letterSpacing: 1,
-                textTransform: "uppercase",
+                width: "100%",
+                padding: "10px 14px",
+                background: palette.surface,
+                border: `1px solid ${palette.border}`,
+                borderRadius: 10,
+                color: palette.text,
+                fontSize: 14,
+                fontFamily: "'Syne', sans-serif",
+                outline: "none",
+                boxSizing: "border-box",
                 marginBottom: 12,
               }}
-            >
-              Add a track
-            </div>
-            <SpotifySearch onSelect={handleAddTrack} forceType="track" />
-          </div>
-        )}
+            />
+          )}
+          <SpotifySearch onSelect={handleAddTrack} forceType="track" />
+        </div>
 
         {/* Track list header */}
         <div
@@ -537,6 +558,7 @@ export default function MixtapePage() {
                 isOwner={isOwner}
                 isFirst={index === 0}
                 isLast={index === tracks.length - 1}
+                addedByName={track.added_by_name}
                 onMoveUp={() => handleMove(index, -1)}
                 onMoveDown={() => handleMove(index, 1)}
                 onRemove={() => handleRemove(track.id)}
