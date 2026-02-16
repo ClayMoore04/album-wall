@@ -38,6 +38,9 @@ export default function MixtapePage() {
   const [tapeWarning, setTapeWarning] = useState(null);
   const [contributorName, setContributorName] = useState("");
   const [copied, setCopied] = useState(false);
+  const [playingTrackId, setPlayingTrackId] = useState(null);
+  const [topPlayerIndex, setTopPlayerIndex] = useState(null);
+  const [copiedTracks, setCopiedTracks] = useState(false);
 
   // Export modal state
   const [showExportModal, setShowExportModal] = useState(false);
@@ -473,6 +476,142 @@ export default function MixtapePage() {
           </div>
         </div>
 
+        {/* Top player */}
+        {topPlayerIndex !== null && tracks[topPlayerIndex] && (
+          <div
+            style={{
+              background: palette.surface,
+              border: `1px solid ${palette.border}`,
+              borderRadius: 10,
+              padding: "12px 14px",
+              marginBottom: 12,
+            }}
+          >
+            <div
+              style={{
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "space-between",
+                marginBottom: 8,
+              }}
+            >
+              <div
+                style={{
+                  fontSize: 11,
+                  fontWeight: 600,
+                  fontFamily: "'Space Mono', monospace",
+                  color: palette.textMuted,
+                  letterSpacing: 1,
+                  textTransform: "uppercase",
+                }}
+              >
+                Now playing ({topPlayerIndex + 1}/{tracks.length})
+              </div>
+              <div style={{ display: "flex", gap: 6 }}>
+                <button
+                  onClick={() => setTopPlayerIndex((i) => Math.max(0, i - 1))}
+                  disabled={topPlayerIndex === 0}
+                  style={{
+                    padding: "4px 10px",
+                    border: `1px solid ${palette.border}`,
+                    borderRadius: 6,
+                    background: "transparent",
+                    color: topPlayerIndex === 0 ? palette.textDim : palette.textMuted,
+                    fontSize: 11,
+                    fontFamily: "'Space Mono', monospace",
+                    cursor: topPlayerIndex === 0 ? "default" : "pointer",
+                  }}
+                >
+                  Prev
+                </button>
+                <button
+                  onClick={() =>
+                    setTopPlayerIndex((i) => Math.min(tracks.length - 1, i + 1))
+                  }
+                  disabled={topPlayerIndex === tracks.length - 1}
+                  style={{
+                    padding: "4px 10px",
+                    border: `1px solid ${palette.border}`,
+                    borderRadius: 6,
+                    background: "transparent",
+                    color:
+                      topPlayerIndex === tracks.length - 1
+                        ? palette.textDim
+                        : palette.textMuted,
+                    fontSize: 11,
+                    fontFamily: "'Space Mono', monospace",
+                    cursor:
+                      topPlayerIndex === tracks.length - 1 ? "default" : "pointer",
+                  }}
+                >
+                  Next
+                </button>
+                <button
+                  onClick={() => setTopPlayerIndex(null)}
+                  style={{
+                    padding: "4px 10px",
+                    border: `1px solid ${palette.border}`,
+                    borderRadius: 6,
+                    background: "transparent",
+                    color: palette.coral,
+                    fontSize: 11,
+                    fontFamily: "'Space Mono', monospace",
+                    cursor: "pointer",
+                  }}
+                >
+                  Close
+                </button>
+              </div>
+            </div>
+            <div
+              style={{
+                fontSize: 13,
+                fontWeight: 700,
+                marginBottom: 6,
+              }}
+            >
+              {tracks[topPlayerIndex].track_name}
+              <span style={{ color: palette.textMuted, fontWeight: 400 }}>
+                {" "}
+                — {tracks[topPlayerIndex].artist_name}
+              </span>
+            </div>
+            <iframe
+              key={tracks[topPlayerIndex].spotify_id}
+              src={`https://open.spotify.com/embed/track/${tracks[topPlayerIndex].spotify_id}?utm_source=generator&theme=0`}
+              width="100%"
+              height="80"
+              frameBorder="0"
+              allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture"
+              loading="lazy"
+              style={{ borderRadius: 8 }}
+            />
+          </div>
+        )}
+
+        {/* Play all button */}
+        {tracks.length > 0 && topPlayerIndex === null && (
+          <div style={{ textAlign: "center", marginBottom: 12 }}>
+            <button
+              onClick={() => setTopPlayerIndex(0)}
+              style={{
+                padding: "8px 20px",
+                border: `1px solid ${palette.border}`,
+                borderRadius: 8,
+                background: "transparent",
+                color: palette.accent,
+                fontSize: 12,
+                fontWeight: 600,
+                fontFamily: "'Space Mono', monospace",
+                cursor: "pointer",
+                transition: "all 0.2s",
+              }}
+            >
+              ▶ Preview mixtape
+            </button>
+          </div>
+        )}
+
         {/* Tape warning */}
         {tapeWarning && (
           <div
@@ -580,6 +719,12 @@ export default function MixtapePage() {
                 isFirst={index === 0}
                 isLast={index === tracks.length - 1}
                 addedByName={track.added_by_name}
+                isPlaying={playingTrackId === track.id}
+                onPlay={() =>
+                  setPlayingTrackId(
+                    playingTrackId === track.id ? null : track.id
+                  )
+                }
                 onMoveUp={() => handleMove(index, -1)}
                 onMoveDown={() => handleMove(index, 1)}
                 onRemove={() => handleRemove(track.id)}
@@ -601,7 +746,7 @@ export default function MixtapePage() {
         )}
 
         {/* Export bottom bar */}
-        {tracks.length > 0 && isOwner && (
+        {tracks.length > 0 && (
           <div
             style={{
               position: "fixed",
@@ -630,26 +775,60 @@ export default function MixtapePage() {
             </span>
             <button
               onClick={() => {
-                setShowExportModal(true);
-                setExportResult(null);
-                setExportError(null);
-                setPlaylistName(mixtape.title);
+                const text = `${mixtape.title}\n\n${tracks
+                  .map(
+                    (t, i) =>
+                      `${i + 1}. ${t.track_name} — ${t.artist_name}${
+                        t.liner_notes ? `\n   "${t.liner_notes}"` : ""
+                      }`
+                  )
+                  .join("\n")}\n\n${tracks
+                  .map((t) => t.spotify_url)
+                  .filter(Boolean)
+                  .join("\n")}`;
+                navigator.clipboard.writeText(text);
+                setCopiedTracks(true);
+                setTimeout(() => setCopiedTracks(false), 2000);
               }}
               style={{
-                padding: "10px 24px",
-                border: "none",
+                padding: "10px 16px",
+                border: `1px solid ${palette.border}`,
                 borderRadius: 10,
-                fontSize: 13,
-                fontWeight: 700,
+                fontSize: 12,
+                fontWeight: 600,
                 fontFamily: "'Space Mono', monospace",
                 cursor: "pointer",
-                background: palette.accent,
-                color: "#000",
+                background: "transparent",
+                color: copiedTracks ? palette.accent : palette.textMuted,
                 transition: "all 0.2s",
               }}
             >
-              Export to Spotify
+              {copiedTracks ? "Copied!" : "Copy tracklist"}
             </button>
+            {isOwner && (
+              <button
+                onClick={() => {
+                  setShowExportModal(true);
+                  setExportResult(null);
+                  setExportError(null);
+                  setPlaylistName(mixtape.title);
+                }}
+                style={{
+                  padding: "10px 24px",
+                  border: "none",
+                  borderRadius: 10,
+                  fontSize: 13,
+                  fontWeight: 700,
+                  fontFamily: "'Space Mono', monospace",
+                  cursor: "pointer",
+                  background: palette.accent,
+                  color: "#000",
+                  transition: "all 0.2s",
+                }}
+              >
+                Export to Spotify
+              </button>
+            )}
           </div>
         )}
 

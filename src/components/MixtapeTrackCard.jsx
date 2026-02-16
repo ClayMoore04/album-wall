@@ -15,6 +15,8 @@ export default function MixtapeTrackCard({
   isFirst,
   isLast,
   addedByName,
+  isPlaying,
+  onPlay,
   onMoveUp,
   onMoveDown,
   onRemove,
@@ -135,6 +137,22 @@ export default function MixtapeTrackCard({
           </div>
         </div>
 
+        {/* Play button */}
+        {track.spotify_id && (
+          <button
+            onClick={onPlay}
+            style={{
+              ...smallBtnStyle,
+              color: isPlaying ? palette.accent : palette.textMuted,
+              borderColor: isPlaying ? palette.accent : palette.border,
+              fontSize: 10,
+            }}
+            title={isPlaying ? "Hide player" : "Preview"}
+          >
+            {isPlaying ? "■" : "▶"}
+          </button>
+        )}
+
         {/* Duration */}
         <div
           style={{
@@ -194,6 +212,21 @@ export default function MixtapeTrackCard({
           }}
         >
           {track.liner_notes}
+        </div>
+      )}
+
+      {/* Spotify embed player */}
+      {isPlaying && track.spotify_id && (
+        <div style={{ padding: "0 14px 10px" }}>
+          <iframe
+            src={`https://open.spotify.com/embed/track/${track.spotify_id}?utm_source=generator&theme=0`}
+            width="100%"
+            height="80"
+            frameBorder="0"
+            allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture"
+            loading="lazy"
+            style={{ borderRadius: 8 }}
+          />
         </div>
       )}
 
