@@ -4,6 +4,7 @@ import { supabase } from "../lib/supabase";
 import { useAuth } from "./AuthProvider";
 import { palette } from "../lib/palette";
 import ActivityFeed from "./ActivityFeed";
+import TapeTradeInbox from "./TapeTradeInbox";
 
 export default function Dashboard() {
   const navigate = useNavigate();
@@ -428,6 +429,22 @@ export default function Dashboard() {
         >
           90 minutes. Liner notes. Export to Spotify.
         </p>
+      </div>
+
+      {/* Tape Trades */}
+      <div
+        style={{
+          background: palette.cardBg,
+          border: `1px solid ${palette.border}`,
+          borderRadius: 12,
+          padding: 20,
+          marginTop: 24,
+        }}
+      >
+        <h2 style={{ fontSize: 16, fontWeight: 700, margin: "0 0 16px" }}>
+          Tape Trades
+        </h2>
+        <TapeTradeInbox />
       </div>
 
       {/* Following */}

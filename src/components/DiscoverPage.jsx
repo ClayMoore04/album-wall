@@ -5,6 +5,7 @@ import { useAuth } from "./AuthProvider";
 import { palette } from "../lib/palette";
 import NavBar from "./NavBar";
 import DiscoverWallCard from "./DiscoverWallCard";
+import MixtapeOfTheWeek from "./MixtapeOfTheWeek";
 
 export default function DiscoverPage() {
   const { user, profile } = useAuth();
@@ -74,6 +75,8 @@ export default function DiscoverPage() {
         >
           Find booths to follow and explore new music.
         </p>
+
+        <MixtapeOfTheWeek />
 
         <div
           style={{

@@ -218,12 +218,15 @@ $$ LANGUAGE plpgsql SECURITY DEFINER;
 
 -- 6a. Create tables
 CREATE TABLE mixtapes (
-  id          UUID DEFAULT gen_random_uuid() PRIMARY KEY,
-  user_id     UUID NOT NULL REFERENCES profiles(id) ON DELETE CASCADE,
-  title       TEXT NOT NULL,
-  is_public   BOOLEAN DEFAULT true,
-  created_at  TIMESTAMPTZ DEFAULT NOW(),
-  updated_at  TIMESTAMPTZ DEFAULT NOW()
+  id              UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+  user_id         UUID NOT NULL REFERENCES profiles(id) ON DELETE CASCADE,
+  title           TEXT NOT NULL,
+  is_public       BOOLEAN DEFAULT true,
+  theme           TEXT DEFAULT '',
+  cover_art_index SMALLINT DEFAULT NULL,
+  featured_at     TIMESTAMPTZ DEFAULT NULL,
+  created_at      TIMESTAMPTZ DEFAULT NOW(),
+  updated_at      TIMESTAMPTZ DEFAULT NOW()
 );
 
 CREATE INDEX idx_mixtapes_user ON mixtapes(user_id);
@@ -283,6 +286,110 @@ CREATE POLICY "Owner can delete tracks" ON mixtape_tracks
   FOR DELETE USING (
     mixtape_id IN (SELECT id FROM mixtapes WHERE user_id = auth.uid())
   );
+
+-- ============================================================
+-- 7. MIXTAPE COMMENTS (reactions on mixtapes)
+-- ============================================================
+
+CREATE TABLE mixtape_comments (
+  id         BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+  mixtape_id UUID NOT NULL REFERENCES mixtapes(id) ON DELETE CASCADE,
+  user_id    UUID REFERENCES profiles(id) ON DELETE SET NULL,
+  author_name TEXT NOT NULL DEFAULT 'Anonymous',
+  body       VARCHAR(140) NOT NULL,
+  created_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+CREATE INDEX idx_mixtape_comments_mixtape ON mixtape_comments(mixtape_id);
+
+ALTER TABLE mixtape_comments ENABLE ROW LEVEL SECURITY;
+
+CREATE POLICY "Comments readable on public mixtapes" ON mixtape_comments
+  FOR SELECT USING (
+    mixtape_id IN (SELECT id FROM mixtapes WHERE is_public = true)
+    OR mixtape_id IN (SELECT id FROM mixtapes WHERE user_id = auth.uid())
+  );
+CREATE POLICY "Anyone can comment on public mixtapes" ON mixtape_comments
+  FOR INSERT WITH CHECK (
+    mixtape_id IN (SELECT id FROM mixtapes WHERE is_public = true)
+  );
+CREATE POLICY "Owner or author can delete comments" ON mixtape_comments
+  FOR DELETE USING (
+    auth.uid() = user_id
+    OR mixtape_id IN (SELECT id FROM mixtapes WHERE user_id = auth.uid())
+  );
+
+-- ============================================================
+-- 8. MIXTAPE TRADES (tape trading between users)
+-- ============================================================
+
+CREATE TABLE mixtape_trades (
+  id                  BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+  sender_id           UUID NOT NULL REFERENCES profiles(id) ON DELETE CASCADE,
+  receiver_id         UUID NOT NULL REFERENCES profiles(id) ON DELETE CASCADE,
+  sender_mixtape_id   UUID NOT NULL REFERENCES mixtapes(id) ON DELETE CASCADE,
+  receiver_mixtape_id UUID REFERENCES mixtapes(id) ON DELETE SET NULL,
+  status              TEXT NOT NULL DEFAULT 'pending'
+                      CHECK (status IN ('pending', 'completed', 'declined')),
+  created_at          TIMESTAMPTZ DEFAULT NOW(),
+  completed_at        TIMESTAMPTZ,
+  CHECK (sender_id <> receiver_id)
+);
+
+CREATE INDEX idx_trades_sender ON mixtape_trades(sender_id);
+CREATE INDEX idx_trades_receiver ON mixtape_trades(receiver_id);
+
+ALTER TABLE mixtape_trades ENABLE ROW LEVEL SECURITY;
+
+CREATE POLICY "Users can read own trades" ON mixtape_trades
+  FOR SELECT USING (auth.uid() = sender_id OR auth.uid() = receiver_id);
+CREATE POLICY "Users can send trades" ON mixtape_trades
+  FOR INSERT WITH CHECK (auth.uid() = sender_id AND status = 'pending');
+CREATE POLICY "Receiver can respond to trade" ON mixtape_trades
+  FOR UPDATE USING (auth.uid() = receiver_id);
+CREATE POLICY "Sender can cancel pending trade" ON mixtape_trades
+  FOR DELETE USING (auth.uid() = sender_id AND status = 'pending');
+
+-- ============================================================
+-- 9. MIXTAPE OF THE WEEK (auto-select or manual feature)
+-- ============================================================
+
+CREATE OR REPLACE FUNCTION get_mixtape_of_the_week()
+RETURNS TABLE (
+  id UUID, title TEXT, theme TEXT, cover_art_index SMALLINT,
+  user_id UUID, display_name TEXT, slug TEXT,
+  track_count BIGINT, comment_count BIGINT
+) AS $$
+BEGIN
+  -- Try manually featured mixtape first
+  RETURN QUERY
+  SELECT m.id, m.title, m.theme, m.cover_art_index,
+    m.user_id, p.display_name, p.slug,
+    (SELECT COUNT(*) FROM mixtape_tracks mt WHERE mt.mixtape_id = m.id),
+    (SELECT COUNT(*) FROM mixtape_comments mc WHERE mc.mixtape_id = m.id)
+  FROM mixtapes m JOIN profiles p ON p.id = m.user_id
+  WHERE m.is_public = true AND m.featured_at IS NOT NULL
+    AND m.featured_at > NOW() - INTERVAL '7 days'
+  ORDER BY m.featured_at DESC LIMIT 1;
+
+  -- Fallback: auto-select by most reactions this week
+  IF NOT FOUND THEN
+    RETURN QUERY
+    SELECT m.id, m.title, m.theme, m.cover_art_index,
+      m.user_id, p.display_name, p.slug,
+      (SELECT COUNT(*) FROM mixtape_tracks mt WHERE mt.mixtape_id = m.id),
+      COALESCE(cc.cnt, 0)
+    FROM mixtapes m JOIN profiles p ON p.id = m.user_id
+    LEFT JOIN (
+      SELECT mc.mixtape_id, COUNT(*) AS cnt FROM mixtape_comments mc
+      WHERE mc.created_at > NOW() - INTERVAL '7 days' GROUP BY mc.mixtape_id
+    ) cc ON cc.mixtape_id = m.id
+    WHERE m.is_public = true
+      AND (SELECT COUNT(*) FROM mixtape_tracks mt WHERE mt.mixtape_id = m.id) >= 3
+    ORDER BY cc.cnt DESC NULLS LAST, m.created_at DESC LIMIT 1;
+  END IF;
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER;
 
 -- ============================================================
 -- MIGRATION: If you already have the old single-user table,

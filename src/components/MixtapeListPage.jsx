@@ -4,6 +4,7 @@ import { supabase } from "../lib/supabase";
 import { useAuth } from "./AuthProvider";
 import { palette } from "../lib/palette";
 import NavBar from "./NavBar";
+import MixtapeCoverArt from "./MixtapeCoverArt";
 
 function formatMs(ms) {
   const totalSeconds = Math.floor(ms / 1000);
@@ -46,10 +47,16 @@ export default function MixtapeListPage() {
       (data || []).map(async (m) => {
         const { data: tracks } = await supabase
           .from("mixtape_tracks")
-          .select("duration_ms")
-          .eq("mixtape_id", m.id);
+          .select("duration_ms, album_art_url")
+          .eq("mixtape_id", m.id)
+          .order("position", { ascending: true });
         const totalMs = (tracks || []).reduce((sum, t) => sum + t.duration_ms, 0);
-        return { ...m, trackCount: tracks?.length || 0, totalMs };
+        return {
+          ...m,
+          trackCount: tracks?.length || 0,
+          totalMs,
+          tracks: tracks || [],
+        };
       })
     );
 
@@ -219,7 +226,7 @@ export default function MixtapeListPage() {
                 style={{
                   display: "flex",
                   alignItems: "center",
-                  justifyContent: "space-between",
+                  gap: 14,
                   padding: "16px 20px",
                   background: palette.cardBg,
                   border: `1px solid ${palette.border}`,
@@ -229,10 +236,28 @@ export default function MixtapeListPage() {
                   transition: "border-color 0.2s",
                 }}
               >
-                <div>
+                <MixtapeCoverArt
+                  tracks={mixtape.tracks}
+                  coverArtIndex={mixtape.cover_art_index}
+                  size={56}
+                />
+                <div style={{ flex: 1, minWidth: 0 }}>
                   <div style={{ fontSize: 15, fontWeight: 700 }}>
                     {mixtape.title}
                   </div>
+                  {mixtape.theme && (
+                    <div
+                      style={{
+                        fontSize: 11,
+                        color: palette.coral,
+                        fontFamily: "'Space Mono', monospace",
+                        fontStyle: "italic",
+                        marginTop: 2,
+                      }}
+                    >
+                      for: {mixtape.theme}
+                    </div>
+                  )}
                   <div
                     style={{
                       fontSize: 11,

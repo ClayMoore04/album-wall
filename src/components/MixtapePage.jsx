@@ -12,6 +12,9 @@ import {
 import NavBar from "./NavBar";
 import SpotifySearch from "./SpotifySearch";
 import MixtapeTrackCard from "./MixtapeTrackCard";
+import MixtapeCoverArt from "./MixtapeCoverArt";
+import MixtapeComments from "./MixtapeComments";
+import TapeTradeButton from "./TapeTradeButton";
 
 const MAX_DURATION_MS = 90 * 60 * 1000; // 90 minutes
 
@@ -33,11 +36,14 @@ export default function MixtapePage() {
   const [notFound, setNotFound] = useState(false);
   const [editingTitle, setEditingTitle] = useState(false);
   const [titleValue, setTitleValue] = useState("");
+  const [editingTheme, setEditingTheme] = useState(false);
+  const [themeValue, setThemeValue] = useState("");
   const [editingNotesId, setEditingNotesId] = useState(null);
   const [notesValue, setNotesValue] = useState("");
   const [tapeWarning, setTapeWarning] = useState(null);
   const [contributorName, setContributorName] = useState("");
   const [copied, setCopied] = useState(false);
+  const [showCoverPicker, setShowCoverPicker] = useState(false);
   const [playingTrackId, setPlayingTrackId] = useState(null);
   const [topPlayerIndex, setTopPlayerIndex] = useState(null);
   const [copiedTracks, setCopiedTracks] = useState(false);
@@ -70,6 +76,7 @@ export default function MixtapePage() {
       if (!cancelled) {
         setMixtape(mixtapeData);
         setTitleValue(mixtapeData.title);
+        setThemeValue(mixtapeData.theme || "");
         setPlaylistName(mixtapeData.title);
       }
 
@@ -94,6 +101,24 @@ export default function MixtapePage() {
   const remainingMs = MAX_DURATION_MS - totalMs;
   const isOwner = user && mixtape && user.id === mixtape.user_id;
   const connected = isSpotifyConnected();
+
+  // Side A / Side B split at 45 minutes
+  const SIDE_DURATION_MS = 45 * 60 * 1000;
+  let sideBStartIndex = tracks.length;
+  {
+    let cumMs = 0;
+    for (let i = 0; i < tracks.length; i++) {
+      if (cumMs >= SIDE_DURATION_MS) {
+        sideBStartIndex = i;
+        break;
+      }
+      cumMs += tracks[i].duration_ms;
+    }
+  }
+  const sideATracks = tracks.slice(0, sideBStartIndex);
+  const sideBTracks = tracks.slice(sideBStartIndex);
+  const sideAMs = sideATracks.reduce((s, t) => s + t.duration_ms, 0);
+  const sideBMs = sideBTracks.reduce((s, t) => s + t.duration_ms, 0);
 
   // Add track
   const handleAddTrack = useCallback(
@@ -210,6 +235,28 @@ export default function MixtapePage() {
     setEditingTitle(false);
   };
 
+  // Save theme
+  const handleSaveTheme = async () => {
+    if (!supabase || !mixtape) return;
+    await supabase
+      .from("mixtapes")
+      .update({ theme: themeValue.trim(), updated_at: new Date().toISOString() })
+      .eq("id", mixtape.id);
+    setMixtape((prev) => ({ ...prev, theme: themeValue.trim() }));
+    setEditingTheme(false);
+  };
+
+  // Change cover art
+  const handleCoverChange = async (index) => {
+    if (!supabase || !mixtape) return;
+    await supabase
+      .from("mixtapes")
+      .update({ cover_art_index: index, updated_at: new Date().toISOString() })
+      .eq("id", mixtape.id);
+    setMixtape((prev) => ({ ...prev, cover_art_index: index }));
+    setShowCoverPicker(false);
+  };
+
   // Delete mixtape
   const handleDelete = async () => {
     if (!supabase || !mixtape) return;
@@ -314,6 +361,121 @@ export default function MixtapePage() {
       <div style={{ maxWidth: 560, margin: "0 auto", padding: "40px 0" }}>
         {/* Header */}
         <div style={{ textAlign: "center", marginBottom: 24 }}>
+          {/* Cover Art */}
+          <div style={{ marginBottom: 14, display: "flex", justifyContent: "center", position: "relative" }}>
+            <MixtapeCoverArt
+              tracks={tracks}
+              coverArtIndex={mixtape.cover_art_index}
+              size={120}
+            />
+            {isOwner && (
+              <div style={{ position: "absolute", bottom: -8 }}>
+                <button
+                  onClick={() => setShowCoverPicker(!showCoverPicker)}
+                  style={{
+                    padding: "3px 10px",
+                    borderRadius: 6,
+                    border: `1px solid ${palette.border}`,
+                    background: palette.surface,
+                    color: palette.textMuted,
+                    fontSize: 9,
+                    fontFamily: "'Space Mono', monospace",
+                    cursor: "pointer",
+                  }}
+                >
+                  Change cover
+                </button>
+                {showCoverPicker && (
+                  <div
+                    style={{
+                      position: "absolute",
+                      top: "100%",
+                      left: "50%",
+                      transform: "translateX(-50%)",
+                      marginTop: 4,
+                      background: palette.surface,
+                      border: `1px solid ${palette.border}`,
+                      borderRadius: 8,
+                      padding: 6,
+                      zIndex: 10,
+                      minWidth: 180,
+                      maxHeight: 200,
+                      overflowY: "auto",
+                    }}
+                  >
+                    <button
+                      onClick={() => handleCoverChange(null)}
+                      style={{
+                        display: "block",
+                        width: "100%",
+                        padding: "6px 10px",
+                        border: "none",
+                        background:
+                          mixtape.cover_art_index === null
+                            ? "rgba(29,185,84,0.15)"
+                            : "transparent",
+                        color: palette.text,
+                        fontSize: 11,
+                        fontFamily: "'Space Mono', monospace",
+                        cursor: "pointer",
+                        textAlign: "left",
+                        borderRadius: 4,
+                      }}
+                    >
+                      Auto collage
+                    </button>
+                    {tracks.map((t, i) => (
+                      <button
+                        key={t.id}
+                        onClick={() => handleCoverChange(i)}
+                        style={{
+                          display: "flex",
+                          alignItems: "center",
+                          gap: 8,
+                          width: "100%",
+                          padding: "5px 10px",
+                          border: "none",
+                          background:
+                            mixtape.cover_art_index === i
+                              ? "rgba(29,185,84,0.15)"
+                              : "transparent",
+                          color: palette.text,
+                          fontSize: 11,
+                          fontFamily: "'Space Mono', monospace",
+                          cursor: "pointer",
+                          textAlign: "left",
+                          borderRadius: 4,
+                        }}
+                      >
+                        {t.album_art_url && (
+                          <img
+                            src={t.album_art_url}
+                            alt=""
+                            style={{
+                              width: 20,
+                              height: 20,
+                              borderRadius: 3,
+                              objectFit: "cover",
+                            }}
+                          />
+                        )}
+                        <span
+                          style={{
+                            overflow: "hidden",
+                            textOverflow: "ellipsis",
+                            whiteSpace: "nowrap",
+                          }}
+                        >
+                          {t.track_name}
+                        </span>
+                      </button>
+                    ))}
+                  </div>
+                )}
+              </div>
+            )}
+          </div>
+
           {editingTitle && isOwner ? (
             <div style={{ display: "flex", gap: 8, justifyContent: "center", marginBottom: 8 }}>
               <input
@@ -368,6 +530,97 @@ export default function MixtapePage() {
               {mixtape.title}
             </h1>
           )}
+
+          {/* Theme */}
+          {editingTheme ? (
+            <div
+              style={{
+                display: "flex",
+                gap: 6,
+                justifyContent: "center",
+                marginBottom: 6,
+                alignItems: "center",
+              }}
+            >
+              <span
+                style={{
+                  fontSize: 13,
+                  color: palette.coral,
+                  fontFamily: "'Space Mono', monospace",
+                }}
+              >
+                for:
+              </span>
+              <input
+                type="text"
+                value={themeValue}
+                onChange={(e) => setThemeValue(e.target.value.slice(0, 50))}
+                onKeyDown={(e) => e.key === "Enter" && handleSaveTheme()}
+                placeholder="long drives, sunday morning..."
+                autoFocus
+                maxLength={50}
+                style={{
+                  padding: "6px 12px",
+                  background: palette.surface,
+                  border: `1px solid ${palette.border}`,
+                  borderRadius: 8,
+                  color: palette.text,
+                  fontSize: 13,
+                  fontFamily: "'Space Mono', monospace",
+                  outline: "none",
+                  width: 200,
+                }}
+              />
+              <button
+                onClick={handleSaveTheme}
+                style={{
+                  padding: "6px 12px",
+                  border: "none",
+                  borderRadius: 8,
+                  fontSize: 11,
+                  fontWeight: 700,
+                  fontFamily: "'Space Mono', monospace",
+                  cursor: "pointer",
+                  background: palette.accent,
+                  color: "#000",
+                }}
+              >
+                Save
+              </button>
+            </div>
+          ) : mixtape.theme ? (
+            <div
+              style={{
+                fontSize: 13,
+                fontStyle: "italic",
+                color: palette.coral,
+                fontFamily: "'Space Mono', monospace",
+                marginBottom: 4,
+                cursor: isOwner ? "pointer" : "default",
+              }}
+              onClick={() => isOwner && setEditingTheme(true)}
+              title={isOwner ? "Click to edit theme" : ""}
+            >
+              for: {mixtape.theme}
+            </div>
+          ) : isOwner ? (
+            <button
+              onClick={() => setEditingTheme(true)}
+              style={{
+                background: "none",
+                border: "none",
+                color: palette.textDim,
+                fontSize: 11,
+                fontFamily: "'Space Mono', monospace",
+                cursor: "pointer",
+                marginBottom: 4,
+                padding: 0,
+              }}
+            >
+              + add theme
+            </button>
+          ) : null}
+
           <div
             style={{
               fontSize: 12,
@@ -383,7 +636,24 @@ export default function MixtapePage() {
               {mixtape.profiles?.display_name || "Unknown"}
             </Link>
           </div>
-          <div style={{ marginTop: 10, display: "flex", gap: 8, justifyContent: "center" }}>
+          <div style={{ marginTop: 10, display: "flex", gap: 8, justifyContent: "center", flexWrap: "wrap" }}>
+            {tracks.some((t) => t.liner_notes) && (
+              <Link
+                to={`/mixtape/${mixtapeId}/notes`}
+                style={{
+                  padding: "4px 12px",
+                  borderRadius: 6,
+                  border: `1px solid ${palette.border}`,
+                  background: "transparent",
+                  color: palette.textMuted,
+                  fontSize: 10,
+                  fontFamily: "'Space Mono', monospace",
+                  textDecoration: "none",
+                }}
+              >
+                Liner notes
+              </Link>
+            )}
             <button
               onClick={() => {
                 navigator.clipboard.writeText(window.location.href);
@@ -404,6 +674,9 @@ export default function MixtapePage() {
             >
               {copied ? "Copied!" : "Copy link"}
             </button>
+            {user && !isOwner && (
+              <TapeTradeButton mixtape={mixtape} />
+            )}
             {isOwner && (
               <button
                 onClick={handleDelete}
@@ -462,6 +735,7 @@ export default function MixtapePage() {
               borderRadius: 3,
               background: palette.border,
               overflow: "hidden",
+              position: "relative",
             }}
           >
             <div
@@ -473,6 +747,34 @@ export default function MixtapePage() {
                 transition: "width 0.3s, background 0.3s",
               }}
             />
+            {/* 45-min midpoint marker */}
+            <div
+              style={{
+                position: "absolute",
+                left: "50%",
+                top: -1,
+                bottom: -1,
+                width: 2,
+                background: palette.textDim,
+                borderRadius: 1,
+              }}
+            />
+          </div>
+          <div
+            style={{
+              display: "flex",
+              justifyContent: "space-between",
+              fontSize: 10,
+              fontFamily: "'Space Mono', monospace",
+              marginTop: 6,
+            }}
+          >
+            <span style={{ color: palette.accent }}>
+              SIDE A ({formatMs(sideAMs)})
+            </span>
+            <span style={{ color: palette.coral }}>
+              SIDE B ({formatMs(sideBMs)})
+            </span>
           </div>
         </div>
 
@@ -710,40 +1012,114 @@ export default function MixtapePage() {
           </div>
         ) : (
           <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
-            {tracks.map((track, index) => (
-              <MixtapeTrackCard
-                key={track.id}
-                track={track}
-                index={index}
-                isOwner={isOwner}
-                isFirst={index === 0}
-                isLast={index === tracks.length - 1}
-                addedByName={track.added_by_name}
-                isPlaying={playingTrackId === track.id}
-                onPlay={() =>
-                  setPlayingTrackId(
-                    playingTrackId === track.id ? null : track.id
-                  )
-                }
-                onMoveUp={() => handleMove(index, -1)}
-                onMoveDown={() => handleMove(index, 1)}
-                onRemove={() => handleRemove(track.id)}
-                onEditNotes={() => {
-                  if (editingNotesId === track.id) {
-                    handleSaveNotes();
-                  } else {
-                    setEditingNotesId(track.id);
-                    setNotesValue(track.liner_notes || "");
+            {sideATracks.map((track, i) => {
+              const index = i;
+              return (
+                <MixtapeTrackCard
+                  key={track.id}
+                  track={track}
+                  index={index}
+                  isOwner={isOwner}
+                  isFirst={index === 0}
+                  isLast={index === tracks.length - 1}
+                  addedByName={track.added_by_name}
+                  isPlaying={playingTrackId === track.id}
+                  onPlay={() =>
+                    setPlayingTrackId(
+                      playingTrackId === track.id ? null : track.id
+                    )
                   }
+                  onMoveUp={() => handleMove(index, -1)}
+                  onMoveDown={() => handleMove(index, 1)}
+                  onRemove={() => handleRemove(track.id)}
+                  onEditNotes={() => {
+                    if (editingNotesId === track.id) {
+                      handleSaveNotes();
+                    } else {
+                      setEditingNotesId(track.id);
+                      setNotesValue(track.liner_notes || "");
+                    }
+                  }}
+                  editingNotes={editingNotesId === track.id}
+                  notesValue={notesValue}
+                  onNotesChange={setNotesValue}
+                  onNotesSave={handleSaveNotes}
+                />
+              );
+            })}
+
+            {/* Side B divider */}
+            {sideBTracks.length > 0 && (
+              <div
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  gap: 12,
+                  padding: "16px 0",
+                  margin: "8px 0",
                 }}
-                editingNotes={editingNotesId === track.id}
-                notesValue={notesValue}
-                onNotesChange={setNotesValue}
-                onNotesSave={handleSaveNotes}
-              />
-            ))}
+              >
+                <div
+                  style={{ flex: 1, height: 1, background: palette.border }}
+                />
+                <div
+                  style={{
+                    fontSize: 11,
+                    fontWeight: 700,
+                    fontFamily: "'Space Mono', monospace",
+                    color: palette.coral,
+                    letterSpacing: 2,
+                    textTransform: "uppercase",
+                  }}
+                >
+                  FLIP — SIDE B
+                </div>
+                <div
+                  style={{ flex: 1, height: 1, background: palette.border }}
+                />
+              </div>
+            )}
+
+            {sideBTracks.map((track, i) => {
+              const index = sideBStartIndex + i;
+              return (
+                <MixtapeTrackCard
+                  key={track.id}
+                  track={track}
+                  index={index}
+                  isOwner={isOwner}
+                  isFirst={index === 0}
+                  isLast={index === tracks.length - 1}
+                  addedByName={track.added_by_name}
+                  isPlaying={playingTrackId === track.id}
+                  onPlay={() =>
+                    setPlayingTrackId(
+                      playingTrackId === track.id ? null : track.id
+                    )
+                  }
+                  onMoveUp={() => handleMove(index, -1)}
+                  onMoveDown={() => handleMove(index, 1)}
+                  onRemove={() => handleRemove(track.id)}
+                  onEditNotes={() => {
+                    if (editingNotesId === track.id) {
+                      handleSaveNotes();
+                    } else {
+                      setEditingNotesId(track.id);
+                      setNotesValue(track.liner_notes || "");
+                    }
+                  }}
+                  editingNotes={editingNotesId === track.id}
+                  notesValue={notesValue}
+                  onNotesChange={setNotesValue}
+                  onNotesSave={handleSaveNotes}
+                />
+              );
+            })}
           </div>
         )}
+
+        {/* Comments / Reactions */}
+        <MixtapeComments mixtapeId={mixtapeId} isOwner={isOwner} />
 
         {/* Export bottom bar */}
         {tracks.length > 0 && (
