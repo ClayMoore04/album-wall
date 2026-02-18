@@ -403,3 +403,14 @@ $$ LANGUAGE plpgsql SECURITY DEFINER;
 -- DROP POLICY IF EXISTS "Anyone can delete submissions" ON submissions;
 -- CREATE POLICY "Wall owner can update" ON submissions FOR UPDATE USING (wall_id = auth.uid());
 -- CREATE POLICY "Wall owner can delete" ON submissions FOR DELETE USING (wall_id = auth.uid());
+
+-- ============================================================
+-- 10. BOOTH CUSTOMIZATION (themes, banners, status, pinned albums)
+-- ============================================================
+-- Run these ALTER TABLE statements to add customization columns:
+
+ALTER TABLE profiles ADD COLUMN IF NOT EXISTS theme TEXT DEFAULT 'default';
+ALTER TABLE profiles ADD COLUMN IF NOT EXISTS banner_style TEXT;
+ALTER TABLE profiles ADD COLUMN IF NOT EXISTS banner_url TEXT;
+ALTER TABLE profiles ADD COLUMN IF NOT EXISTS status_text TEXT;
+ALTER TABLE profiles ADD COLUMN IF NOT EXISTS pinned_submission_ids BIGINT[] DEFAULT '{}';

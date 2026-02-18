@@ -3,6 +3,7 @@ import { useNavigate, Link } from "react-router-dom";
 import { supabase } from "../lib/supabase";
 import { useAuth } from "./AuthProvider";
 import { palette } from "../lib/palette";
+import { THEMES, BANNER_PRESETS, getBannerCss } from "../lib/themes";
 import ActivityFeed from "./ActivityFeed";
 import TapeTradeInbox from "./TapeTradeInbox";
 
@@ -16,6 +17,10 @@ export default function Dashboard() {
   const [stats, setStats] = useState({ total: 0, listened: 0 });
   const [following, setFollowing] = useState([]);
   const [discoverable, setDiscoverable] = useState(false);
+  const [theme, setTheme] = useState("default");
+  const [bannerStyle, setBannerStyle] = useState("none");
+  const [bannerUrl, setBannerUrl] = useState("");
+  const [statusText, setStatusText] = useState("");
   const [roomCount, setRoomCount] = useState(0);
   const [mixtapeCount, setMixtapeCount] = useState(0);
 
@@ -30,6 +35,10 @@ export default function Dashboard() {
       setDisplayName(profile.display_name);
       setBio(profile.bio || "");
       setDiscoverable(profile.discoverable || false);
+      setTheme(profile.theme || "default");
+      setBannerStyle(profile.banner_style || "none");
+      setBannerUrl(profile.banner_url || "");
+      setStatusText(profile.status_text || "");
       loadStats(profile.id);
       loadFollowing(user.id);
       loadRoomCount(user.id);
@@ -105,7 +114,14 @@ export default function Dashboard() {
     try {
       const { error } = await supabase
         .from("profiles")
-        .update({ display_name: displayName.trim(), bio: bio.trim() })
+        .update({
+          display_name: displayName.trim(),
+          bio: bio.trim(),
+          theme,
+          banner_style: bannerStyle === "none" ? null : bannerStyle,
+          banner_url: bannerUrl.trim() || null,
+          status_text: statusText.trim() || null,
+        })
         .eq("id", user.id);
       if (error) throw error;
       await loadProfile(user.id);
@@ -333,6 +349,190 @@ export default function Dashboard() {
         >
           {saving ? "Saving..." : saved ? "Saved!" : "Save Changes"}
         </button>
+      </div>
+
+      {/* Customize Your Booth */}
+      <div
+        style={{
+          background: palette.cardBg,
+          border: `1px solid ${palette.border}`,
+          borderRadius: 12,
+          padding: 20,
+          marginTop: 24,
+        }}
+      >
+        <h2
+          style={{
+            fontSize: 16,
+            fontWeight: 700,
+            marginBottom: 20,
+            marginTop: 0,
+          }}
+        >
+          Customize Your Booth
+        </h2>
+
+        {/* Theme picker */}
+        <div style={{ marginBottom: 20 }}>
+          <label style={labelStyle}>Theme</label>
+          <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
+            {Object.entries(THEMES).map(([key, t]) => (
+              <button
+                key={key}
+                onClick={() => setTheme(key)}
+                title={t.name}
+                style={{
+                  width: 36,
+                  height: 36,
+                  borderRadius: 18,
+                  border:
+                    theme === key
+                      ? `2px solid ${palette.text}`
+                      : `2px solid ${palette.border}`,
+                  background: t.accent,
+                  cursor: "pointer",
+                  transition: "all 0.15s",
+                  transform: theme === key ? "scale(1.15)" : "scale(1)",
+                  boxShadow:
+                    theme === key
+                      ? `0 0 12px ${t.accent}66`
+                      : "none",
+                }}
+              />
+            ))}
+          </div>
+          <div
+            style={{
+              fontSize: 11,
+              color: palette.textDim,
+              fontFamily: "'Space Mono', monospace",
+              marginTop: 6,
+            }}
+          >
+            {THEMES[theme]?.name || "Default"}
+          </div>
+        </div>
+
+        {/* Status text */}
+        <div style={{ marginBottom: 20 }}>
+          <label style={labelStyle}>Status</label>
+          <input
+            type="text"
+            value={statusText}
+            onChange={(e) =>
+              e.target.value.length <= 100 && setStatusText(e.target.value)
+            }
+            placeholder='e.g. "currently spinning Blonde on repeat"'
+            style={inputStyle}
+          />
+          <div
+            style={{
+              fontSize: 10,
+              color: palette.textDim,
+              fontFamily: "'Space Mono', monospace",
+              marginTop: 4,
+              textAlign: "right",
+            }}
+          >
+            {statusText.length}/100
+          </div>
+        </div>
+
+        {/* Banner picker */}
+        <div style={{ marginBottom: 20 }}>
+          <label style={labelStyle}>Banner</label>
+          <div
+            style={{
+              display: "grid",
+              gridTemplateColumns: "repeat(4, 1fr)",
+              gap: 8,
+            }}
+          >
+            {BANNER_PRESETS.map((b) => (
+              <button
+                key={b.key}
+                onClick={() => {
+                  setBannerStyle(b.key);
+                  if (b.key !== "none") setBannerUrl("");
+                }}
+                style={{
+                  height: 40,
+                  borderRadius: 8,
+                  border:
+                    bannerStyle === b.key && !bannerUrl
+                      ? `2px solid ${palette.text}`
+                      : `2px solid ${palette.border}`,
+                  background:
+                    b.css === "none" ? palette.surface : b.css,
+                  cursor: "pointer",
+                  transition: "all 0.15s",
+                  position: "relative",
+                  overflow: "hidden",
+                }}
+              >
+                {b.key === "none" && (
+                  <span
+                    style={{
+                      fontSize: 10,
+                      color: palette.textDim,
+                      fontFamily: "'Space Mono', monospace",
+                    }}
+                  >
+                    None
+                  </span>
+                )}
+              </button>
+            ))}
+          </div>
+          <div
+            style={{
+              fontSize: 11,
+              color: palette.textDim,
+              fontFamily: "'Space Mono', monospace",
+              marginTop: 6,
+            }}
+          >
+            {BANNER_PRESETS.find((b) => b.key === bannerStyle)?.label || "None"}
+          </div>
+
+          {/* Custom banner URL */}
+          <div style={{ marginTop: 10 }}>
+            <label
+              style={{
+                ...labelStyle,
+                fontSize: 10,
+                color: palette.textDim,
+              }}
+            >
+              Or paste an image URL
+            </label>
+            <input
+              type="url"
+              value={bannerUrl}
+              onChange={(e) => {
+                setBannerUrl(e.target.value);
+                if (e.target.value) setBannerStyle("none");
+              }}
+              placeholder="https://..."
+              style={{ ...inputStyle, fontSize: 12 }}
+            />
+          </div>
+        </div>
+
+        {/* Banner preview */}
+        {(bannerStyle !== "none" || bannerUrl) && (
+          <div style={{ marginBottom: 10 }}>
+            <label style={{ ...labelStyle, fontSize: 10 }}>Preview</label>
+            <div
+              style={{
+                height: 60,
+                borderRadius: 8,
+                background: getBannerCss(bannerStyle, bannerUrl),
+                border: `1px solid ${palette.border}`,
+              }}
+            />
+          </div>
+        )}
       </div>
 
       {/* Collaborative Rooms */}

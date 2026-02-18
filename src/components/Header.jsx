@@ -1,8 +1,34 @@
 import { palette } from "../lib/palette";
+import { getBannerCss, getThemeAccent } from "../lib/themes";
 
-export default function Header({ profile, followerCount }) {
+export default function Header({
+  profile,
+  followerCount,
+  bannerStyle,
+  bannerUrl,
+  statusText,
+  themeAccent,
+}) {
+  const accent = themeAccent || palette.accent;
+  const bannerCss = getBannerCss(bannerStyle, bannerUrl);
+
   return (
-    <header style={{ textAlign: "center", marginBottom: 40, paddingTop: 24 }}>
+    <header style={{ textAlign: "center", marginBottom: 40, paddingTop: bannerCss ? 0 : 24 }}>
+      {/* Banner */}
+      {bannerCss && (
+        <div
+          style={{
+            width: "calc(100% + 40px)",
+            marginLeft: -20,
+            marginBottom: 24,
+            height: 120,
+            borderRadius: 12,
+            background: bannerCss,
+            opacity: 0.85,
+          }}
+        />
+      )}
+
       <div
         style={{
           display: "inline-flex",
@@ -12,7 +38,7 @@ export default function Header({ profile, followerCount }) {
           fontFamily: "'Space Mono', monospace",
           letterSpacing: 3,
           textTransform: "uppercase",
-          color: palette.accent,
+          color: accent,
           marginBottom: 12,
           opacity: 0.8,
         }}
@@ -28,7 +54,7 @@ export default function Header({ profile, followerCount }) {
           letterSpacing: "-0.02em",
         }}
       >
-        Slide into the booth<span style={{ color: palette.coral }}>.</span>
+        Slide into the booth<span style={{ color: accent }}>.</span>
       </h1>
       <p
         style={{
@@ -42,6 +68,23 @@ export default function Header({ profile, followerCount }) {
       >
         {profile?.bio || "Search for your favorite album on Spotify and tell me why I need to hear it."}
       </p>
+
+      {/* Status text */}
+      {statusText && (
+        <div
+          style={{
+            marginTop: 10,
+            fontSize: 12,
+            fontFamily: "'Space Mono', monospace",
+            color: accent,
+            fontStyle: "italic",
+            opacity: 0.7,
+          }}
+        >
+          {statusText}
+        </div>
+      )}
+
       {followerCount > 0 && (
         <div
           style={{

@@ -30,7 +30,7 @@ function StarRating({ rating, interactive, onRate }) {
   );
 }
 
-export default function WallCard({ submission, isOwner, ownerName = "Owner", onFeedback, onDelete, onListened, onRate }) {
+export default function WallCard({ submission, isOwner, ownerName = "Owner", onFeedback, onDelete, onListened, onRate, isPinned, canPin, onPin, onUnpin }) {
   const sub = submission;
   const [replying, setReplying] = useState(false);
   const [feedbackText, setFeedbackText] = useState("");
@@ -385,7 +385,46 @@ export default function WallCard({ submission, isOwner, ownerName = "Owner", onF
           )}
 
           {/* Action buttons row */}
-          <div style={{ display: "flex", gap: 8 }}>
+          <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
+            {/* Pin/Unpin button */}
+            {isPinned ? (
+              <button
+                onClick={() => onUnpin(sub.id)}
+                style={{
+                  padding: "8px 16px",
+                  border: `1px solid ${palette.accent}`,
+                  borderRadius: 8,
+                  fontSize: 12,
+                  fontWeight: 600,
+                  fontFamily: "'Space Mono', monospace",
+                  cursor: "pointer",
+                  background: "rgba(29,185,84,0.15)",
+                  color: palette.accent,
+                  transition: "all 0.2s",
+                }}
+              >
+                📌 Unpin
+              </button>
+            ) : canPin ? (
+              <button
+                onClick={() => onPin(sub.id)}
+                style={{
+                  padding: "8px 16px",
+                  border: `1px solid ${palette.border}`,
+                  borderRadius: 8,
+                  fontSize: 12,
+                  fontWeight: 600,
+                  fontFamily: "'Space Mono', monospace",
+                  cursor: "pointer",
+                  background: "transparent",
+                  color: palette.textMuted,
+                  transition: "all 0.2s",
+                }}
+              >
+                📌 Pin
+              </button>
+            ) : null}
+
             {!sub.owner_feedback && !replying && (
               <button
                 onClick={() => setReplying(true)}

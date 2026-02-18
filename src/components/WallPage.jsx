@@ -3,6 +3,7 @@ import { useParams, useNavigate } from "react-router-dom";
 import { supabase } from "../lib/supabase";
 import { useAuth } from "./AuthProvider";
 import { palette } from "../lib/palette";
+import { getThemeAccent } from "../lib/themes";
 import Header from "./Header";
 import NavBar from "./NavBar";
 import FollowButton from "./FollowButton";
@@ -28,6 +29,8 @@ export default function WallPage() {
 
   const isOwner = user && profile && user.id === profile.id;
   const ownerName = profile?.display_name || "Someone";
+  const themeAccent = getThemeAccent(profile?.theme);
+  const pinnedIds = profile?.pinned_submission_ids || [];
 
   // Load profile + submissions
   useEffect(() => {
@@ -223,8 +226,48 @@ export default function WallPage() {
         .eq("id", submissionId);
       if (error) throw error;
       setSubmissions((prev) => prev.filter((s) => s.id !== submissionId));
+      // Also remove from pinned if it was pinned
+      if (pinnedIds.includes(submissionId)) {
+        const newPinned = pinnedIds.filter((id) => id !== submissionId);
+        await supabase
+          .from("profiles")
+          .update({ pinned_submission_ids: newPinned })
+          .eq("id", profile.id);
+        setProfile((prev) => ({ ...prev, pinned_submission_ids: newPinned }));
+      }
     } catch (e) {
       console.error("Failed to delete submission:", e);
+    }
+  };
+
+  const handlePin = async (submissionId) => {
+    if (!supabase || !profile) return;
+    if (pinnedIds.length >= 3) return;
+    const newPinned = [...pinnedIds, submissionId];
+    try {
+      const { error } = await supabase
+        .from("profiles")
+        .update({ pinned_submission_ids: newPinned })
+        .eq("id", profile.id);
+      if (error) throw error;
+      setProfile((prev) => ({ ...prev, pinned_submission_ids: newPinned }));
+    } catch (e) {
+      console.error("Failed to pin submission:", e);
+    }
+  };
+
+  const handleUnpin = async (submissionId) => {
+    if (!supabase || !profile) return;
+    const newPinned = pinnedIds.filter((id) => id !== submissionId);
+    try {
+      const { error } = await supabase
+        .from("profiles")
+        .update({ pinned_submission_ids: newPinned })
+        .eq("id", profile.id);
+      if (error) throw error;
+      setProfile((prev) => ({ ...prev, pinned_submission_ids: newPinned }));
+    } catch (e) {
+      console.error("Failed to unpin submission:", e);
     }
   };
 
@@ -279,7 +322,14 @@ export default function WallPage() {
     <>
       <NavBar wallSlug={slug} isOwner={isOwner} />
 
-      <Header profile={profile} followerCount={followerCount} />
+      <Header
+        profile={profile}
+        followerCount={followerCount}
+        bannerStyle={profile.banner_style}
+        bannerUrl={profile.banner_url}
+        statusText={profile.status_text}
+        themeAccent={themeAccent}
+      />
 
       {!isOwner && user && (
         <div style={{ textAlign: "center", marginBottom: 16 }}>
@@ -296,12 +346,12 @@ export default function WallPage() {
             textAlign: "center",
             marginBottom: 12,
             padding: "6px 12px",
-            background: "rgba(29,185,84,0.1)",
-            border: `1px solid rgba(29,185,84,0.3)`,
+            background: `${themeAccent}1a`,
+            border: `1px solid ${themeAccent}4d`,
             borderRadius: 8,
             fontSize: 12,
             fontFamily: "'Space Mono', monospace",
-            color: palette.accent,
+            color: themeAccent,
           }}
         >
           You're viewing your own wall — admin controls are active
@@ -333,6 +383,9 @@ export default function WallPage() {
           onDelete={handleDelete}
           onListened={handleListened}
           onRate={handleRate}
+          pinnedIds={pinnedIds}
+          onPin={handlePin}
+          onUnpin={handleUnpin}
         />
       ) : view === "playlist" ? (
         <PlaylistBuilder submissions={submissions} />

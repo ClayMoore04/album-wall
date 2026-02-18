@@ -12,6 +12,9 @@ export default function Wall({
   onDelete,
   onListened,
   onRate,
+  pinnedIds = [],
+  onPin,
+  onUnpin,
 }) {
   const [filterTags, setFilterTags] = useState([]);
   const [showFilter, setShowFilter] = useState(false);
@@ -24,8 +27,17 @@ export default function Wall({
     );
   };
 
+  // Separate pinned and unpinned submissions
+  const pinnedSubmissions = useMemo(() => {
+    if (pinnedIds.length === 0) return [];
+    return pinnedIds
+      .map((id) => submissions.find((s) => s.id === id))
+      .filter(Boolean);
+  }, [submissions, pinnedIds]);
+
   const filtered = useMemo(() => {
-    let result = [...submissions];
+    // Exclude pinned from the main list
+    let result = submissions.filter((s) => !pinnedIds.includes(s.id));
 
     // Tag filter (OR logic)
     if (filterTags.length > 0) {
@@ -47,7 +59,7 @@ export default function Wall({
     }
 
     return result;
-  }, [submissions, filterTags, listenedFilter, sortBy]);
+  }, [submissions, pinnedIds, filterTags, listenedFilter, sortBy]);
 
   const hasActiveFilters =
     filterTags.length > 0 || listenedFilter !== "all" || sortBy !== "newest";
@@ -104,8 +116,50 @@ export default function Wall({
     </button>
   );
 
+  const cardProps = (sub) => ({
+    key: sub.id,
+    submission: sub,
+    isOwner,
+    ownerName,
+    onFeedback,
+    onDelete,
+    onListened,
+    onRate,
+    isPinned: pinnedIds.includes(sub.id),
+    canPin: pinnedIds.length < 3,
+    onPin,
+    onUnpin,
+  });
+
   return (
     <div>
+      {/* Pinned albums section */}
+      {pinnedSubmissions.length > 0 && (
+        <div style={{ marginBottom: 20 }}>
+          <div
+            style={{
+              fontSize: 10,
+              fontWeight: 700,
+              fontFamily: "'Space Mono', monospace",
+              color: palette.textDim,
+              textTransform: "uppercase",
+              letterSpacing: 1,
+              marginBottom: 8,
+              display: "flex",
+              alignItems: "center",
+              gap: 6,
+            }}
+          >
+            <span style={{ fontSize: 12 }}>📌</span> Pinned
+          </div>
+          <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+            {pinnedSubmissions.map((sub) => (
+              <WallCard {...cardProps(sub)} />
+            ))}
+          </div>
+        </div>
+      )}
+
       {/* Filter toggle + sort */}
       <div
         style={{
@@ -256,16 +310,7 @@ export default function Wall({
       {/* Submission cards */}
       <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
         {filtered.map((sub) => (
-          <WallCard
-            key={sub.id}
-            submission={sub}
-            isOwner={isOwner}
-            ownerName={ownerName}
-            onFeedback={onFeedback}
-            onDelete={onDelete}
-            onListened={onListened}
-            onRate={onRate}
-          />
+          <WallCard {...cardProps(sub)} />
         ))}
         {filtered.length === 0 && submissions.length > 0 && (
           <div
