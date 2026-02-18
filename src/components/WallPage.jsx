@@ -3,7 +3,7 @@ import { useParams, useNavigate } from "react-router-dom";
 import { supabase } from "../lib/supabase";
 import { useAuth } from "./AuthProvider";
 import { palette } from "../lib/palette";
-import { getThemeAccent } from "../lib/themes";
+import { getThemeAccent, getBannerCss } from "../lib/themes";
 import Header from "./Header";
 import NavBar from "./NavBar";
 import FollowButton from "./FollowButton";
@@ -318,15 +318,34 @@ export default function WallPage() {
     );
   }
 
+  const bannerCss = getBannerCss(profile.banner_style, profile.banner_url);
+
   return (
     <>
+      {/* Full-page banner background */}
+      {bannerCss && (
+        <div
+          style={{
+            position: "fixed",
+            top: 0,
+            left: 0,
+            right: 0,
+            height: "45vh",
+            background: bannerCss,
+            opacity: 0.18,
+            zIndex: 0,
+            pointerEvents: "none",
+            maskImage: "linear-gradient(to bottom, black 40%, transparent 100%)",
+            WebkitMaskImage: "linear-gradient(to bottom, black 40%, transparent 100%)",
+          }}
+        />
+      )}
+
       <NavBar wallSlug={slug} isOwner={isOwner} />
 
       <Header
         profile={profile}
         followerCount={followerCount}
-        bannerStyle={profile.banner_style}
-        bannerUrl={profile.banner_url}
         statusText={profile.status_text}
         themeAccent={themeAccent}
       />

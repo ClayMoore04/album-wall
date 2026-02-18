@@ -330,25 +330,6 @@ export default function Dashboard() {
           </div>
         </div>
 
-        <button
-          onClick={handleSave}
-          disabled={saving}
-          style={{
-            padding: "12px 24px",
-            border: "none",
-            borderRadius: 10,
-            fontSize: 13,
-            fontWeight: 700,
-            fontFamily: "'Space Mono', monospace",
-            cursor: saving ? "not-allowed" : "pointer",
-            background: palette.accent,
-            color: "#000",
-            opacity: saving ? 0.6 : 1,
-            transition: "all 0.2s",
-          }}
-        >
-          {saving ? "Saving..." : saved ? "Saved!" : "Save Changes"}
-        </button>
       </div>
 
       {/* Customize Your Booth */}
@@ -533,6 +514,27 @@ export default function Dashboard() {
             />
           </div>
         )}
+
+        <button
+          onClick={handleSave}
+          disabled={saving}
+          style={{
+            padding: "12px 24px",
+            border: "none",
+            borderRadius: 10,
+            fontSize: 13,
+            fontWeight: 700,
+            fontFamily: "'Space Mono', monospace",
+            cursor: saving ? "not-allowed" : "pointer",
+            background: palette.accent,
+            color: "#000",
+            opacity: saving ? 0.6 : 1,
+            transition: "all 0.2s",
+            marginTop: 10,
+          }}
+        >
+          {saving ? "Saving..." : saved ? "Saved!" : "Save Changes"}
+        </button>
       </div>
 
       {/* Collaborative Rooms */}
