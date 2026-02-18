@@ -28,10 +28,10 @@ export default function NavBar({ wallSlug, isOwner }) {
         zIndex: 100,
         width: "100vw",
         marginLeft: "calc(-50vw + 50%)",
-        background: `${palette.bg}ee`,
-        backdropFilter: "blur(12px)",
-        WebkitBackdropFilter: "blur(12px)",
-        borderBottom: `1px solid ${palette.border}`,
+        background: "transparent",
+        backdropFilter: "none",
+        WebkitBackdropFilter: "none",
+        borderBottom: "none",
         marginBottom: 8,
       }}
     >
