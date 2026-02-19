@@ -414,3 +414,141 @@ ALTER TABLE profiles ADD COLUMN IF NOT EXISTS banner_style TEXT;
 ALTER TABLE profiles ADD COLUMN IF NOT EXISTS banner_url TEXT;
 ALTER TABLE profiles ADD COLUMN IF NOT EXISTS status_text TEXT;
 ALTER TABLE profiles ADD COLUMN IF NOT EXISTS pinned_submission_ids BIGINT[] DEFAULT '{}';
+
+-- ============================================================
+-- 11. COLLABORATIVE MIXTAPES
+-- ============================================================
+
+-- 11a. Add collab columns to mixtapes
+ALTER TABLE mixtapes ADD COLUMN IF NOT EXISTS is_collab BOOLEAN DEFAULT false;
+ALTER TABLE mixtapes ADD COLUMN IF NOT EXISTS collab_mode TEXT DEFAULT 'open';
+ALTER TABLE mixtapes ADD COLUMN IF NOT EXISTS invite_code TEXT UNIQUE DEFAULT NULL;
+ALTER TABLE mixtapes ADD COLUMN IF NOT EXISTS max_collaborators SMALLINT DEFAULT 4;
+
+-- 11b. Add added_by_user_id to mixtape_tracks (nullable for backward compat)
+ALTER TABLE mixtape_tracks ADD COLUMN IF NOT EXISTS added_by_user_id UUID REFERENCES profiles(id) ON DELETE SET NULL;
+
+-- 11c. Collaborators table
+CREATE TABLE mixtape_collaborators (
+  id         BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+  mixtape_id UUID NOT NULL REFERENCES mixtapes(id) ON DELETE CASCADE,
+  user_id    UUID NOT NULL REFERENCES profiles(id) ON DELETE CASCADE,
+  turn_order SMALLINT NOT NULL DEFAULT 0,
+  joined_at  TIMESTAMPTZ DEFAULT NOW(),
+  UNIQUE(mixtape_id, user_id)
+);
+
+CREATE INDEX idx_mixtape_collabs_mixtape ON mixtape_collaborators(mixtape_id);
+
+ALTER TABLE mixtape_collaborators ENABLE ROW LEVEL SECURITY;
+
+-- Collaborators can see other collaborators on the same mixtape
+CREATE POLICY "Collaborators can read collaborators" ON mixtape_collaborators
+  FOR SELECT USING (
+    mixtape_id IN (
+      SELECT mixtape_id FROM mixtape_collaborators WHERE user_id = auth.uid()
+    )
+    OR mixtape_id IN (
+      SELECT id FROM mixtapes WHERE user_id = auth.uid()
+    )
+  );
+
+-- Users can join (insert themselves)
+CREATE POLICY "Users can join mixtape" ON mixtape_collaborators
+  FOR INSERT WITH CHECK (auth.uid() = user_id);
+
+-- Users can leave (delete themselves), owner can remove anyone
+CREATE POLICY "Users can leave or owner can remove" ON mixtape_collaborators
+  FOR DELETE USING (
+    auth.uid() = user_id
+    OR mixtape_id IN (SELECT id FROM mixtapes WHERE user_id = auth.uid())
+  );
+
+-- Enable realtime for collaborators and mixtape_tracks
+ALTER PUBLICATION supabase_realtime ADD TABLE mixtape_collaborators;
+ALTER PUBLICATION supabase_realtime ADD TABLE mixtape_tracks;
+
+-- 11d. Update mixtape SELECT policy to include collaborators
+DROP POLICY IF EXISTS "Public mixtapes are viewable" ON mixtapes;
+CREATE POLICY "Public or collab mixtapes are viewable" ON mixtapes
+  FOR SELECT USING (
+    is_public = true
+    OR auth.uid() = user_id
+    OR id IN (SELECT mixtape_id FROM mixtape_collaborators WHERE user_id = auth.uid())
+  );
+
+-- 11e. Update mixtape_tracks INSERT policy to allow collaborators
+DROP POLICY IF EXISTS "Owner can add tracks" ON mixtape_tracks;
+DROP POLICY IF EXISTS "Anyone can add tracks to public mixtapes" ON mixtape_tracks;
+
+CREATE POLICY "Owner or collaborator can add tracks" ON mixtape_tracks
+  FOR INSERT WITH CHECK (
+    mixtape_id IN (SELECT id FROM mixtapes WHERE user_id = auth.uid())
+    OR mixtape_id IN (SELECT mixtape_id FROM mixtape_collaborators WHERE user_id = auth.uid())
+    OR mixtape_id IN (SELECT id FROM mixtapes WHERE is_public = true)
+  );
+
+-- 11f. Update mixtape_tracks SELECT policy to include collaborators
+DROP POLICY IF EXISTS "Tracks viewable if mixtape is viewable" ON mixtape_tracks;
+CREATE POLICY "Tracks viewable if mixtape is viewable" ON mixtape_tracks
+  FOR SELECT USING (
+    mixtape_id IN (
+      SELECT id FROM mixtapes WHERE is_public = true OR user_id = auth.uid()
+    )
+    OR mixtape_id IN (
+      SELECT mixtape_id FROM mixtape_collaborators WHERE user_id = auth.uid()
+    )
+  );
+
+-- 11g. Allow collaborators to update their own tracks
+DROP POLICY IF EXISTS "Owner can update tracks" ON mixtape_tracks;
+CREATE POLICY "Owner or track author can update tracks" ON mixtape_tracks
+  FOR UPDATE USING (
+    mixtape_id IN (SELECT id FROM mixtapes WHERE user_id = auth.uid())
+    OR (added_by_user_id = auth.uid())
+  );
+
+-- 11h. Allow track authors to delete their own tracks
+DROP POLICY IF EXISTS "Owner can delete tracks" ON mixtape_tracks;
+CREATE POLICY "Owner or track author can delete tracks" ON mixtape_tracks
+  FOR DELETE USING (
+    mixtape_id IN (SELECT id FROM mixtapes WHERE user_id = auth.uid())
+    OR (added_by_user_id = auth.uid())
+  );
+
+-- 11i. Join mixtape by invite RPC
+CREATE OR REPLACE FUNCTION join_mixtape_by_invite(code TEXT)
+RETURNS UUID AS $$
+DECLARE
+  target_mixtape_id UUID;
+  current_count INT;
+  max_collabs INT;
+BEGIN
+  SELECT id, max_collaborators INTO target_mixtape_id, max_collabs
+    FROM mixtapes WHERE invite_code = code AND is_collab = true;
+  IF target_mixtape_id IS NULL THEN
+    RAISE EXCEPTION 'Invalid invite code';
+  END IF;
+
+  -- Check collaborator count (owner is not in the table)
+  SELECT COUNT(*) INTO current_count
+    FROM mixtape_collaborators WHERE mixtape_id = target_mixtape_id;
+
+  -- max_collaborators includes the owner, so table can have max - 1
+  IF current_count >= (max_collabs - 1) THEN
+    RAISE EXCEPTION 'Mixtape is full';
+  END IF;
+
+  -- Don't let the owner join as collaborator
+  IF auth.uid() = (SELECT user_id FROM mixtapes WHERE id = target_mixtape_id) THEN
+    RETURN target_mixtape_id;
+  END IF;
+
+  -- Assign turn_order as next available
+  INSERT INTO mixtape_collaborators (mixtape_id, user_id, turn_order)
+    VALUES (target_mixtape_id, auth.uid(), current_count + 1)
+    ON CONFLICT (mixtape_id, user_id) DO NOTHING;
+
+  RETURN target_mixtape_id;
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER;

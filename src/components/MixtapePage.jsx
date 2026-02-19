@@ -25,6 +25,24 @@ function formatMs(ms) {
   return `${minutes}:${seconds.toString().padStart(2, "0")}`;
 }
 
+function getWhoseTurn(mixtape, collaborators, tracks) {
+  const participants = [
+    {
+      userId: mixtape.user_id,
+      displayName: mixtape.profiles?.display_name || "Owner",
+    },
+    ...collaborators
+      .sort((a, b) => a.turn_order - b.turn_order)
+      .map((c) => ({
+        userId: c.user_id,
+        displayName: c.profiles?.display_name || "Collaborator",
+      })),
+  ];
+  if (participants.length === 0) return null;
+  const turnIndex = tracks.length % participants.length;
+  return { ...participants[turnIndex], turnIndex };
+}
+
 export default function MixtapePage() {
   const { id: mixtapeId } = useParams();
   const navigate = useNavigate();
@@ -32,6 +50,7 @@ export default function MixtapePage() {
 
   const [mixtape, setMixtape] = useState(null);
   const [tracks, setTracks] = useState([]);
+  const [collaborators, setCollaborators] = useState([]);
   const [loadingMixtape, setLoadingMixtape] = useState(true);
   const [notFound, setNotFound] = useState(false);
   const [editingTitle, setEditingTitle] = useState(false);
@@ -43,6 +62,7 @@ export default function MixtapePage() {
   const [tapeWarning, setTapeWarning] = useState(null);
   const [contributorName, setContributorName] = useState("");
   const [copied, setCopied] = useState(false);
+  const [collabCopied, setCollabCopied] = useState(false);
   const [showCoverPicker, setShowCoverPicker] = useState(false);
   const [playingTrackId, setPlayingTrackId] = useState(null);
   const [topPlayerIndex, setTopPlayerIndex] = useState(null);
@@ -80,16 +100,30 @@ export default function MixtapePage() {
         setPlaylistName(mixtapeData.title);
       }
 
-      const { data: trackData } = await supabase
+      // Load tracks (with profile join for collab tapes)
+      const trackQuery = supabase
         .from("mixtape_tracks")
-        .select("*")
+        .select("*, profiles:added_by_user_id(display_name)")
         .eq("mixtape_id", mixtapeId)
         .order("position", { ascending: true });
 
+      const { data: trackData } = await trackQuery;
+
       if (!cancelled) {
         setTracks(trackData || []);
-        setLoadingMixtape(false);
       }
+
+      // Load collaborators if collab tape
+      if (mixtapeData.is_collab) {
+        const { data: collabData } = await supabase
+          .from("mixtape_collaborators")
+          .select("*, profiles!user_id(id, display_name, slug)")
+          .eq("mixtape_id", mixtapeId)
+          .order("turn_order", { ascending: true });
+        if (!cancelled) setCollaborators(collabData || []);
+      }
+
+      if (!cancelled) setLoadingMixtape(false);
     })();
 
     return () => {
@@ -97,10 +131,91 @@ export default function MixtapePage() {
     };
   }, [mixtapeId]);
 
+  // Realtime subscriptions for collab tapes
+  useEffect(() => {
+    if (!supabase || !mixtapeId || !mixtape?.is_collab) return;
+
+    const trackChannel = supabase
+      .channel(`mixtape-tracks-${mixtapeId}`)
+      .on(
+        "postgres_changes",
+        {
+          event: "INSERT",
+          schema: "public",
+          table: "mixtape_tracks",
+          filter: `mixtape_id=eq.${mixtapeId}`,
+        },
+        async (payload) => {
+          const { data } = await supabase
+            .from("mixtape_tracks")
+            .select("*, profiles:added_by_user_id(display_name)")
+            .eq("id", payload.new.id)
+            .single();
+          if (data) {
+            setTracks((prev) => {
+              if (prev.some((t) => t.id === data.id)) return prev;
+              return [...prev, data].sort((a, b) => a.position - b.position);
+            });
+          }
+        }
+      )
+      .on(
+        "postgres_changes",
+        {
+          event: "DELETE",
+          schema: "public",
+          table: "mixtape_tracks",
+          filter: `mixtape_id=eq.${mixtapeId}`,
+        },
+        (payload) => {
+          setTracks((prev) => prev.filter((t) => t.id !== payload.old.id));
+        }
+      )
+      .subscribe();
+
+    const collabChannel = supabase
+      .channel(`mixtape-collabs-${mixtapeId}`)
+      .on(
+        "postgres_changes",
+        {
+          event: "*",
+          schema: "public",
+          table: "mixtape_collaborators",
+          filter: `mixtape_id=eq.${mixtapeId}`,
+        },
+        async () => {
+          const { data } = await supabase
+            .from("mixtape_collaborators")
+            .select("*, profiles!user_id(id, display_name, slug)")
+            .eq("mixtape_id", mixtapeId)
+            .order("turn_order", { ascending: true });
+          setCollaborators(data || []);
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(trackChannel);
+      supabase.removeChannel(collabChannel);
+    };
+  }, [mixtapeId, mixtape?.is_collab]);
+
   const totalMs = tracks.reduce((sum, t) => sum + t.duration_ms, 0);
   const remainingMs = MAX_DURATION_MS - totalMs;
   const isOwner = user && mixtape && user.id === mixtape.user_id;
+  const isCollaborator =
+    user && collaborators.some((c) => c.user_id === user.id);
+  const canEdit = isOwner;
   const connected = isSpotifyConnected();
+
+  // Turn logic
+  const currentTurn =
+    mixtape?.is_collab && mixtape?.collab_mode === "turns" && collaborators.length > 0
+      ? getWhoseTurn(mixtape, collaborators, tracks)
+      : null;
+  const isMyTurn = !currentTurn || currentTurn.userId === user?.id;
+  const canAddTrack = isOwner || isCollaborator || !mixtape?.is_collab;
+  const canAddTrackNow = canAddTrack && isMyTurn;
 
   // Side A / Side B split at 45 minutes
   const SIDE_DURATION_MS = 45 * 60 * 1000;
@@ -125,6 +240,11 @@ export default function MixtapePage() {
     async (item) => {
       if (!supabase || !mixtapeId) return;
 
+      // Turn enforcement (client-side)
+      if (mixtape?.is_collab && mixtape?.collab_mode === "turns" && currentTurn) {
+        if (currentTurn.userId !== user?.id) return;
+      }
+
       const newTotalMs = totalMs + (item.durationMs || 0);
       if (newTotalMs > MAX_DURATION_MS) {
         setTapeWarning(
@@ -148,15 +268,16 @@ export default function MixtapePage() {
           spotify_id: item.id,
           duration_ms: item.durationMs || 0,
           added_by_name: isOwner ? "" : contributorName.trim(),
+          added_by_user_id: user?.id || null,
         })
-        .select()
+        .select("*, profiles:added_by_user_id(display_name)")
         .single();
 
       if (!error && data) {
         setTracks((prev) => [...prev, data]);
       }
     },
-    [mixtapeId, tracks.length, totalMs, isOwner, contributorName]
+    [mixtapeId, tracks.length, totalMs, isOwner, contributorName, mixtape, currentTurn, user]
   );
 
   // Remove track
@@ -169,10 +290,8 @@ export default function MixtapePage() {
     if (!error) {
       setTracks((prev) => {
         const updated = prev.filter((t) => t.id !== trackId);
-        // Reassign positions
         return updated.map((t, i) => ({ ...t, position: i }));
       });
-      // Update positions in DB
       const remaining = tracks.filter((t) => t.id !== trackId);
       for (let i = 0; i < remaining.length; i++) {
         await supabase
@@ -196,7 +315,6 @@ export default function MixtapePage() {
     const updated = newTracks.map((t, i) => ({ ...t, position: i }));
     setTracks(updated);
 
-    // Update both swapped tracks in DB
     await Promise.all([
       supabase
         .from("mixtape_tracks")
@@ -262,6 +380,28 @@ export default function MixtapePage() {
     if (!supabase || !mixtape) return;
     if (!window.confirm("Delete this mixtape? This cannot be undone.")) return;
     await supabase.from("mixtapes").delete().eq("id", mixtape.id);
+    navigate("/mixtapes");
+  };
+
+  // Toggle collab mode
+  const handleToggleCollabMode = async () => {
+    if (!supabase || !mixtape) return;
+    const newMode = mixtape.collab_mode === "turns" ? "open" : "turns";
+    await supabase
+      .from("mixtapes")
+      .update({ collab_mode: newMode, updated_at: new Date().toISOString() })
+      .eq("id", mixtape.id);
+    setMixtape((prev) => ({ ...prev, collab_mode: newMode }));
+  };
+
+  // Leave collab tape
+  const handleLeave = async () => {
+    if (!supabase || !user) return;
+    await supabase
+      .from("mixtape_collaborators")
+      .delete()
+      .eq("mixtape_id", mixtape.id)
+      .eq("user_id", user.id);
     navigate("/mixtapes");
   };
 
@@ -368,7 +508,7 @@ export default function MixtapePage() {
               coverArtIndex={mixtape.cover_art_index}
               size={120}
             />
-            {isOwner && (
+            {canEdit && (
               <div style={{ position: "absolute", bottom: -8 }}>
                 <button
                   onClick={() => setShowCoverPicker(!showCoverPicker)}
@@ -476,7 +616,28 @@ export default function MixtapePage() {
             )}
           </div>
 
-          {editingTitle && isOwner ? (
+          {/* Collab badge */}
+          {mixtape.is_collab && (
+            <div style={{ marginBottom: 8 }}>
+              <span
+                style={{
+                  fontSize: 10,
+                  fontWeight: 700,
+                  fontFamily: "'Space Mono', monospace",
+                  color: palette.coral,
+                  background: "rgba(255,107,107,0.1)",
+                  padding: "3px 10px",
+                  borderRadius: 6,
+                  letterSpacing: 1,
+                  textTransform: "uppercase",
+                }}
+              >
+                COLLAB {mixtape.collab_mode === "turns" ? "/ TURNS" : "/ OPEN"}
+              </span>
+            </div>
+          )}
+
+          {editingTitle && canEdit ? (
             <div style={{ display: "flex", gap: 8, justifyContent: "center", marginBottom: 8 }}>
               <input
                 type="text"
@@ -522,10 +683,10 @@ export default function MixtapePage() {
                 fontSize: 26,
                 fontWeight: 800,
                 margin: "0 0 8px",
-                cursor: isOwner ? "pointer" : "default",
+                cursor: canEdit ? "pointer" : "default",
               }}
-              onClick={() => isOwner && setEditingTitle(true)}
-              title={isOwner ? "Click to edit title" : ""}
+              onClick={() => canEdit && setEditingTitle(true)}
+              title={canEdit ? "Click to edit title" : ""}
             >
               {mixtape.title}
             </h1>
@@ -596,14 +757,14 @@ export default function MixtapePage() {
                 color: palette.coral,
                 fontFamily: "'Space Mono', monospace",
                 marginBottom: 4,
-                cursor: isOwner ? "pointer" : "default",
+                cursor: canEdit ? "pointer" : "default",
               }}
-              onClick={() => isOwner && setEditingTheme(true)}
-              title={isOwner ? "Click to edit theme" : ""}
+              onClick={() => canEdit && setEditingTheme(true)}
+              title={canEdit ? "Click to edit theme" : ""}
             >
               for: {mixtape.theme}
             </div>
-          ) : isOwner ? (
+          ) : canEdit ? (
             <button
               onClick={() => setEditingTheme(true)}
               style={{
@@ -621,6 +782,7 @@ export default function MixtapePage() {
             </button>
           ) : null}
 
+          {/* Credits line */}
           <div
             style={{
               fontSize: 12,
@@ -635,7 +797,75 @@ export default function MixtapePage() {
             >
               {mixtape.profiles?.display_name || "Unknown"}
             </Link>
+            {mixtape.is_collab &&
+              collaborators.length > 0 &&
+              collaborators.map((c, i) => (
+                <span key={c.user_id}>
+                  {i === collaborators.length - 1 ? " & " : ", "}
+                  <Link
+                    to={`/${c.profiles?.slug}`}
+                    style={{ color: palette.accent, textDecoration: "none" }}
+                  >
+                    {c.profiles?.display_name}
+                  </Link>
+                </span>
+              ))}
           </div>
+
+          {/* Collaborator badges (turns mode) */}
+          {mixtape.is_collab && collaborators.length > 0 && (
+            <div
+              style={{
+                display: "flex",
+                gap: 8,
+                flexWrap: "wrap",
+                justifyContent: "center",
+                marginTop: 10,
+              }}
+            >
+              <span
+                style={{
+                  padding: "4px 10px",
+                  borderRadius: 12,
+                  background: palette.surface,
+                  border: `1px solid ${currentTurn?.userId === mixtape.user_id ? palette.accent : palette.border}`,
+                  fontSize: 11,
+                  fontWeight: 600,
+                  fontFamily: "'Space Mono', monospace",
+                  color:
+                    currentTurn?.userId === mixtape.user_id
+                      ? palette.accent
+                      : palette.text,
+                }}
+              >
+                {mixtape.profiles?.display_name}
+                {currentTurn?.userId === mixtape.user_id && " \u2190"}
+              </span>
+              {collaborators.map((c) => (
+                <span
+                  key={c.user_id}
+                  style={{
+                    padding: "4px 10px",
+                    borderRadius: 12,
+                    background: palette.surface,
+                    border: `1px solid ${currentTurn?.userId === c.user_id ? palette.coral : palette.border}`,
+                    fontSize: 11,
+                    fontWeight: 600,
+                    fontFamily: "'Space Mono', monospace",
+                    color:
+                      currentTurn?.userId === c.user_id
+                        ? palette.coral
+                        : palette.text,
+                  }}
+                >
+                  {c.profiles?.display_name}
+                  {currentTurn?.userId === c.user_id && " \u2190"}
+                </span>
+              ))}
+            </div>
+          )}
+
+          {/* Action buttons */}
           <div style={{ marginTop: 10, display: "flex", gap: 8, justifyContent: "center", flexWrap: "wrap" }}>
             {tracks.some((t) => t.liner_notes) && (
               <Link
@@ -674,8 +904,68 @@ export default function MixtapePage() {
             >
               {copied ? "Copied!" : "Copy link"}
             </button>
-            {user && !isOwner && (
+            {/* Collab invite link */}
+            {isOwner && mixtape.is_collab && mixtape.invite_code && (
+              <button
+                onClick={() => {
+                  const url = `${window.location.origin}/mixtape/join/${mixtape.invite_code}`;
+                  navigator.clipboard.writeText(url);
+                  setCollabCopied(true);
+                  setTimeout(() => setCollabCopied(false), 2000);
+                }}
+                style={{
+                  padding: "4px 12px",
+                  borderRadius: 6,
+                  border: `1px solid ${palette.border}`,
+                  background: "transparent",
+                  color: collabCopied ? palette.accent : palette.textMuted,
+                  fontSize: 10,
+                  fontFamily: "'Space Mono', monospace",
+                  cursor: "pointer",
+                  transition: "color 0.2s",
+                }}
+              >
+                {collabCopied ? "Invite copied!" : "Copy invite link"}
+              </button>
+            )}
+            {/* Collab mode toggle */}
+            {isOwner && mixtape.is_collab && (
+              <button
+                onClick={handleToggleCollabMode}
+                style={{
+                  padding: "4px 12px",
+                  borderRadius: 6,
+                  border: `1px solid ${palette.border}`,
+                  background: "transparent",
+                  color: palette.textMuted,
+                  fontSize: 10,
+                  fontFamily: "'Space Mono', monospace",
+                  cursor: "pointer",
+                }}
+              >
+                Mode: {mixtape.collab_mode === "turns" ? "Strict turns" : "Open"}
+              </button>
+            )}
+            {user && !isOwner && !isCollaborator && (
               <TapeTradeButton mixtape={mixtape} />
+            )}
+            {/* Leave button for collaborators */}
+            {isCollaborator && !isOwner && (
+              <button
+                onClick={handleLeave}
+                style={{
+                  padding: "4px 12px",
+                  borderRadius: 6,
+                  border: `1px solid ${palette.border}`,
+                  background: "transparent",
+                  color: palette.coral,
+                  fontSize: 10,
+                  fontFamily: "'Space Mono', monospace",
+                  cursor: "pointer",
+                }}
+              >
+                Leave tape
+              </button>
             )}
             {isOwner && (
               <button
@@ -914,6 +1204,29 @@ export default function MixtapePage() {
           </div>
         )}
 
+        {/* Turn indicator */}
+        {mixtape.is_collab && mixtape.collab_mode === "turns" && currentTurn && (
+          <div
+            style={{
+              textAlign: "center",
+              padding: "10px 14px",
+              marginBottom: 12,
+              fontSize: 13,
+              fontFamily: "'Space Mono', monospace",
+              borderRadius: 8,
+              background: isMyTurn
+                ? "rgba(29,185,84,0.08)"
+                : "rgba(255,255,255,0.03)",
+              border: `1px solid ${isMyTurn ? "rgba(29,185,84,0.2)" : palette.border}`,
+              color: isMyTurn ? palette.accent : palette.textMuted,
+            }}
+          >
+            {isMyTurn
+              ? "Your turn! Pick a track."
+              : `Waiting for ${currentTurn.displayName}'s pick...`}
+          </div>
+        )}
+
         {/* Tape warning */}
         {tapeWarning && (
           <div
@@ -933,52 +1246,57 @@ export default function MixtapePage() {
           </div>
         )}
 
-        {/* Search — open to everyone */}
-        <div
-          style={{
-            background: palette.cardBg,
-            border: `1px solid ${palette.border}`,
-            borderRadius: 14,
-            padding: 20,
-            marginBottom: 20,
-          }}
-        >
+        {/* Search — conditional on permissions */}
+        {(canAddTrack || !mixtape.is_collab) && (
           <div
             style={{
-              fontSize: 12,
-              fontWeight: 600,
-              fontFamily: "'Space Mono', monospace",
-              color: palette.textMuted,
-              letterSpacing: 1,
-              textTransform: "uppercase",
-              marginBottom: 12,
+              background: palette.cardBg,
+              border: `1px solid ${palette.border}`,
+              borderRadius: 14,
+              padding: 20,
+              marginBottom: 20,
+              opacity: canAddTrackNow ? 1 : 0.4,
+              pointerEvents: canAddTrackNow ? "auto" : "none",
+              transition: "opacity 0.3s",
             }}
           >
-            Add a track
-          </div>
-          {!isOwner && (
-            <input
-              type="text"
-              value={contributorName}
-              onChange={(e) => setContributorName(e.target.value)}
-              placeholder="Your name..."
+            <div
               style={{
-                width: "100%",
-                padding: "10px 14px",
-                background: palette.surface,
-                border: `1px solid ${palette.border}`,
-                borderRadius: 10,
-                color: palette.text,
-                fontSize: 14,
-                fontFamily: "'Syne', sans-serif",
-                outline: "none",
-                boxSizing: "border-box",
+                fontSize: 12,
+                fontWeight: 600,
+                fontFamily: "'Space Mono', monospace",
+                color: palette.textMuted,
+                letterSpacing: 1,
+                textTransform: "uppercase",
                 marginBottom: 12,
               }}
-            />
-          )}
-          <SpotifySearch onSelect={handleAddTrack} forceType="track" />
-        </div>
+            >
+              Add a track
+            </div>
+            {!isOwner && !isCollaborator && (
+              <input
+                type="text"
+                value={contributorName}
+                onChange={(e) => setContributorName(e.target.value)}
+                placeholder="Your name..."
+                style={{
+                  width: "100%",
+                  padding: "10px 14px",
+                  background: palette.surface,
+                  border: `1px solid ${palette.border}`,
+                  borderRadius: 10,
+                  color: palette.text,
+                  fontSize: 14,
+                  fontFamily: "'Syne', sans-serif",
+                  outline: "none",
+                  boxSizing: "border-box",
+                  marginBottom: 12,
+                }}
+              />
+            )}
+            <SpotifySearch onSelect={handleAddTrack} forceType="track" />
+          </div>
+        )}
 
         {/* Track list header */}
         <div
@@ -1006,7 +1324,7 @@ export default function MixtapePage() {
               fontFamily: "'Space Mono', monospace",
             }}
           >
-            {isOwner
+            {isOwner || isCollaborator
               ? "No tracks yet. Search and add some!"
               : "This mixtape is empty."}
           </div>
@@ -1020,9 +1338,13 @@ export default function MixtapePage() {
                   track={track}
                   index={index}
                   isOwner={isOwner}
+                  isCollaborator={isCollaborator}
+                  isTrackAuthor={user && track.added_by_user_id === user.id}
                   isFirst={index === 0}
                   isLast={index === tracks.length - 1}
-                  addedByName={track.added_by_name}
+                  addedByName={
+                    track.profiles?.display_name || track.added_by_name
+                  }
                   isPlaying={playingTrackId === track.id}
                   onPlay={() =>
                     setPlayingTrackId(
@@ -1088,9 +1410,13 @@ export default function MixtapePage() {
                   track={track}
                   index={index}
                   isOwner={isOwner}
+                  isCollaborator={isCollaborator}
+                  isTrackAuthor={user && track.added_by_user_id === user.id}
                   isFirst={index === 0}
                   isLast={index === tracks.length - 1}
-                  addedByName={track.added_by_name}
+                  addedByName={
+                    track.profiles?.display_name || track.added_by_name
+                  }
                   isPlaying={playingTrackId === track.id}
                   onPlay={() =>
                     setPlayingTrackId(
@@ -1181,7 +1507,7 @@ export default function MixtapePage() {
             >
               {copiedTracks ? "Copied!" : "Copy tracklist"}
             </button>
-            {isOwner && (
+            {(isOwner || isCollaborator) && (
               <button
                 onClick={() => {
                   setShowExportModal(true);

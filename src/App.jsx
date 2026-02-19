@@ -10,6 +10,7 @@ import RoomJoinPage from "./components/RoomJoinPage";
 import RoomPage from "./components/RoomPage";
 import MixtapeListPage from "./components/MixtapeListPage";
 import MixtapePage from "./components/MixtapePage";
+import MixtapeJoinPage from "./components/MixtapeJoinPage";
 import LinerNotesPage from "./components/LinerNotesPage";
 import WallPage from "./components/WallPage";
 import SpotifyCallback from "./components/SpotifyCallback";
@@ -60,6 +61,7 @@ export default function App() {
           <Route path="/room/join/:inviteCode" element={<RoomJoinPage />} />
           <Route path="/room/:roomId" element={<RoomPage />} />
           <Route path="/mixtapes" element={<MixtapeListPage />} />
+          <Route path="/mixtape/join/:inviteCode" element={<MixtapeJoinPage />} />
           <Route path="/mixtape/:id/notes" element={<LinerNotesPage />} />
           <Route path="/mixtape/:id" element={<MixtapePage />} />
           <Route path="/:slug" element={<WallPage />} />

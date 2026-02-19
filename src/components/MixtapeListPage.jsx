@@ -13,6 +13,14 @@ function formatMs(ms) {
   return `${minutes}:${seconds.toString().padStart(2, "0")}`;
 }
 
+function generateInviteCode() {
+  const bytes = new Uint8Array(6);
+  crypto.getRandomValues(bytes);
+  return Array.from(bytes)
+    .map((b) => b.toString(16).padStart(2, "0"))
+    .join("");
+}
+
 export default function MixtapeListPage() {
   const navigate = useNavigate();
   const { user, loading } = useAuth();
@@ -21,6 +29,11 @@ export default function MixtapeListPage() {
   const [creating, setCreating] = useState(false);
   const [newTitle, setNewTitle] = useState("");
   const [error, setError] = useState(null);
+
+  // Collab creation options
+  const [isCollab, setIsCollab] = useState(false);
+  const [collabMode, setCollabMode] = useState("open");
+  const [maxCollaborators, setMaxCollaborators] = useState(4);
 
   useEffect(() => {
     if (!loading && !user) {
@@ -37,30 +50,82 @@ export default function MixtapeListPage() {
     if (!supabase || !user) return;
     setLoadingMixtapes(true);
 
+    // Load owned mixtapes
     const { data } = await supabase
       .from("mixtapes")
-      .select("*")
+      .select("*, profiles!user_id(display_name, slug)")
       .eq("user_id", user.id)
       .order("created_at", { ascending: false });
 
-    const mixtapesWithStats = await Promise.all(
+    const ownedWithStats = await Promise.all(
       (data || []).map(async (m) => {
         const { data: tracks } = await supabase
           .from("mixtape_tracks")
           .select("duration_ms, album_art_url")
           .eq("mixtape_id", m.id)
           .order("position", { ascending: true });
-        const totalMs = (tracks || []).reduce((sum, t) => sum + t.duration_ms, 0);
+        const totalMs = (tracks || []).reduce(
+          (sum, t) => sum + t.duration_ms,
+          0
+        );
         return {
           ...m,
           trackCount: tracks?.length || 0,
           totalMs,
           tracks: tracks || [],
+          isJoined: false,
         };
       })
     );
 
-    setMixtapes(mixtapesWithStats);
+    // Load collab mixtapes user has joined
+    const { data: collabMemberships } = await supabase
+      .from("mixtape_collaborators")
+      .select("mixtape_id")
+      .eq("user_id", user.id);
+
+    let collabMixtapes = [];
+    if (collabMemberships?.length) {
+      const collabIds = collabMemberships.map((m) => m.mixtape_id);
+      // Filter out any the user also owns
+      const ownedIds = new Set((data || []).map((m) => m.id));
+      const joinedIds = collabIds.filter((id) => !ownedIds.has(id));
+
+      if (joinedIds.length) {
+        const { data: collabData } = await supabase
+          .from("mixtapes")
+          .select("*, profiles!user_id(display_name, slug)")
+          .in("id", joinedIds)
+          .order("created_at", { ascending: false });
+
+        collabMixtapes = await Promise.all(
+          (collabData || []).map(async (m) => {
+            const { data: tracks } = await supabase
+              .from("mixtape_tracks")
+              .select("duration_ms, album_art_url")
+              .eq("mixtape_id", m.id)
+              .order("position", { ascending: true });
+            const totalMs = (tracks || []).reduce(
+              (sum, t) => sum + t.duration_ms,
+              0
+            );
+            return {
+              ...m,
+              trackCount: tracks?.length || 0,
+              totalMs,
+              tracks: tracks || [],
+              isJoined: true,
+            };
+          })
+        );
+      }
+    }
+
+    const allMixtapes = [...ownedWithStats, ...collabMixtapes].sort(
+      (a, b) => new Date(b.created_at) - new Date(a.created_at)
+    );
+
+    setMixtapes(allMixtapes);
     setLoadingMixtapes(false);
   };
 
@@ -70,9 +135,19 @@ export default function MixtapeListPage() {
     setError(null);
 
     try {
+      const insertData = {
+        title: newTitle.trim(),
+        user_id: user.id,
+        is_collab: isCollab,
+      };
+      if (isCollab) {
+        insertData.collab_mode = collabMode;
+        insertData.max_collaborators = maxCollaborators;
+        insertData.invite_code = generateInviteCode();
+      }
       const { data, error: insertError } = await supabase
         .from("mixtapes")
-        .insert({ title: newTitle.trim(), user_id: user.id })
+        .insert(insertData)
         .select()
         .single();
       if (insertError) throw insertError;
@@ -118,6 +193,14 @@ export default function MixtapeListPage() {
     background: palette.accent,
     color: "#000",
     flexShrink: 0,
+  };
+
+  const smallLabelStyle = {
+    fontSize: 11,
+    fontWeight: 600,
+    fontFamily: "'Space Mono', monospace",
+    color: palette.textMuted,
+    letterSpacing: 0.5,
   };
 
   return (
@@ -176,6 +259,139 @@ export default function MixtapeListPage() {
               {creating ? "Creating..." : "Create"}
             </button>
           </div>
+
+          {/* Collab toggle */}
+          <div
+            style={{
+              display: "flex",
+              alignItems: "center",
+              gap: 10,
+              marginTop: 12,
+            }}
+          >
+            <button
+              onClick={() => setIsCollab(!isCollab)}
+              style={{
+                width: 36,
+                height: 20,
+                borderRadius: 10,
+                border: "none",
+                background: isCollab ? palette.accent : palette.border,
+                cursor: "pointer",
+                position: "relative",
+                transition: "background 0.2s",
+                flexShrink: 0,
+              }}
+            >
+              <div
+                style={{
+                  width: 14,
+                  height: 14,
+                  borderRadius: 7,
+                  background: "#fff",
+                  position: "absolute",
+                  top: 3,
+                  left: isCollab ? 19 : 3,
+                  transition: "left 0.2s",
+                }}
+              />
+            </button>
+            <span style={smallLabelStyle}>Collab tape</span>
+          </div>
+
+          {/* Collab options */}
+          {isCollab && (
+            <div
+              style={{
+                marginTop: 12,
+                padding: "12px 14px",
+                background: palette.surface,
+                borderRadius: 8,
+                border: `1px solid ${palette.border}`,
+                display: "flex",
+                flexDirection: "column",
+                gap: 10,
+              }}
+            >
+              {/* Mode selector */}
+              <div>
+                <div style={{ ...smallLabelStyle, marginBottom: 6 }}>Mode</div>
+                <div style={{ display: "flex", gap: 6 }}>
+                  {["open", "turns"].map((mode) => (
+                    <button
+                      key={mode}
+                      onClick={() => setCollabMode(mode)}
+                      style={{
+                        padding: "6px 14px",
+                        borderRadius: 8,
+                        border: `1px solid ${collabMode === mode ? palette.accent : palette.border}`,
+                        background:
+                          collabMode === mode
+                            ? "rgba(29,185,84,0.1)"
+                            : "transparent",
+                        color:
+                          collabMode === mode ? palette.accent : palette.text,
+                        fontSize: 12,
+                        fontWeight: 600,
+                        fontFamily: "'Space Mono', monospace",
+                        cursor: "pointer",
+                        transition: "all 0.2s",
+                      }}
+                    >
+                      {mode === "open" ? "Open" : "Strict turns"}
+                    </button>
+                  ))}
+                </div>
+                <div
+                  style={{
+                    fontSize: 10,
+                    color: palette.textDim,
+                    fontFamily: "'Space Mono', monospace",
+                    marginTop: 4,
+                  }}
+                >
+                  {collabMode === "open"
+                    ? "Anyone can add tracks anytime"
+                    : "Alternate picks, one at a time"}
+                </div>
+              </div>
+
+              {/* Max collaborators */}
+              <div>
+                <div style={{ ...smallLabelStyle, marginBottom: 6 }}>
+                  Max people
+                </div>
+                <div style={{ display: "flex", gap: 6 }}>
+                  {[2, 3, 4].map((n) => (
+                    <button
+                      key={n}
+                      onClick={() => setMaxCollaborators(n)}
+                      style={{
+                        padding: "6px 12px",
+                        borderRadius: 8,
+                        border: `1px solid ${maxCollaborators === n ? palette.accent : palette.border}`,
+                        background:
+                          maxCollaborators === n
+                            ? "rgba(29,185,84,0.1)"
+                            : "transparent",
+                        color:
+                          maxCollaborators === n
+                            ? palette.accent
+                            : palette.text,
+                        fontSize: 12,
+                        fontWeight: 600,
+                        fontFamily: "'Space Mono', monospace",
+                        cursor: "pointer",
+                        transition: "all 0.2s",
+                      }}
+                    >
+                      {n}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            </div>
+          )}
         </div>
 
         {error && (
@@ -242,8 +458,34 @@ export default function MixtapeListPage() {
                   size={56}
                 />
                 <div style={{ flex: 1, minWidth: 0 }}>
-                  <div style={{ fontSize: 15, fontWeight: 700 }}>
+                  <div
+                    style={{
+                      fontSize: 15,
+                      fontWeight: 700,
+                      display: "flex",
+                      alignItems: "center",
+                      gap: 8,
+                    }}
+                  >
                     {mixtape.title}
+                    {mixtape.is_collab && (
+                      <span
+                        style={{
+                          fontSize: 9,
+                          fontWeight: 700,
+                          fontFamily: "'Space Mono', monospace",
+                          color: palette.coral,
+                          background: "rgba(255,107,107,0.1)",
+                          padding: "2px 6px",
+                          borderRadius: 4,
+                          letterSpacing: 0.5,
+                          textTransform: "uppercase",
+                          flexShrink: 0,
+                        }}
+                      >
+                        COLLAB
+                      </span>
+                    )}
                   </div>
                   {mixtape.theme && (
                     <div
@@ -256,6 +498,18 @@ export default function MixtapeListPage() {
                       }}
                     >
                       for: {mixtape.theme}
+                    </div>
+                  )}
+                  {mixtape.isJoined && mixtape.profiles && (
+                    <div
+                      style={{
+                        fontSize: 10,
+                        color: palette.textDim,
+                        fontFamily: "'Space Mono', monospace",
+                        marginTop: 2,
+                      }}
+                    >
+                      by {mixtape.profiles.display_name}
                     </div>
                   )}
                   <div

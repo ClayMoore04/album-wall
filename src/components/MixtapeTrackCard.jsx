@@ -12,6 +12,8 @@ export default function MixtapeTrackCard({
   track,
   index,
   isOwner,
+  isCollaborator,
+  isTrackAuthor,
   isFirst,
   isLast,
   addedByName,
@@ -26,6 +28,9 @@ export default function MixtapeTrackCard({
   onNotesChange,
   onNotesSave,
 }) {
+  const canEditNotes = isOwner || isTrackAuthor;
+  const canRemove = isOwner || isTrackAuthor;
+  const canReorder = isOwner;
   const smallBtnStyle = {
     width: 24,
     height: 24,
@@ -165,22 +170,24 @@ export default function MixtapeTrackCard({
           {formatMs(track.duration_ms)}
         </div>
 
-        {/* Owner controls */}
-        {isOwner && (
+        {/* Track controls */}
+        {(canEditNotes || canRemove || canReorder) && (
           <div style={{ display: "flex", gap: 4, flexShrink: 0 }}>
-            <button
-              onClick={onEditNotes}
-              style={smallBtnStyle}
-              title="Liner notes"
-            >
-              ✎
-            </button>
-            {!isFirst && (
+            {canEditNotes && (
+              <button
+                onClick={onEditNotes}
+                style={smallBtnStyle}
+                title="Liner notes"
+              >
+                ✎
+              </button>
+            )}
+            {canReorder && !isFirst && (
               <button onClick={onMoveUp} style={smallBtnStyle} title="Move up">
                 ↑
               </button>
             )}
-            {!isLast && (
+            {canReorder && !isLast && (
               <button
                 onClick={onMoveDown}
                 style={smallBtnStyle}
@@ -189,13 +196,15 @@ export default function MixtapeTrackCard({
                 ↓
               </button>
             )}
-            <button
-              onClick={onRemove}
-              style={{ ...smallBtnStyle, borderRadius: 12 }}
-              title="Remove"
-            >
-              &times;
-            </button>
+            {canRemove && (
+              <button
+                onClick={onRemove}
+                style={{ ...smallBtnStyle, borderRadius: 12 }}
+                title="Remove"
+              >
+                &times;
+              </button>
+            )}
           </div>
         )}
       </div>

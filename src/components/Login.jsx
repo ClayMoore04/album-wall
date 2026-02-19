@@ -25,6 +25,13 @@ export default function Login() {
         navigate(`/room/join/${pendingJoin}`, { replace: true });
         return;
       }
+      // Check for pending mixtape join redirect
+      const mixtapeJoin = sessionStorage.getItem("mixtape_join_return");
+      if (mixtapeJoin) {
+        sessionStorage.removeItem("mixtape_join_return");
+        navigate(`/mixtape/join/${mixtapeJoin}`, { replace: true });
+        return;
+      }
       // Profile will load via onAuthStateChange — navigate after a tick
       setTimeout(() => {
         navigate("/dashboard");
