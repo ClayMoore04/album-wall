@@ -85,9 +85,10 @@ export default function RoomListPage() {
       if (insertError) throw insertError;
 
       // Auto-join as creator
-      await supabase
+      const { error: joinError } = await supabase
         .from("room_members")
         .insert({ room_id: data.id, user_id: user.id });
+      if (joinError) throw joinError;
 
       navigate(`/room/${data.id}`);
     } catch (e) {

@@ -175,7 +175,7 @@ ALTER TABLE room_tracks ENABLE ROW LEVEL SECURITY;
 
 -- 5c. Add policies (now that all tables exist)
 CREATE POLICY "Members can read room" ON rooms FOR SELECT
-  USING (id IN (SELECT room_id FROM room_members WHERE user_id = auth.uid()));
+  USING (auth.uid() = created_by OR id IN (SELECT room_id FROM room_members WHERE user_id = auth.uid()));
 CREATE POLICY "Auth users can create rooms" ON rooms FOR INSERT
   WITH CHECK (auth.uid() = created_by);
 CREATE POLICY "Creator can update room" ON rooms FOR UPDATE
