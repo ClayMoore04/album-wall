@@ -18,7 +18,7 @@ export function AuthProvider({ children }) {
       if (error) {
         // Invalid or expired session — clear it and start fresh
         console.warn("Session expired, signing out:", error.message);
-        supabase.auth.signOut();
+        supabase.auth.signOut({ scope: "local" });
         setUser(null);
         setProfile(null);
         setLoading(false);
@@ -107,7 +107,7 @@ export function AuthProvider({ children }) {
 
   const signOut = async () => {
     if (!supabase) return;
-    await supabase.auth.signOut();
+    await supabase.auth.signOut({ scope: "local" });
     setUser(null);
     setProfile(null);
   };
