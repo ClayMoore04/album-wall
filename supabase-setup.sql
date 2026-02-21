@@ -428,7 +428,19 @@ ALTER TABLE mixtapes ADD COLUMN IF NOT EXISTS max_collaborators SMALLINT DEFAULT
 -- 11b. Add added_by_user_id to mixtape_tracks (nullable for backward compat)
 ALTER TABLE mixtape_tracks ADD COLUMN IF NOT EXISTS added_by_user_id UUID REFERENCES profiles(id) ON DELETE SET NULL;
 
--- 11c. Collaborators table
+-- 11c. Helper functions (SECURITY DEFINER) to break circular RLS references
+-- between mixtapes and mixtape_collaborators.
+CREATE OR REPLACE FUNCTION is_mixtape_owner(mid UUID)
+RETURNS BOOLEAN AS $$
+  SELECT EXISTS (SELECT 1 FROM mixtapes WHERE id = mid AND user_id = auth.uid());
+$$ LANGUAGE sql SECURITY DEFINER;
+
+CREATE OR REPLACE FUNCTION is_mixtape_collaborator(mid UUID)
+RETURNS BOOLEAN AS $$
+  SELECT EXISTS (SELECT 1 FROM mixtape_collaborators WHERE mixtape_id = mid AND user_id = auth.uid());
+$$ LANGUAGE sql SECURITY DEFINER;
+
+-- 11d. Collaborators table
 CREATE TABLE mixtape_collaborators (
   id         BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
   mixtape_id UUID NOT NULL REFERENCES mixtapes(id) ON DELETE CASCADE,
@@ -448,9 +460,7 @@ CREATE POLICY "Collaborators can read collaborators" ON mixtape_collaborators
     mixtape_id IN (
       SELECT mixtape_id FROM mixtape_collaborators WHERE user_id = auth.uid()
     )
-    OR mixtape_id IN (
-      SELECT id FROM mixtapes WHERE user_id = auth.uid()
-    )
+    OR is_mixtape_owner(mixtape_id)
   );
 
 -- Users can join (insert themselves)
@@ -461,58 +471,56 @@ CREATE POLICY "Users can join mixtape" ON mixtape_collaborators
 CREATE POLICY "Users can leave or owner can remove" ON mixtape_collaborators
   FOR DELETE USING (
     auth.uid() = user_id
-    OR mixtape_id IN (SELECT id FROM mixtapes WHERE user_id = auth.uid())
+    OR is_mixtape_owner(mixtape_id)
   );
 
 -- Enable realtime for collaborators and mixtape_tracks
 ALTER PUBLICATION supabase_realtime ADD TABLE mixtape_collaborators;
 ALTER PUBLICATION supabase_realtime ADD TABLE mixtape_tracks;
 
--- 11d. Update mixtape SELECT policy to include collaborators
+-- 11e. Update mixtape SELECT policy to include collaborators
 DROP POLICY IF EXISTS "Public mixtapes are viewable" ON mixtapes;
 CREATE POLICY "Public or collab mixtapes are viewable" ON mixtapes
   FOR SELECT USING (
     is_public = true
     OR auth.uid() = user_id
-    OR id IN (SELECT mixtape_id FROM mixtape_collaborators WHERE user_id = auth.uid())
+    OR is_mixtape_collaborator(id)
   );
 
--- 11e. Update mixtape_tracks INSERT policy to allow collaborators
+-- 11f. Update mixtape_tracks INSERT policy to allow collaborators
 DROP POLICY IF EXISTS "Owner can add tracks" ON mixtape_tracks;
 DROP POLICY IF EXISTS "Anyone can add tracks to public mixtapes" ON mixtape_tracks;
 
 CREATE POLICY "Owner or collaborator can add tracks" ON mixtape_tracks
   FOR INSERT WITH CHECK (
-    mixtape_id IN (SELECT id FROM mixtapes WHERE user_id = auth.uid())
-    OR mixtape_id IN (SELECT mixtape_id FROM mixtape_collaborators WHERE user_id = auth.uid())
+    is_mixtape_owner(mixtape_id)
+    OR is_mixtape_collaborator(mixtape_id)
     OR mixtape_id IN (SELECT id FROM mixtapes WHERE is_public = true)
   );
 
--- 11f. Update mixtape_tracks SELECT policy to include collaborators
+-- 11g. Update mixtape_tracks SELECT policy to include collaborators
 DROP POLICY IF EXISTS "Tracks viewable if mixtape is viewable" ON mixtape_tracks;
 CREATE POLICY "Tracks viewable if mixtape is viewable" ON mixtape_tracks
   FOR SELECT USING (
     mixtape_id IN (
       SELECT id FROM mixtapes WHERE is_public = true OR user_id = auth.uid()
     )
-    OR mixtape_id IN (
-      SELECT mixtape_id FROM mixtape_collaborators WHERE user_id = auth.uid()
-    )
+    OR is_mixtape_collaborator(mixtape_id)
   );
 
--- 11g. Allow collaborators to update their own tracks
+-- 11h. Allow collaborators to update their own tracks
 DROP POLICY IF EXISTS "Owner can update tracks" ON mixtape_tracks;
 CREATE POLICY "Owner or track author can update tracks" ON mixtape_tracks
   FOR UPDATE USING (
-    mixtape_id IN (SELECT id FROM mixtapes WHERE user_id = auth.uid())
+    is_mixtape_owner(mixtape_id)
     OR (added_by_user_id = auth.uid())
   );
 
--- 11h. Allow track authors to delete their own tracks
+-- 11i. Allow track authors to delete their own tracks
 DROP POLICY IF EXISTS "Owner can delete tracks" ON mixtape_tracks;
 CREATE POLICY "Owner or track author can delete tracks" ON mixtape_tracks
   FOR DELETE USING (
-    mixtape_id IN (SELECT id FROM mixtapes WHERE user_id = auth.uid())
+    is_mixtape_owner(mixtape_id)
     OR (added_by_user_id = auth.uid())
   );
 
