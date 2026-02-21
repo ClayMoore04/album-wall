@@ -173,9 +173,16 @@ ALTER TABLE rooms ENABLE ROW LEVEL SECURITY;
 ALTER TABLE room_members ENABLE ROW LEVEL SECURITY;
 ALTER TABLE room_tracks ENABLE ROW LEVEL SECURITY;
 
--- 5c. Add policies (now that all tables exist)
+-- 5c. Helper function (SECURITY DEFINER) to avoid RLS recursion
+-- when rooms/room_tracks policies check room_members membership.
+CREATE OR REPLACE FUNCTION is_room_member(rid UUID)
+RETURNS BOOLEAN AS $$
+  SELECT EXISTS (SELECT 1 FROM room_members WHERE room_id = rid AND user_id = auth.uid());
+$$ LANGUAGE sql SECURITY DEFINER;
+
+-- 5d. Add policies (now that all tables exist)
 CREATE POLICY "Members can read room" ON rooms FOR SELECT
-  USING (auth.uid() = created_by OR id IN (SELECT room_id FROM room_members WHERE user_id = auth.uid()));
+  USING (auth.uid() = created_by OR is_room_member(id));
 CREATE POLICY "Auth users can create rooms" ON rooms FOR INSERT
   WITH CHECK (auth.uid() = created_by);
 CREATE POLICY "Creator can update room" ON rooms FOR UPDATE
@@ -184,18 +191,18 @@ CREATE POLICY "Creator can delete room" ON rooms FOR DELETE
   USING (auth.uid() = created_by);
 
 CREATE POLICY "Members can read members" ON room_members FOR SELECT
-  USING (room_id IN (SELECT room_id FROM room_members WHERE user_id = auth.uid()));
+  USING (is_room_member(room_id));
 CREATE POLICY "Users can join room" ON room_members FOR INSERT
   WITH CHECK (auth.uid() = user_id);
 CREATE POLICY "Users can leave room" ON room_members FOR DELETE
   USING (auth.uid() = user_id);
 
 CREATE POLICY "Members can read tracks" ON room_tracks FOR SELECT
-  USING (room_id IN (SELECT room_id FROM room_members WHERE user_id = auth.uid()));
+  USING (is_room_member(room_id));
 CREATE POLICY "Members can add tracks" ON room_tracks FOR INSERT
-  WITH CHECK (auth.uid() = added_by AND room_id IN (SELECT room_id FROM room_members WHERE user_id = auth.uid()));
+  WITH CHECK (auth.uid() = added_by AND is_room_member(room_id));
 CREATE POLICY "Members can remove tracks" ON room_tracks FOR DELETE
-  USING (room_id IN (SELECT room_id FROM room_members WHERE user_id = auth.uid()));
+  USING (is_room_member(room_id));
 
 ALTER PUBLICATION supabase_realtime ADD TABLE room_tracks;
 ALTER PUBLICATION supabase_realtime ADD TABLE room_members;
