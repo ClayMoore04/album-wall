@@ -343,12 +343,21 @@ export default function CoverDesigner({
     const w = getCanvasWidth();
     const h = getCanvasHeight();
 
+    // Calculate display size to fit viewport
+    const maxW = Math.min(window.innerWidth * 0.85, 400);
+    const maxH = window.innerHeight * 0.4;
+    const fitScale = Math.min(maxW / w, maxH / h);
+
     const canvas = new fabric.Canvas(el, {
-      width: w,
-      height: h,
+      width: w * fitScale,
+      height: h * fitScale,
       backgroundColor: "transparent",
       isDrawingMode: true,
     });
+
+    // Zoom so internal coordinates stay at logical size (e.g. 600x600)
+    // but rendering fits the smaller display area
+    canvas.setZoom(fitScale);
 
     // CD clip path — clip to circle
     if (shape === "cd") {
@@ -581,7 +590,14 @@ export default function CoverDesigner({
         if (hole) canvas.bringObjectToFront(hole);
       }
 
+      // Reset zoom to export at full resolution
+      const currentZoom = canvas.getZoom();
+      canvas.setZoom(1);
+      canvas.setDimensions({ width: getCanvasWidth(), height: getCanvasHeight() });
       const dataUrl = canvas.toDataURL({ format: "png", multiplier: 1 });
+      // Restore zoom
+      canvas.setZoom(currentZoom);
+      canvas.setDimensions({ width: getCanvasWidth() * currentZoom, height: getCanvasHeight() * currentZoom });
       const res = await fetch(dataUrl);
       const blob = await res.blob();
 
@@ -617,11 +633,14 @@ export default function CoverDesigner({
     }
   };
 
-  // Display scaling — give the canvas more room
-  const maxDisplayWidth = Math.min(window.innerWidth * 0.9, 460);
+  // Display scaling — fit the canvas into the viewport
   const canvasW = getCanvasWidth();
   const canvasH = getCanvasHeight();
-  const scale = Math.min(maxDisplayWidth / canvasW, (window.innerHeight * 0.48) / canvasH);
+  const maxDisplayWidth = Math.min(window.innerWidth * 0.85, 400);
+  const maxDisplayHeight = window.innerHeight * 0.4;
+  const displayScale = Math.min(maxDisplayWidth / canvasW, maxDisplayHeight / canvasH);
+  const displayW = Math.round(canvasW * displayScale);
+  const displayH = Math.round(canvasH * displayScale);
 
   const toolBtnStyle = (isActive) => ({
     padding: "6px 10px",
@@ -743,8 +762,8 @@ export default function CoverDesigner({
       >
         <div
           style={{
-            width: canvasW * scale,
-            height: canvasH * scale,
+            width: displayW,
+            height: displayH,
             borderRadius: shape === "cd" ? "50%" : 10,
             overflow: "hidden",
             boxShadow: "0 4px 40px rgba(0,0,0,0.5)",
@@ -753,8 +772,6 @@ export default function CoverDesigner({
           <canvas
             ref={canvasRef}
             style={{
-              width: canvasW * scale,
-              height: canvasH * scale,
               display: "block",
             }}
           />
