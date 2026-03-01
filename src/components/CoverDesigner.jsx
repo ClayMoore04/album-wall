@@ -4,10 +4,16 @@ import { supabase } from "../lib/supabase";
 import { palette } from "../lib/palette";
 import { STICKERS, MARKER_COLORS, BACKGROUND_COLORS } from "../lib/coverDesignerStickers";
 
+// CD: 600x600 — realistic disc proportions
 const CD_SIZE = 600;
+const CD_OUTER_RING = 290; // outer edge radius
+const CD_INNER_RING = 58;  // center hole radius (proportional to real CD)
+const CD_LABEL_RADIUS = 170; // label area radius
+
+// Cassette: 600x380 — realistic J-card proportions (roughly 4" x 2.5")
 const CASSETTE_WIDTH = 600;
-const CASSETTE_HEIGHT = 420;
-const CENTER_HOLE_RADIUS = 45;
+const CASSETTE_HEIGHT = 380;
+
 const MAX_UNDO = 30;
 
 function hexToRgba(hex, alpha) {
@@ -15,6 +21,278 @@ function hexToRgba(hex, alpha) {
   const g = parseInt(hex.slice(3, 5), 16);
   const b = parseInt(hex.slice(5, 7), 16);
   return `rgba(${r},${g},${b},${alpha})`;
+}
+
+// Draw the CD template (non-selectable background objects)
+function drawCDTemplate(canvas, bgColor) {
+  const cx = CD_SIZE / 2;
+  const cy = CD_SIZE / 2;
+
+  // Outer disc fill
+  const disc = new fabric.Circle({
+    radius: CD_OUTER_RING,
+    left: cx,
+    top: cy,
+    originX: "center",
+    originY: "center",
+    fill: bgColor,
+    stroke: "#bbb",
+    strokeWidth: 2,
+    selectable: false,
+    evented: false,
+  });
+  disc.customType = "template";
+  canvas.add(disc);
+
+  // Subtle concentric grooves
+  [240, 210, 185].forEach((r) => {
+    const groove = new fabric.Circle({
+      radius: r,
+      left: cx,
+      top: cy,
+      originX: "center",
+      originY: "center",
+      fill: "transparent",
+      stroke: "rgba(0,0,0,0.06)",
+      strokeWidth: 0.5,
+      selectable: false,
+      evented: false,
+    });
+    groove.customType = "template";
+    canvas.add(groove);
+  });
+
+  // Label area boundary ring
+  const labelRing = new fabric.Circle({
+    radius: CD_LABEL_RADIUS,
+    left: cx,
+    top: cy,
+    originX: "center",
+    originY: "center",
+    fill: "transparent",
+    stroke: "rgba(0,0,0,0.12)",
+    strokeWidth: 1,
+    selectable: false,
+    evented: false,
+  });
+  labelRing.customType = "template";
+  canvas.add(labelRing);
+
+  // Center hole
+  const hole = new fabric.Circle({
+    radius: CD_INNER_RING,
+    left: cx,
+    top: cy,
+    originX: "center",
+    originY: "center",
+    fill: palette.bg,
+    stroke: "#999",
+    strokeWidth: 1.5,
+    selectable: false,
+    evented: false,
+  });
+  hole.customType = "centerHole";
+  canvas.add(hole);
+
+  // Center hub ring (the little raised ring around the hole)
+  const hub = new fabric.Circle({
+    radius: CD_INNER_RING + 8,
+    left: cx,
+    top: cy,
+    originX: "center",
+    originY: "center",
+    fill: "transparent",
+    stroke: "rgba(0,0,0,0.15)",
+    strokeWidth: 1,
+    selectable: false,
+    evented: false,
+  });
+  hub.customType = "template";
+  canvas.add(hub);
+}
+
+// Draw the cassette J-card template
+function drawCassetteTemplate(canvas, bgColor) {
+  const w = CASSETTE_WIDTH;
+  const h = CASSETTE_HEIGHT;
+  const pad = 16;
+
+  // Card background
+  const card = new fabric.Rect({
+    left: 0,
+    top: 0,
+    width: w,
+    height: h,
+    fill: bgColor,
+    selectable: false,
+    evented: false,
+  });
+  card.customType = "template";
+  canvas.add(card);
+
+  // Outer border (cassette shell outline)
+  const border = new fabric.Rect({
+    left: pad,
+    top: pad,
+    width: w - pad * 2,
+    height: h - pad * 2,
+    fill: "transparent",
+    stroke: "rgba(0,0,0,0.12)",
+    strokeWidth: 1.5,
+    rx: 10,
+    ry: 10,
+    selectable: false,
+    evented: false,
+  });
+  border.customType = "template";
+  canvas.add(border);
+
+  // Tape window (the rectangular window showing the tape reels)
+  const winW = 260;
+  const winH = 90;
+  const winX = (w - winW) / 2;
+  const winY = h - pad - winH - 30;
+
+  const tapeWindow = new fabric.Rect({
+    left: winX,
+    top: winY,
+    width: winW,
+    height: winH,
+    fill: "rgba(0,0,0,0.05)",
+    stroke: "rgba(0,0,0,0.15)",
+    strokeWidth: 1,
+    rx: 6,
+    ry: 6,
+    selectable: false,
+    evented: false,
+  });
+  tapeWindow.customType = "template";
+  canvas.add(tapeWindow);
+
+  // Left spool
+  const spoolR = 28;
+  const spoolY = winY + winH / 2;
+  const leftSpool = new fabric.Circle({
+    radius: spoolR,
+    left: winX + 55,
+    top: spoolY,
+    originX: "center",
+    originY: "center",
+    fill: "rgba(0,0,0,0.08)",
+    stroke: "rgba(0,0,0,0.15)",
+    strokeWidth: 1,
+    selectable: false,
+    evented: false,
+  });
+  leftSpool.customType = "template";
+  canvas.add(leftSpool);
+
+  // Left spool hub
+  const leftHub = new fabric.Circle({
+    radius: 8,
+    left: winX + 55,
+    top: spoolY,
+    originX: "center",
+    originY: "center",
+    fill: "rgba(0,0,0,0.12)",
+    selectable: false,
+    evented: false,
+  });
+  leftHub.customType = "template";
+  canvas.add(leftHub);
+
+  // Right spool
+  const rightSpool = new fabric.Circle({
+    radius: spoolR,
+    left: winX + winW - 55,
+    top: spoolY,
+    originX: "center",
+    originY: "center",
+    fill: "rgba(0,0,0,0.08)",
+    stroke: "rgba(0,0,0,0.15)",
+    strokeWidth: 1,
+    selectable: false,
+    evented: false,
+  });
+  rightSpool.customType = "template";
+  canvas.add(rightSpool);
+
+  // Right spool hub
+  const rightHub = new fabric.Circle({
+    radius: 8,
+    left: winX + winW - 55,
+    top: spoolY,
+    originX: "center",
+    originY: "center",
+    fill: "rgba(0,0,0,0.12)",
+    selectable: false,
+    evented: false,
+  });
+  rightHub.customType = "template";
+  canvas.add(rightHub);
+
+  // Tape between spools
+  const tapeLine = new fabric.Rect({
+    left: winX + 55,
+    top: spoolY - 4,
+    width: winW - 110,
+    height: 8,
+    fill: "rgba(0,0,0,0.04)",
+    selectable: false,
+    evented: false,
+  });
+  tapeLine.customType = "template";
+  canvas.add(tapeLine);
+
+  // Screw holes (top corners of the shell)
+  [pad + 28, w - pad - 28].forEach((x) => {
+    const screw = new fabric.Circle({
+      radius: 5,
+      left: x,
+      top: pad + 28,
+      originX: "center",
+      originY: "center",
+      fill: "rgba(0,0,0,0.08)",
+      stroke: "rgba(0,0,0,0.12)",
+      strokeWidth: 0.5,
+      selectable: false,
+      evented: false,
+    });
+    screw.customType = "template";
+    canvas.add(screw);
+  });
+
+  // Label area hint text (very faint)
+  const hint = new fabric.IText("", {
+    left: w / 2,
+    top: pad + 50,
+    originX: "center",
+    originY: "center",
+    fontSize: 11,
+    fontFamily: "'Space Mono', monospace",
+    fill: "rgba(0,0,0,0.08)",
+    selectable: false,
+    evented: false,
+  });
+  hint.customType = "template";
+  canvas.add(hint);
+
+  // Lines for writing (like a label)
+  for (let i = 0; i < 5; i++) {
+    const lineY = pad + 65 + i * 32;
+    if (lineY > winY - 15) break;
+    const line = new fabric.Line(
+      [pad + 40, lineY, w - pad - 40, lineY],
+      {
+        stroke: "rgba(0,0,0,0.06)",
+        strokeWidth: 0.5,
+        selectable: false,
+        evented: false,
+      }
+    );
+    line.customType = "template";
+    canvas.add(line);
+  }
 }
 
 export default function CoverDesigner({
@@ -45,10 +323,9 @@ export default function CoverDesigner({
   const getCanvasWidth = () => (shape === "cd" ? CD_SIZE : CASSETTE_WIDTH);
   const getCanvasHeight = () => (shape === "cd" ? CD_SIZE : CASSETTE_HEIGHT);
 
-  // Save undo snapshot
   const pushUndo = useCallback(() => {
     if (isLoadingRef.current || !fabricRef.current) return;
-    const json = JSON.stringify(fabricRef.current.toJSON());
+    const json = JSON.stringify(fabricRef.current.toJSON(["customType"]));
     undoStackRef.current.push(json);
     if (undoStackRef.current.length > MAX_UNDO) {
       undoStackRef.current.shift();
@@ -69,14 +346,14 @@ export default function CoverDesigner({
     const canvas = new fabric.Canvas(el, {
       width: w,
       height: h,
-      backgroundColor: bgColor,
+      backgroundColor: "transparent",
       isDrawingMode: true,
     });
 
-    // CD clip path
+    // CD clip path — clip to circle
     if (shape === "cd") {
       canvas.clipPath = new fabric.Circle({
-        radius: CD_SIZE / 2,
+        radius: CD_OUTER_RING,
         left: CD_SIZE / 2,
         top: CD_SIZE / 2,
         originX: "center",
@@ -89,7 +366,6 @@ export default function CoverDesigner({
     canvas.freeDrawingBrush.width = penSize;
     canvas.freeDrawingBrush.color = activeColor;
 
-    // Listen for changes
     canvas.on("path:created", () => pushUndo());
     canvas.on("object:modified", () => pushUndo());
 
@@ -104,10 +380,13 @@ export default function CoverDesigner({
         pushUndo();
       });
     } else {
-      // Add CD center hole
+      // Draw the template
       if (shape === "cd") {
-        addCenterHole(canvas);
+        drawCDTemplate(canvas, bgColor);
+      } else {
+        drawCassetteTemplate(canvas, bgColor);
       }
+      canvas.renderAll();
       pushUndo();
     }
 
@@ -116,25 +395,6 @@ export default function CoverDesigner({
       fabricRef.current = null;
     };
   }, [shape]); // eslint-disable-line react-hooks/exhaustive-deps
-
-  function addCenterHole(canvas) {
-    const hole = new fabric.Circle({
-      radius: CENTER_HOLE_RADIUS,
-      left: CD_SIZE / 2,
-      top: CD_SIZE / 2,
-      originX: "center",
-      originY: "center",
-      fill: palette.bg,
-      stroke: "#ccc",
-      strokeWidth: 1,
-      selectable: false,
-      evented: false,
-      excludeFromExport: false,
-    });
-    hole.customType = "centerHole";
-    canvas.add(hole);
-    canvas.bringObjectToFront(hole);
-  }
 
   // Update brush when tool/color/size changes
   useEffect(() => {
@@ -160,7 +420,7 @@ export default function CoverDesigner({
     }
   }, [activeTool, activeColor, penSize, bgColor]);
 
-  // Text tool — click to place
+  // Text tool
   useEffect(() => {
     const canvas = fabricRef.current;
     if (!canvas || activeTool !== "text") return;
@@ -185,7 +445,6 @@ export default function CoverDesigner({
     return () => canvas.off("mouse:down", handleClick);
   }, [activeTool, activeColor, pushUndo]);
 
-  // Undo
   const handleUndo = () => {
     const canvas = fabricRef.current;
     if (!canvas || undoStackRef.current.length <= 1) return;
@@ -203,7 +462,6 @@ export default function CoverDesigner({
     });
   };
 
-  // Redo
   const handleRedo = () => {
     const canvas = fabricRef.current;
     if (!canvas || redoStackRef.current.length === 0) return;
@@ -220,33 +478,32 @@ export default function CoverDesigner({
     });
   };
 
-  // Clear all
   const handleClear = () => {
     const canvas = fabricRef.current;
     if (!canvas || !window.confirm("Clear the entire canvas?")) return;
     canvas.clear();
-    canvas.backgroundColor = bgColor;
+    canvas.backgroundColor = "transparent";
     if (shape === "cd") {
       canvas.clipPath = new fabric.Circle({
-        radius: CD_SIZE / 2,
+        radius: CD_OUTER_RING,
         left: CD_SIZE / 2,
         top: CD_SIZE / 2,
         originX: "center",
         originY: "center",
         absolutePositioned: true,
       });
-      addCenterHole(canvas);
+      drawCDTemplate(canvas, bgColor);
+    } else {
+      drawCassetteTemplate(canvas, bgColor);
     }
     canvas.renderAll();
     pushUndo();
   };
 
-  // Add sticker
   const handleAddSticker = (emoji) => {
     const canvas = fabricRef.current;
     if (!canvas) return;
 
-    // Render emoji to an offscreen canvas
     const offscreen = document.createElement("canvas");
     offscreen.width = 120;
     offscreen.height = 120;
@@ -276,37 +533,42 @@ export default function CoverDesigner({
     setActiveTool("select");
   };
 
-  // Background color change
   const handleBgChange = (color) => {
     const canvas = fabricRef.current;
     if (!canvas) return;
     setBgColor(color);
-    canvas.backgroundColor = color;
+
+    // Update the template background objects
+    canvas.getObjects().forEach((obj) => {
+      if (obj.customType === "template" && obj.type === "circle" && obj.fill !== "transparent" && obj.fill !== "rgba(0,0,0,0.08)") {
+        obj.set("fill", color);
+      }
+      if (obj.customType === "template" && obj.type === "rect" && obj.width === CASSETTE_WIDTH) {
+        obj.set("fill", color);
+      }
+    });
     canvas.renderAll();
     pushUndo();
     setShowBgPicker(false);
   };
 
-  // Shape switch
   const handleShapeSwitch = (newShape) => {
     if (newShape === shape) return;
     if (!window.confirm("Switching shape will clear your design. Continue?")) return;
     setShape(newShape);
   };
 
-  // Delete selected object
   const handleDeleteSelected = () => {
     const canvas = fabricRef.current;
     if (!canvas) return;
     const active = canvas.getActiveObject();
-    if (active && active.customType !== "centerHole") {
+    if (active && active.customType !== "centerHole" && active.customType !== "template") {
       canvas.remove(active);
       canvas.renderAll();
       pushUndo();
     }
   };
 
-  // Save
   const handleSave = async () => {
     const canvas = fabricRef.current;
     if (!canvas || !supabase) return;
@@ -343,7 +605,7 @@ export default function CoverDesigner({
         .getPublicUrl(path);
 
       const url = `${urlData.publicUrl}?v=${Date.now()}`;
-      const jsonData = canvas.toJSON();
+      const jsonData = canvas.toJSON(["customType"]);
 
       await onSave(url, jsonData, shape);
       onClose();
@@ -355,11 +617,11 @@ export default function CoverDesigner({
     }
   };
 
-  // Scale factor for display
-  const maxDisplayWidth = Math.min(window.innerWidth * 0.88, 500);
+  // Display scaling — give the canvas more room
+  const maxDisplayWidth = Math.min(window.innerWidth * 0.9, 460);
   const canvasW = getCanvasWidth();
   const canvasH = getCanvasHeight();
-  const scale = Math.min(maxDisplayWidth / canvasW, (window.innerHeight * 0.5) / canvasH);
+  const scale = Math.min(maxDisplayWidth / canvasW, (window.innerHeight * 0.48) / canvasH);
 
   const toolBtnStyle = (isActive) => ({
     padding: "6px 10px",
@@ -382,7 +644,7 @@ export default function CoverDesigner({
         left: 0,
         right: 0,
         bottom: 0,
-        background: "rgba(0,0,0,0.9)",
+        background: "rgba(0,0,0,0.92)",
         display: "flex",
         flexDirection: "column",
         alignItems: "center",
@@ -475,7 +737,7 @@ export default function CoverDesigner({
           display: "flex",
           alignItems: "center",
           justifyContent: "center",
-          padding: "8px 0",
+          padding: "8px 16px",
           minHeight: 0,
         }}
       >
@@ -483,10 +745,9 @@ export default function CoverDesigner({
           style={{
             width: canvasW * scale,
             height: canvasH * scale,
-            borderRadius: shape === "cd" ? "50%" : 12,
+            borderRadius: shape === "cd" ? "50%" : 10,
             overflow: "hidden",
             boxShadow: "0 4px 40px rgba(0,0,0,0.5)",
-            border: `2px solid ${palette.border}`,
           }}
         >
           <canvas
@@ -575,7 +836,6 @@ export default function CoverDesigner({
             Select
           </button>
 
-          {/* Separator */}
           <div style={{ width: 1, height: 20, background: palette.border, margin: "0 4px" }} />
 
           {/* Pen sizes */}
@@ -605,7 +865,6 @@ export default function CoverDesigner({
 
           <div style={{ width: 1, height: 20, background: palette.border, margin: "0 4px" }} />
 
-          {/* Undo/Redo */}
           <button
             onClick={handleUndo}
             disabled={!canUndo}
@@ -629,12 +888,10 @@ export default function CoverDesigner({
             Redo
           </button>
 
-          {/* Delete selected */}
           <button onClick={handleDeleteSelected} style={toolBtnStyle(false)}>
             Delete
           </button>
 
-          {/* Clear */}
           <button
             onClick={handleClear}
             style={{
