@@ -356,10 +356,35 @@ export default function useMixtapeData() {
     if (!supabase || !mixtape) return;
     await supabase
       .from("mixtapes")
-      .update({ cover_art_index: index, updated_at: new Date().toISOString() })
+      .update({
+        cover_art_index: index,
+        custom_cover_url: null,
+        updated_at: new Date().toISOString(),
+      })
       .eq("id", mixtape.id);
-    setMixtape((prev) => ({ ...prev, cover_art_index: index }));
+    setMixtape((prev) => ({ ...prev, cover_art_index: index, custom_cover_url: null }));
     setShowCoverPicker(false);
+  };
+
+  const handleSaveCustomCover = async (url, jsonData, shape) => {
+    if (!supabase || !mixtape) return;
+    await supabase
+      .from("mixtapes")
+      .update({
+        custom_cover_url: url,
+        custom_cover_data: jsonData,
+        custom_cover_shape: shape,
+        cover_art_index: null,
+        updated_at: new Date().toISOString(),
+      })
+      .eq("id", mixtape.id);
+    setMixtape((prev) => ({
+      ...prev,
+      custom_cover_url: url,
+      custom_cover_data: jsonData,
+      custom_cover_shape: shape,
+      cover_art_index: null,
+    }));
   };
 
   const handleDelete = async () => {
@@ -516,6 +541,7 @@ export default function useMixtapeData() {
     handleSaveTitle,
     handleSaveTheme,
     handleCoverChange,
+    handleSaveCustomCover,
     handleDelete,
     handleToggleCollabMode,
     handleLeave,

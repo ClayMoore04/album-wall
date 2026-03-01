@@ -455,6 +455,7 @@ export default function MixtapeListPage() {
                 <MixtapeCoverArt
                   tracks={mixtape.tracks}
                   coverArtIndex={mixtape.cover_art_index}
+                  customCoverUrl={mixtape.custom_cover_url}
                   size={56}
                 />
                 <div style={{ flex: 1, minWidth: 0 }}>

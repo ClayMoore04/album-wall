@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { Link } from "react-router-dom";
 import { palette } from "../lib/palette";
 import { formatMs } from "../hooks/useMixtapeData";
@@ -7,6 +8,7 @@ import MixtapeTrackCard from "./MixtapeTrackCard";
 import MixtapeCoverArt from "./MixtapeCoverArt";
 import MixtapeComments from "./MixtapeComments";
 import TapeTradeButton from "./TapeTradeButton";
+import CoverDesigner from "./CoverDesigner";
 
 export default function MixtapeEditView(props) {
   const {
@@ -79,11 +81,14 @@ export default function MixtapeEditView(props) {
     handleSaveTitle,
     handleSaveTheme,
     handleCoverChange,
+    handleSaveCustomCover,
     handleDelete,
     handleToggleCollabMode,
     handleLeave,
     startSpotifyAuth,
   } = props;
+
+  const [showCoverDesigner, setShowCoverDesigner] = useState(false);
 
   return (
     <>
@@ -96,6 +101,7 @@ export default function MixtapeEditView(props) {
             <MixtapeCoverArt
               tracks={tracks}
               coverArtIndex={mixtape.cover_art_index}
+              customCoverUrl={mixtape.custom_cover_url}
               size={120}
             />
             {canEdit && (
@@ -200,6 +206,61 @@ export default function MixtapeEditView(props) {
                         </span>
                       </button>
                     ))}
+                    {/* Design your own divider + button */}
+                    <div style={{ borderTop: `1px solid ${palette.border}`, margin: "6px 0" }} />
+                    <button
+                      onClick={() => {
+                        setShowCoverPicker(false);
+                        setShowCoverDesigner(true);
+                      }}
+                      style={{
+                        display: "block",
+                        width: "100%",
+                        padding: "6px 10px",
+                        border: "none",
+                        background: "transparent",
+                        color: palette.coral,
+                        fontSize: 11,
+                        fontFamily: "'Space Mono', monospace",
+                        cursor: "pointer",
+                        textAlign: "left",
+                        borderRadius: 4,
+                        fontWeight: 600,
+                      }}
+                    >
+                      {mixtape.custom_cover_url ? "Edit custom design" : "Design your own"}
+                    </button>
+                    {mixtape.custom_cover_url && (
+                      <button
+                        onClick={() => {
+                          // Re-apply custom cover (if they had switched away)
+                          handleSaveCustomCover(
+                            mixtape.custom_cover_url,
+                            mixtape.custom_cover_data,
+                            mixtape.custom_cover_shape
+                          );
+                          setShowCoverPicker(false);
+                        }}
+                        style={{
+                          display: "block",
+                          width: "100%",
+                          padding: "6px 10px",
+                          border: "none",
+                          background:
+                            mixtape.custom_cover_url && !mixtape.cover_art_index
+                              ? "rgba(29,185,84,0.15)"
+                              : "transparent",
+                          color: palette.text,
+                          fontSize: 11,
+                          fontFamily: "'Space Mono', monospace",
+                          cursor: "pointer",
+                          textAlign: "left",
+                          borderRadius: 4,
+                        }}
+                      >
+                        Use custom design
+                      </button>
+                    )}
                   </div>
                 )}
               </div>
@@ -1456,6 +1517,18 @@ export default function MixtapeEditView(props) {
           </div>
         )}
       </div>
+
+      {/* Cover Designer Modal */}
+      {showCoverDesigner && (
+        <CoverDesigner
+          mixtapeId={mixtapeId}
+          userId={user.id}
+          initialShape={mixtape.custom_cover_shape}
+          initialData={mixtape.custom_cover_data}
+          onSave={handleSaveCustomCover}
+          onClose={() => setShowCoverDesigner(false)}
+        />
+      )}
     </>
   );
 }

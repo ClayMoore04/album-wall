@@ -70,6 +70,7 @@ export default function MixtapeOfTheWeek() {
         <MixtapeCoverArt
           tracks={tracks}
           coverArtIndex={featured.cover_art_index}
+          customCoverUrl={featured.custom_cover_url}
           size={100}
         />
       </div>

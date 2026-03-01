@@ -67,6 +67,7 @@ export default function GatefoldHero({ mixtape, tracks, collaborators, totalMs, 
           <MixtapeCoverArt
             tracks={tracks}
             coverArtIndex={mixtape.cover_art_index}
+            customCoverUrl={mixtape.custom_cover_url}
             size={260}
           />
         </div>

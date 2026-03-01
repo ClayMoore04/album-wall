@@ -1,6 +1,22 @@
 import { palette } from "../lib/palette";
 
-export default function MixtapeCoverArt({ tracks, coverArtIndex, size = 120 }) {
+export default function MixtapeCoverArt({ tracks, coverArtIndex, customCoverUrl, size = 120 }) {
+  // Custom cover takes priority
+  if (customCoverUrl) {
+    return (
+      <img
+        src={customCoverUrl}
+        alt=""
+        style={{
+          width: size,
+          height: size,
+          borderRadius: 8,
+          objectFit: "cover",
+        }}
+      />
+    );
+  }
+
   // Single art from a specific track
   if (
     coverArtIndex !== null &&

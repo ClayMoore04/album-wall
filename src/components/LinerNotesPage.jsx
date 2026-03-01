@@ -88,6 +88,7 @@ export default function LinerNotesPage() {
             <MixtapeCoverArt
               tracks={tracks}
               coverArtIndex={mixtape.cover_art_index}
+              customCoverUrl={mixtape.custom_cover_url}
               size={100}
             />
           </div>
