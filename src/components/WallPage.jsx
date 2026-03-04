@@ -13,6 +13,7 @@ import ThankYou from "./ThankYou";
 import Wall from "./Wall";
 import Stats from "./Stats";
 import PlaylistBuilder from "./PlaylistBuilder";
+import Celebration from "./Celebration";
 
 export default function WallPage() {
   const { slug } = useParams();
@@ -26,6 +27,7 @@ export default function WallPage() {
   const [view, setView] = useState("submit");
   const [justSubmitted, setJustSubmitted] = useState(false);
   const [followerCount, setFollowerCount] = useState(0);
+  const [showCelebration, setShowCelebration] = useState(false);
 
   const isOwner = user && profile && user.id === profile.id;
   const ownerName = profile?.display_name || "Someone";
@@ -96,7 +98,12 @@ export default function WallPage() {
           filter: `wall_id=eq.${profile.id}`,
         },
         (payload) => {
-          setSubmissions((prev) => [payload.new, ...prev]);
+          setSubmissions((prev) => {
+            if (isOwner && prev.length === 0) {
+              setShowCelebration(true);
+            }
+            return [payload.new, ...prev];
+          });
         }
       )
       .on(
@@ -327,6 +334,7 @@ export default function WallPage() {
 
   return (
     <>
+      {showCelebration && <Celebration />}
       {/* Full-page banner background */}
       {bannerCss && (
         <div

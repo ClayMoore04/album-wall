@@ -1,6 +1,7 @@
 import { Link } from "react-router-dom";
 import { useAuth } from "./AuthProvider";
 import { palette } from "../lib/palette";
+import NotificationBell from "./NotificationBell";
 
 export default function NavBar({ wallSlug, isOwner }) {
   const { user, profile, signOut } = useAuth();
@@ -91,6 +92,7 @@ export default function NavBar({ wallSlug, isOwner }) {
                   My Booth
                 </Link>
               )}
+              <NotificationBell />
               <button
                 onClick={signOut}
                 style={{

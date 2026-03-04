@@ -49,6 +49,17 @@ export default function TapeTradeButton({ mixtape }) {
       return;
     }
 
+    // Create notification for receiver
+    try {
+      await supabase.from("notifications").insert({
+        recipient_id: mixtape.user_id,
+        actor_id: user.id,
+        type: "tape_trade_request",
+      });
+    } catch {
+      // Non-critical
+    }
+
     setSending(false);
     setSent(true);
   };

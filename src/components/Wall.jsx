@@ -76,19 +76,72 @@ export default function Wall({
   }
 
   if (submissions.length === 0) {
+    if (isOwner) {
+      const handleCopyLink = () => {
+        navigator.clipboard.writeText(window.location.href).catch(() => {});
+      };
+      return (
+        <div style={{ textAlign: "center", padding: "60px 20px" }}>
+          <div style={{ fontSize: 42, marginBottom: 12 }}>🧱</div>
+          <p
+            style={{
+              color: palette.textMuted,
+              fontFamily: "'Space Mono', monospace",
+              fontSize: 14,
+              marginBottom: 16,
+            }}
+          >
+            Your wall is empty — share your booth link to get recommendations.
+          </p>
+          <button
+            onClick={handleCopyLink}
+            style={{
+              padding: "10px 20px",
+              border: "none",
+              borderRadius: 10,
+              fontSize: 13,
+              fontWeight: 700,
+              fontFamily: "'Space Mono', monospace",
+              cursor: "pointer",
+              background: palette.accent,
+              color: "#000",
+            }}
+          >
+            Copy booth link
+          </button>
+        </div>
+      );
+    }
     return (
-      <div style={{ textAlign: "center", padding: "60px 20px" }}>
+      <div
+        style={{
+          textAlign: "center",
+          padding: "40px 20px",
+          background: palette.cardBg,
+          border: `1px solid ${palette.border}`,
+          borderRadius: 12,
+        }}
+      >
         <div style={{ fontSize: 42, marginBottom: 12 }}>🧱</div>
         <p
           style={{
             color: palette.textMuted,
             fontFamily: "'Space Mono', monospace",
             fontSize: 14,
+            marginBottom: 4,
           }}
         >
           No albums on the wall yet.
-          <br />
-          Be the first to drop one!
+        </p>
+        <p
+          style={{
+            color: palette.accent,
+            fontFamily: "'Space Mono', monospace",
+            fontSize: 13,
+            fontWeight: 600,
+          }}
+        >
+          Be the first to drop one — switch to the Submit tab!
         </p>
       </div>
     );

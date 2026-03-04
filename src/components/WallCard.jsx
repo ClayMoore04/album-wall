@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { palette, getColor } from "../lib/palette";
 import { inputStyle } from "../lib/styles";
+import ReactionBar from "./ReactionBar";
 
 function StarRating({ rating, interactive, onRate }) {
   const [hover, setHover] = useState(0);
@@ -238,6 +239,8 @@ export default function WallCard({ submission, isOwner, ownerName = "Owner", onF
           >
             from {sub.submitted_by}
           </div>
+
+          <ReactionBar submissionId={sub.id} reactions={sub.reactions || {}} />
         </div>
       </div>
 

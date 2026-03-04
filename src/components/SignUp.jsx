@@ -87,7 +87,7 @@ export default function SignUp() {
     setSubmitting(true);
     try {
       await signUp({ email, password, displayName, slug });
-      navigate(`/${slug}`);
+      navigate("/dashboard");
     } catch (err) {
       setError(err.message || "Sign up failed. Please try again.");
     } finally {

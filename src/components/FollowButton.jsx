@@ -45,6 +45,17 @@ export default function FollowButton({ wallId, onCountChange }) {
           .insert({ follower_id: user.id, following_id: wallId });
         setFollowing(true);
         onCountChange?.(1);
+
+        // Create notification for wall owner
+        try {
+          await supabase.from("notifications").insert({
+            recipient_id: wallId,
+            actor_id: user.id,
+            type: "new_follow",
+          });
+        } catch {
+          // Non-critical
+        }
       }
     } catch (e) {
       console.error("Follow toggle failed:", e);

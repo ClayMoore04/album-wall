@@ -7,6 +7,8 @@ import { formatMs } from "../hooks/useMixtapeData";
 import NavBar from "./NavBar";
 import MixtapeCoverArt from "./MixtapeCoverArt";
 import { MixtapeRowSkeleton } from "./Skeleton";
+import SpotifyPlaylistImportModal from "./SpotifyPlaylistImportModal";
+import { getValidAccessToken } from "../lib/spotifyAuth";
 
 function generateInviteCode() {
   const bytes = new Uint8Array(6);
@@ -29,6 +31,10 @@ export default function MixtapeListPage() {
   const [isCollab, setIsCollab] = useState(false);
   const [collabMode, setCollabMode] = useState("open");
   const [maxCollaborators, setMaxCollaborators] = useState(4);
+
+  // Spotify import
+  const [showImportModal, setShowImportModal] = useState(false);
+  const [spotifyToken, setSpotifyToken] = useState(null);
 
   useEffect(() => {
     if (!loading && !user) {
@@ -154,6 +160,49 @@ export default function MixtapeListPage() {
     }
   };
 
+  const openImportModal = async () => {
+    const token = await getValidAccessToken();
+    setSpotifyToken(token);
+    setShowImportModal(true);
+  };
+
+  const handleImport = async ({ name, tracks }) => {
+    if (!supabase || !user || !tracks.length) return;
+    setShowImportModal(false);
+
+    try {
+      const { data: mixtape, error: insertError } = await supabase
+        .from("mixtapes")
+        .insert({ title: name, user_id: user.id })
+        .select()
+        .single();
+      if (insertError) throw insertError;
+
+      const trackRows = tracks.map((t, i) => ({
+        mixtape_id: mixtape.id,
+        spotify_id: t.id,
+        name: t.name,
+        artist: t.artist,
+        album_name: t.albumName,
+        album_art_url: t.imageUrl,
+        spotify_url: t.spotifyUrl,
+        duration_ms: t.durationMs,
+        position: i,
+        added_by: user.id,
+      }));
+
+      const { error: trackError } = await supabase
+        .from("mixtape_tracks")
+        .insert(trackRows);
+      if (trackError) throw trackError;
+
+      navigate(`/mixtape/${mixtape.id}`);
+    } catch (e) {
+      console.error("Import failed:", e);
+      setError("Failed to import playlist");
+    }
+  };
+
   if (loading || !user) {
     return (
       <div
@@ -254,6 +303,23 @@ export default function MixtapeListPage() {
               {creating ? "Creating..." : "Create"}
             </button>
           </div>
+          <button
+            onClick={openImportModal}
+            style={{
+              marginTop: 10,
+              padding: "8px 14px",
+              border: `1px solid ${palette.border}`,
+              borderRadius: 8,
+              background: "transparent",
+              color: palette.textMuted,
+              fontSize: 11,
+              fontWeight: 600,
+              fontFamily: "'Space Mono', monospace",
+              cursor: "pointer",
+            }}
+          >
+            Import from Spotify
+          </button>
 
           {/* Collab toggle */}
           <div
@@ -420,7 +486,7 @@ export default function MixtapeListPage() {
               fontFamily: "'Space Mono', monospace",
             }}
           >
-            No mixtapes yet. Create your first one.
+            No mixtapes yet. Create one above or import from a Spotify playlist.
           </div>
         ) : (
           <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
@@ -533,6 +599,14 @@ export default function MixtapeListPage() {
           </div>
         )}
       </div>
+
+      {showImportModal && (
+        <SpotifyPlaylistImportModal
+          onImport={handleImport}
+          onClose={() => setShowImportModal(false)}
+          spotifyAccessToken={spotifyToken}
+        />
+      )}
     </>
   );
 }

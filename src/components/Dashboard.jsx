@@ -9,6 +9,7 @@ import { DashboardCardSkeleton } from "./Skeleton";
 import ActivityFeed from "./ActivityFeed";
 import TapeTradeInbox from "./TapeTradeInbox";
 import QRCode from "./QRCode";
+import OnboardingChecklist from "./OnboardingChecklist";
 
 export default function Dashboard() {
   const navigate = useNavigate();
@@ -27,6 +28,7 @@ export default function Dashboard() {
   const [roomCount, setRoomCount] = useState(0);
   const [mixtapeCount, setMixtapeCount] = useState(0);
   const [showQR, setShowQR] = useState(false);
+  const [onboardingDismissed, setOnboardingDismissed] = useState(false);
 
   useEffect(() => {
     if (!loading && !user) {
@@ -197,6 +199,14 @@ export default function Dashboard() {
           Log out
         </button>
       </div>
+
+      {!profile.onboarding_completed_at && !onboardingDismissed && (
+        <OnboardingChecklist
+          profile={profile}
+          stats={stats}
+          onDismiss={() => setOnboardingDismissed(true)}
+        />
+      )}
 
       {/* Wall link */}
       <div

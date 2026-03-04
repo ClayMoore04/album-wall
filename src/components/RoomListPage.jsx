@@ -269,7 +269,7 @@ export default function RoomListPage() {
               fontFamily: "'Space Mono', monospace",
             }}
           >
-            No rooms yet. Create one or join with an invite code.
+            No rooms yet. Create one above or join with an invite code.
           </div>
         ) : (
           <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>

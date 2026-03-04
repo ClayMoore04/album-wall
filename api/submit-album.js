@@ -59,24 +59,41 @@ export default async function handler(req, res) {
     auth: { autoRefreshToken: false, persistSession: false },
   });
 
-  const { error } = await supabase.from("submissions").insert([
-    {
-      wall_id,
-      album_name,
-      artist_name,
-      album_art_url: album_art_url || null,
-      spotify_url: spotify_url || null,
-      spotify_id: spotify_id || null,
-      submitted_by,
-      email,
-      note: note || null,
-      tags: tags || [],
-    },
-  ]);
+  const { data: inserted, error } = await supabase
+    .from("submissions")
+    .insert([
+      {
+        wall_id,
+        album_name,
+        artist_name,
+        album_art_url: album_art_url || null,
+        spotify_url: spotify_url || null,
+        spotify_id: spotify_id || null,
+        submitted_by,
+        email,
+        note: note || null,
+        tags: tags || [],
+      },
+    ])
+    .select("id")
+    .single();
 
   if (error) {
     console.error("submit-album insert error:", error);
     return res.status(500).json({ error: "Failed to save submission" });
+  }
+
+  // Create notification for wall owner
+  try {
+    await supabase.from("notifications").insert({
+      recipient_id: wall_id,
+      type: "new_submission",
+      entity_id: String(inserted.id),
+      data: { album_name, artist_name, submitted_by },
+    });
+  } catch (e) {
+    // Non-critical — don't fail the submission
+    console.error("Notification insert failed:", e);
   }
 
   return res.status(200).json({ ok: true });
