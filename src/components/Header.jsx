@@ -1,5 +1,13 @@
+import { useState, useEffect, useRef } from "react";
 import { palette } from "../lib/palette";
+import { injectAnimations } from "../lib/animations";
 import { useToast } from "./Toast";
+
+const boothPhrases = [
+  "Step into the booth",
+  "Drop into the booth",
+  "Get into the booth",
+];
 
 export default function Header({
   profile,
@@ -8,7 +16,21 @@ export default function Header({
   themeAccent,
 }) {
   const accent = themeAccent || palette.accent;
+  const [boothPhrase] = useState(() => boothPhrases[Math.floor(Math.random() * boothPhrases.length)]);
   const { showToast } = useToast();
+  const prevCount = useRef(followerCount);
+  const [pulsing, setPulsing] = useState(false);
+
+  useEffect(() => { injectAnimations(); }, []);
+
+  useEffect(() => {
+    if (prevCount.current !== followerCount) {
+      prevCount.current = followerCount;
+      setPulsing(true);
+      const t = setTimeout(() => setPulsing(false), 300);
+      return () => clearTimeout(t);
+    }
+  }, [followerCount]);
 
   const handleCopyLink = () => {
     navigator.clipboard.writeText(window.location.href);
@@ -42,7 +64,7 @@ export default function Header({
           letterSpacing: "-0.02em",
         }}
       >
-        Slide into the booth<span style={{ color: accent }}>.</span>
+        {boothPhrase}<span style={{ color: accent }}>.</span>
       </h1>
       <p
         style={{
@@ -82,7 +104,9 @@ export default function Header({
             color: palette.textDim,
           }}
         >
-          {followerCount} follower{followerCount !== 1 ? "s" : ""}
+          <span style={pulsing ? { display: "inline-block", animation: "booth-countPulse 0.3s ease" } : undefined}>
+            {followerCount} follower{followerCount !== 1 ? "s" : ""}
+          </span>
         </div>
       )}
 

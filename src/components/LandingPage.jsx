@@ -30,8 +30,8 @@ export default function LandingPage() {
             margin: "0 auto 40px",
           }}
         >
-          Slide into the booth. Get album recommendations from friends,
-          build mixtapes, and share what you're listening to.
+          Get ready to make your own DJ booth. Get album recommendations
+          from friends, build mixtapes, and share what you're listening to.
         </p>
 
         {user && profile ? (
