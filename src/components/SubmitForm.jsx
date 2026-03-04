@@ -12,6 +12,7 @@ export default function SubmitForm({ onSubmit, ownerName = "them" }) {
   const [note, setNote] = useState("");
   const [selectedTags, setSelectedTags] = useState([]);
   const [submitting, setSubmitting] = useState(false);
+  const [honeypot, setHoneypot] = useState("");
 
   const toggleTag = (tag) => {
     setSelectedTags((prev) =>
@@ -34,12 +35,25 @@ export default function SubmitForm({ onSubmit, ownerName = "them" }) {
       email: email.trim(),
       note: note.trim(),
       tags: selectedTags,
+      website: honeypot,
     });
     setSubmitting(false);
   };
 
   return (
     <div>
+      {/* Honeypot — hidden from real users */}
+      <input
+        type="text"
+        name="website"
+        value={honeypot}
+        onChange={(e) => setHoneypot(e.target.value)}
+        autoComplete="off"
+        tabIndex={-1}
+        aria-hidden="true"
+        style={{ position: "absolute", left: "-9999px", opacity: 0, height: 0, width: 0 }}
+      />
+
       {/* Spotify Search or Preview */}
       {selectedAlbum ? (
         <AlbumPreview

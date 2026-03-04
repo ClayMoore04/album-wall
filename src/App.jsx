@@ -1,5 +1,6 @@
 import { Routes, Route } from "react-router-dom";
 import { palette } from "./lib/palette";
+import ErrorBoundary from "./components/ErrorBoundary";
 import LandingPage from "./components/LandingPage";
 import SignUp from "./components/SignUp";
 import Login from "./components/Login";
@@ -51,22 +52,24 @@ export default function App() {
           padding: "32px 20px 80px",
         }}
       >
-        <Routes>
-          <Route path="/signup" element={<SignUp />} />
-          <Route path="/login" element={<Login />} />
-          <Route path="/callback" element={<SpotifyCallback />} />
-          <Route path="/dashboard" element={<Dashboard />} />
-          <Route path="/discover" element={<DiscoverPage />} />
-          <Route path="/rooms" element={<RoomListPage />} />
-          <Route path="/room/join/:inviteCode" element={<RoomJoinPage />} />
-          <Route path="/room/:roomId" element={<RoomPage />} />
-          <Route path="/mixtapes" element={<MixtapeListPage />} />
-          <Route path="/mixtape/join/:inviteCode" element={<MixtapeJoinPage />} />
-          <Route path="/mixtape/:id/notes" element={<LinerNotesPage />} />
-          <Route path="/mixtape/:id" element={<MixtapePage />} />
-          <Route path="/:slug" element={<WallPage />} />
-          <Route path="/" element={<LandingPage />} />
-        </Routes>
+        <ErrorBoundary>
+          <Routes>
+            <Route path="/signup" element={<SignUp />} />
+            <Route path="/login" element={<Login />} />
+            <Route path="/callback" element={<SpotifyCallback />} />
+            <Route path="/dashboard" element={<Dashboard />} />
+            <Route path="/discover" element={<DiscoverPage />} />
+            <Route path="/rooms" element={<RoomListPage />} />
+            <Route path="/room/join/:inviteCode" element={<RoomJoinPage />} />
+            <Route path="/room/:roomId" element={<RoomPage />} />
+            <Route path="/mixtapes" element={<MixtapeListPage />} />
+            <Route path="/mixtape/join/:inviteCode" element={<MixtapeJoinPage />} />
+            <Route path="/mixtape/:id/notes" element={<LinerNotesPage />} />
+            <Route path="/mixtape/:id" element={<MixtapePage />} />
+            <Route path="/:slug" element={<WallPage />} />
+            <Route path="/" element={<LandingPage />} />
+          </Routes>
+        </ErrorBoundary>
       </div>
     </div>
   );

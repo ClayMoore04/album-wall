@@ -136,12 +136,17 @@ export default function WallPage() {
 
   // Handlers
   const addSubmission = async (submission) => {
-    if (!supabase || !profile) return;
+    if (!profile) return;
     try {
-      const { error } = await supabase
-        .from("submissions")
-        .insert([{ ...submission, wall_id: profile.id }]);
-      if (error) throw error;
+      const res = await fetch("/api/submit-album", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ ...submission, wall_id: profile.id }),
+      });
+      if (!res.ok) {
+        const data = await res.json().catch(() => ({}));
+        throw new Error(data.error || "Submission failed");
+      }
     } catch (e) {
       console.error("Failed to save submission:", e);
     }

@@ -8,6 +8,7 @@ import { useToast } from "./Toast";
 import { DashboardCardSkeleton } from "./Skeleton";
 import ActivityFeed from "./ActivityFeed";
 import TapeTradeInbox from "./TapeTradeInbox";
+import QRCode from "./QRCode";
 
 export default function Dashboard() {
   const navigate = useNavigate();
@@ -25,6 +26,7 @@ export default function Dashboard() {
   const [statusText, setStatusText] = useState("");
   const [roomCount, setRoomCount] = useState(0);
   const [mixtapeCount, setMixtapeCount] = useState(0);
+  const [showQR, setShowQR] = useState(false);
 
   useEffect(() => {
     if (!loading && !user) {
@@ -234,6 +236,29 @@ export default function Dashboard() {
           <span style={{ color: palette.accent }}>
             {stats.listened} listened
           </span>
+        </div>
+        <div style={{ marginTop: 12 }}>
+          <button
+            onClick={() => setShowQR(!showQR)}
+            style={{
+              padding: "6px 14px",
+              border: `1px solid ${palette.border}`,
+              borderRadius: 8,
+              background: "transparent",
+              color: palette.textMuted,
+              fontSize: 11,
+              fontWeight: 600,
+              fontFamily: "'Space Mono', monospace",
+              cursor: "pointer",
+            }}
+          >
+            {showQR ? "Hide QR code" : "Show QR code"}
+          </button>
+          {showQR && (
+            <div style={{ marginTop: 14 }}>
+              <QRCode url={`${window.location.origin}/${profile.slug}`} />
+            </div>
+          )}
         </div>
       </div>
 

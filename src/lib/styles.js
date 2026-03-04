@@ -36,3 +36,73 @@ export const secondaryBtnStyle = {
   fontFamily: "'Space Mono', monospace",
   cursor: "pointer",
 };
+
+export const primaryBtnStyle = {
+  padding: "12px 24px",
+  border: "none",
+  borderRadius: 10,
+  fontSize: 13,
+  fontWeight: 700,
+  fontFamily: "'Space Mono', monospace",
+  cursor: "pointer",
+  background: palette.accent,
+  color: "#000",
+  transition: "all 0.2s",
+};
+
+export const smallBtnStyle = {
+  padding: "4px 10px",
+  border: `1px solid ${palette.border}`,
+  borderRadius: 6,
+  background: "transparent",
+  color: palette.textMuted,
+  fontSize: 10,
+  fontWeight: 600,
+  fontFamily: "'Space Mono', monospace",
+  cursor: "pointer",
+};
+
+export const cardStyle = {
+  background: palette.cardBg,
+  border: `1px solid ${palette.border}`,
+  borderRadius: 12,
+  padding: 20,
+};
+
+export const pillBtnStyle = (active) => ({
+  padding: "6px 14px",
+  borderRadius: 20,
+  border: active
+    ? `1px solid ${palette.accent}`
+    : `1px solid ${palette.border}`,
+  background: active ? "rgba(29,185,84,0.15)" : "transparent",
+  color: active ? palette.accent : palette.textMuted,
+  fontSize: 12,
+  fontWeight: 600,
+  fontFamily: "'Space Mono', monospace",
+  cursor: "pointer",
+  transition: "all 0.15s",
+});
+
+export const toggleSwitchStyle = (on) => ({
+  outer: {
+    width: 36,
+    height: 20,
+    borderRadius: 10,
+    background: on ? palette.accent : palette.border,
+    position: "relative",
+    transition: "background 0.2s",
+    flexShrink: 0,
+    cursor: "pointer",
+  },
+  knob: {
+    width: 16,
+    height: 16,
+    borderRadius: 8,
+    background: "#fff",
+    position: "absolute",
+    top: 2,
+    left: on ? 18 : 2,
+    transition: "left 0.2s",
+  },
+});
