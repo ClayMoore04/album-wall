@@ -3,6 +3,7 @@ import { useParams, useNavigate } from "react-router-dom";
 import { supabase } from "../lib/supabase";
 import { useAuth } from "./AuthProvider";
 import { palette } from "../lib/palette";
+import { useToast } from "./Toast";
 import NavBar from "./NavBar";
 import SpotifySearch from "./SpotifySearch";
 import RoomTrackCard from "./RoomTrackCard";
@@ -17,7 +18,7 @@ export default function RoomPage() {
   const [tracks, setTracks] = useState([]);
   const [loadingRoom, setLoadingRoom] = useState(true);
   const [notFound, setNotFound] = useState(false);
-  const [copied, setCopied] = useState(false);
+  const { showToast } = useToast();
 
   useEffect(() => {
     if (!loading && !user) {
@@ -165,8 +166,7 @@ export default function RoomPage() {
     if (!room) return;
     const url = `${window.location.origin}/room/join/${room.invite_code}`;
     navigator.clipboard.writeText(url);
-    setCopied(true);
-    setTimeout(() => setCopied(false), 2000);
+    showToast("Copied!");
   };
 
   const handleLeave = async () => {
@@ -258,7 +258,7 @@ export default function RoomPage() {
                 borderRadius: 8,
                 border: `1px solid ${palette.border}`,
                 background: "transparent",
-                color: copied ? palette.accent : palette.textMuted,
+                color: palette.textMuted,
                 fontSize: 11,
                 fontWeight: 600,
                 fontFamily: "'Space Mono', monospace",
@@ -266,7 +266,7 @@ export default function RoomPage() {
                 transition: "color 0.2s",
               }}
             >
-              {copied ? "Copied!" : "Copy invite link"}
+              Copy invite link
             </button>
             {!isCreator && (
               <button

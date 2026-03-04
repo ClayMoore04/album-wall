@@ -6,6 +6,7 @@ import { palette } from "../lib/palette";
 import { formatMs } from "../hooks/useMixtapeData";
 import NavBar from "./NavBar";
 import MixtapeCoverArt from "./MixtapeCoverArt";
+import { MixtapeRowSkeleton } from "./Skeleton";
 
 function generateInviteCode() {
   const bytes = new Uint8Array(6);
@@ -404,16 +405,10 @@ export default function MixtapeListPage() {
 
         {/* Mixtape list */}
         {loadingMixtapes ? (
-          <div
-            style={{
-              textAlign: "center",
-              padding: 40,
-              color: palette.textMuted,
-              fontSize: 13,
-              fontFamily: "'Space Mono', monospace",
-            }}
-          >
-            Loading mixtapes...
+          <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+            <MixtapeRowSkeleton />
+            <MixtapeRowSkeleton />
+            <MixtapeRowSkeleton />
           </div>
         ) : mixtapes.length === 0 ? (
           <div

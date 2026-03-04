@@ -1,17 +1,15 @@
-import { useState } from "react";
 import { Link } from "react-router-dom";
 import { palette } from "../lib/palette";
 import { formatMs } from "../hooks/useMixtapeData";
+import { useToast } from "./Toast";
 import TapeTradeButton from "./TapeTradeButton";
 
 export default function GatefoldFooter({ mixtape, mixtapeId, tracks, totalMs, user, isOwner, isCollaborator, accent }) {
-  const [copied, setCopied] = useState(false);
-  const [copiedTracks, setCopiedTracks] = useState(false);
+  const { showToast } = useToast();
 
   const handleCopyLink = () => {
     navigator.clipboard.writeText(window.location.href);
-    setCopied(true);
-    setTimeout(() => setCopied(false), 2000);
+    showToast("Copied!");
   };
 
   const handleCopyTracklist = () => {
@@ -27,8 +25,7 @@ export default function GatefoldFooter({ mixtape, mixtapeId, tracks, totalMs, us
       .filter(Boolean)
       .join("\n")}`;
     navigator.clipboard.writeText(text);
-    setCopiedTracks(true);
-    setTimeout(() => setCopiedTracks(false), 2000);
+    showToast("Tracklist copied!");
   };
 
   return (
@@ -56,7 +53,7 @@ export default function GatefoldFooter({ mixtape, mixtapeId, tracks, totalMs, us
             borderRadius: 8,
             border: `1px solid ${palette.border}`,
             background: "transparent",
-            color: copied ? accent : palette.textMuted,
+            color: palette.textMuted,
             fontSize: 12,
             fontWeight: 600,
             fontFamily: "'Space Mono', monospace",
@@ -64,7 +61,7 @@ export default function GatefoldFooter({ mixtape, mixtapeId, tracks, totalMs, us
             transition: "color 0.2s",
           }}
         >
-          {copied ? "Copied!" : "Copy link"}
+          Copy link
         </button>
 
         {tracks.length > 0 && (
@@ -75,7 +72,7 @@ export default function GatefoldFooter({ mixtape, mixtapeId, tracks, totalMs, us
               borderRadius: 8,
               border: `1px solid ${palette.border}`,
               background: "transparent",
-              color: copiedTracks ? accent : palette.textMuted,
+              color: palette.textMuted,
               fontSize: 12,
               fontWeight: 600,
               fontFamily: "'Space Mono', monospace",
@@ -83,7 +80,7 @@ export default function GatefoldFooter({ mixtape, mixtapeId, tracks, totalMs, us
               transition: "color 0.2s",
             }}
           >
-            {copiedTracks ? "Copied!" : "Copy tracklist"}
+            Copy tracklist
           </button>
         )}
 

@@ -6,6 +6,7 @@ import { palette } from "../lib/palette";
 import NavBar from "./NavBar";
 import DiscoverWallCard from "./DiscoverWallCard";
 import MixtapeOfTheWeek from "./MixtapeOfTheWeek";
+import { DiscoverCardSkeleton } from "./Skeleton";
 
 export default function DiscoverPage() {
   const { user, profile } = useAuth();
@@ -34,6 +35,11 @@ export default function DiscoverPage() {
     .sort((a, b) => {
       if (sort === "popular") return b.follower_count - a.follower_count;
       if (sort === "albums") return b.submission_count - a.submission_count;
+      if (sort === "recent") {
+        const aDate = a.last_submission_at || "";
+        const bDate = b.last_submission_at || "";
+        return bDate.localeCompare(aDate);
+      }
       return 0;
     });
 
@@ -129,20 +135,28 @@ export default function DiscoverPage() {
             >
               Most Albums
             </button>
+            <button
+              type="button"
+              onClick={() => setSort("recent")}
+              style={toggleStyle(sort === "recent")}
+            >
+              Recent
+            </button>
           </div>
         </div>
 
         {loading ? (
           <div
             style={{
-              textAlign: "center",
-              padding: 60,
-              color: palette.textMuted,
-              fontSize: 14,
-              fontFamily: "'Space Mono', monospace",
+              display: "grid",
+              gridTemplateColumns: "repeat(auto-fill, minmax(260px, 1fr))",
+              gap: 14,
             }}
           >
-            Loading...
+            <DiscoverCardSkeleton />
+            <DiscoverCardSkeleton />
+            <DiscoverCardSkeleton />
+            <DiscoverCardSkeleton />
           </div>
         ) : filtered.length === 0 ? (
           <div

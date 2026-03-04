@@ -2,6 +2,7 @@ import { useState, useMemo } from "react";
 import { palette } from "../lib/palette";
 import { TAGS } from "../lib/tags";
 import WallCard from "./WallCard";
+import { WallCardSkeleton } from "./Skeleton";
 
 export default function Wall({
   submissions,
@@ -66,10 +67,10 @@ export default function Wall({
 
   if (loading) {
     return (
-      <div
-        style={{ textAlign: "center", padding: 60, color: palette.textMuted }}
-      >
-        Loading...
+      <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+        <WallCardSkeleton />
+        <WallCardSkeleton />
+        <WallCardSkeleton />
       </div>
     );
   }

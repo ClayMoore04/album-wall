@@ -1,5 +1,5 @@
-import { useState } from "react";
 import { palette } from "../lib/palette";
+import { useToast } from "./Toast";
 
 export default function Header({
   profile,
@@ -8,12 +8,11 @@ export default function Header({
   themeAccent,
 }) {
   const accent = themeAccent || palette.accent;
-  const [copied, setCopied] = useState(false);
+  const { showToast } = useToast();
 
   const handleCopyLink = () => {
     navigator.clipboard.writeText(window.location.href);
-    setCopied(true);
-    setTimeout(() => setCopied(false), 2000);
+    showToast("Copied!");
   };
 
   return (
@@ -95,7 +94,7 @@ export default function Header({
           borderRadius: 8,
           border: `1px solid ${palette.border}`,
           background: "transparent",
-          color: copied ? accent : palette.textMuted,
+          color: palette.textMuted,
           fontSize: 11,
           fontWeight: 600,
           fontFamily: "'Space Mono', monospace",
@@ -103,7 +102,7 @@ export default function Header({
           transition: "color 0.2s",
         }}
       >
-        {copied ? "Copied!" : "Copy booth link"}
+        Copy booth link
       </button>
     </header>
   );

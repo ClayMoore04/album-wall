@@ -4,6 +4,8 @@ import { supabase } from "../lib/supabase";
 import { useAuth } from "./AuthProvider";
 import { palette } from "../lib/palette";
 import { THEMES, BANNER_PRESETS, getBannerCss } from "../lib/themes";
+import { useToast } from "./Toast";
+import { DashboardCardSkeleton } from "./Skeleton";
 import ActivityFeed from "./ActivityFeed";
 import TapeTradeInbox from "./TapeTradeInbox";
 
@@ -12,8 +14,8 @@ export default function Dashboard() {
   const { user, profile, loading, signOut, loadProfile } = useAuth();
   const [displayName, setDisplayName] = useState("");
   const [bio, setBio] = useState("");
+  const { showToast } = useToast();
   const [saving, setSaving] = useState(false);
-  const [saved, setSaved] = useState(false);
   const [stats, setStats] = useState({ total: 0, listened: 0 });
   const [following, setFollowing] = useState([]);
   const [discoverable, setDiscoverable] = useState(false);
@@ -110,7 +112,6 @@ export default function Dashboard() {
   const handleSave = async () => {
     if (!supabase || !user) return;
     setSaving(true);
-    setSaved(false);
     try {
       const { error } = await supabase
         .from("profiles")
@@ -125,8 +126,7 @@ export default function Dashboard() {
         .eq("id", user.id);
       if (error) throw error;
       await loadProfile(user.id);
-      setSaved(true);
-      setTimeout(() => setSaved(false), 2000);
+      showToast("Saved!");
     } catch (e) {
       console.error("Failed to update profile:", e);
     } finally {
@@ -136,10 +136,10 @@ export default function Dashboard() {
 
   if (loading || !profile) {
     return (
-      <div
-        style={{ textAlign: "center", padding: 80, color: palette.textMuted }}
-      >
-        Loading...
+      <div style={{ maxWidth: 480, margin: "0 auto", padding: "40px 20px", display: "flex", flexDirection: "column", gap: 24 }}>
+        <DashboardCardSkeleton />
+        <DashboardCardSkeleton />
+        <DashboardCardSkeleton />
       </div>
     );
   }
@@ -533,7 +533,7 @@ export default function Dashboard() {
             marginTop: 10,
           }}
         >
-          {saving ? "Saving..." : saved ? "Saved!" : "Save Changes"}
+          {saving ? "Saving..." : "Save Changes"}
         </button>
       </div>
 
