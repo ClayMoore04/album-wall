@@ -35,7 +35,9 @@ export default async function handler(req, res) {
   const totalSecs = Math.floor((totalMs % 60000) / 1000);
   const duration = `${totalMins}:${String(totalSecs).padStart(2, "0")}`;
   const creator = mixtape.profiles?.display_name || "Unknown";
-  const siteUrl = "https://inthebooth.vercel.app";
+  const host = req.headers["x-forwarded-host"] || req.headers.host;
+  const proto = req.headers["x-forwarded-proto"] || "https";
+  const siteUrl = `${proto}://${host}`;
   const pageUrl = `${siteUrl}/mixtape/${id}`;
   const ogImageUrl = `${siteUrl}/api/og-image?id=${id}`;
 

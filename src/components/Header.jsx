@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { palette } from "../lib/palette";
 
 export default function Header({
@@ -7,6 +8,13 @@ export default function Header({
   themeAccent,
 }) {
   const accent = themeAccent || palette.accent;
+  const [copied, setCopied] = useState(false);
+
+  const handleCopyLink = () => {
+    navigator.clipboard.writeText(window.location.href);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+  };
 
   return (
     <header style={{ textAlign: "center", marginBottom: 40, paddingTop: 24 }}>
@@ -78,6 +86,25 @@ export default function Header({
           {followerCount} follower{followerCount !== 1 ? "s" : ""}
         </div>
       )}
+
+      <button
+        onClick={handleCopyLink}
+        style={{
+          marginTop: 12,
+          padding: "8px 16px",
+          borderRadius: 8,
+          border: `1px solid ${palette.border}`,
+          background: "transparent",
+          color: copied ? accent : palette.textMuted,
+          fontSize: 11,
+          fontWeight: 600,
+          fontFamily: "'Space Mono', monospace",
+          cursor: "pointer",
+          transition: "color 0.2s",
+        }}
+      >
+        {copied ? "Copied!" : "Copy booth link"}
+      </button>
     </header>
   );
 }

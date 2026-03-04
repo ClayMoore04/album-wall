@@ -13,7 +13,9 @@ export default async function handler(req, res) {
     .order("updated_at", { ascending: false })
     .limit(1000);
 
-  const siteUrl = "https://inthebooth.vercel.app";
+  const host = req.headers["x-forwarded-host"] || req.headers.host;
+  const proto = req.headers["x-forwarded-proto"] || "https";
+  const siteUrl = `${proto}://${host}`;
 
   const urls = (mixtapes || [])
     .map(

@@ -217,7 +217,7 @@ export default function Dashboard() {
             textDecoration: "none",
           }}
         >
-          thebooth.vercel.app/{profile.slug}
+          {window.location.host}/{profile.slug}
         </Link>
         <div
           style={{

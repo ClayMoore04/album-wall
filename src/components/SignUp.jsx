@@ -226,7 +226,7 @@ export default function SignUp() {
                 marginTop: 4,
               }}
             >
-              thebooth.vercel.app/{slug}
+              {window.location.host}/{slug}
             </div>
           )}
         </div>

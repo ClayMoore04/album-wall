@@ -3,15 +3,9 @@ import { Link, useNavigate } from "react-router-dom";
 import { supabase } from "../lib/supabase";
 import { useAuth } from "./AuthProvider";
 import { palette } from "../lib/palette";
+import { formatMs } from "../hooks/useMixtapeData";
 import NavBar from "./NavBar";
 import MixtapeCoverArt from "./MixtapeCoverArt";
-
-function formatMs(ms) {
-  const totalSeconds = Math.floor(ms / 1000);
-  const minutes = Math.floor(totalSeconds / 60);
-  const seconds = totalSeconds % 60;
-  return `${minutes}:${seconds.toString().padStart(2, "0")}`;
-}
 
 function generateInviteCode() {
   const bytes = new Uint8Array(6);
