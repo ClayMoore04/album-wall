@@ -16,6 +16,8 @@ export default function Wall({
   pinnedIds = [],
   onPin,
   onUnpin,
+  newSubmissionCount = 0,
+  onDismissNew,
 }) {
   const [filterTags, setFilterTags] = useState([]);
   const [showFilter, setShowFilter] = useState(false);
@@ -68,9 +70,9 @@ export default function Wall({
   if (loading) {
     return (
       <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
-        <WallCardSkeleton />
-        <WallCardSkeleton />
-        <WallCardSkeleton />
+        {[0, 1, 2].map((i) => (
+          <WallCardSkeleton key={i} delay={i * 0.15} />
+        ))}
       </div>
     );
   }
@@ -164,13 +166,14 @@ export default function Wall({
         cursor: "pointer",
         transition: "all 0.15s",
         whiteSpace: "nowrap",
+        boxShadow: active ? "0 0 8px rgba(29,185,84,0.2)" : "none",
       }}
     >
       {label}
     </button>
   );
 
-  const cardProps = (sub) => ({
+  const cardProps = (sub, index) => ({
     key: sub.id,
     submission: sub,
     isOwner,
@@ -183,10 +186,40 @@ export default function Wall({
     canPin: pinnedIds.length < 3,
     onPin,
     onUnpin,
+    entranceIndex: index,
   });
 
   return (
     <div>
+      {/* New submissions banner */}
+      {newSubmissionCount > 0 && (
+        <button
+          onClick={() => {
+            onDismissNew && onDismissNew();
+            window.scrollTo({ top: 0, behavior: "smooth" });
+          }}
+          style={{
+            position: "sticky",
+            top: 8,
+            zIndex: 10,
+            width: "100%",
+            padding: "10px 16px",
+            border: "none",
+            borderRadius: 10,
+            background: palette.accent,
+            color: "#000",
+            fontSize: 12,
+            fontWeight: 700,
+            fontFamily: "'Space Mono', monospace",
+            cursor: "pointer",
+            marginBottom: 12,
+            textAlign: "center",
+          }}
+        >
+          {newSubmissionCount} new — tap to see
+        </button>
+      )}
+
       {/* Pinned albums section */}
       {pinnedSubmissions.length > 0 && (
         <div style={{ marginBottom: 20 }}>
@@ -207,8 +240,8 @@ export default function Wall({
             <span style={{ fontSize: 12 }}>📌</span> Pinned
           </div>
           <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
-            {pinnedSubmissions.map((sub) => (
-              <WallCard {...cardProps(sub)} />
+            {pinnedSubmissions.map((sub, i) => (
+              <WallCard {...cardProps(sub, i)} />
             ))}
           </div>
         </div>
@@ -363,8 +396,8 @@ export default function Wall({
 
       {/* Submission cards */}
       <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
-        {filtered.map((sub) => (
-          <WallCard {...cardProps(sub)} />
+        {filtered.map((sub, i) => (
+          <WallCard {...cardProps(sub, i)} />
         ))}
         {filtered.length === 0 && submissions.length > 0 && (
           <div

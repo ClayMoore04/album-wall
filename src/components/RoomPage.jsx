@@ -232,6 +232,26 @@ export default function RoomPage() {
     <>
       <NavBar />
       <div style={{ maxWidth: 560, margin: "0 auto", padding: "40px 0" }}>
+        <button
+          onClick={() => navigate("/rooms")}
+          style={{
+            display: "inline-flex",
+            alignItems: "center",
+            gap: 6,
+            padding: "6px 0",
+            border: "none",
+            background: "transparent",
+            color: palette.textMuted,
+            fontSize: 12,
+            fontWeight: 600,
+            fontFamily: "'Space Mono', monospace",
+            cursor: "pointer",
+            marginBottom: 12,
+            transition: "color 0.15s",
+          }}
+        >
+          ← Back to Rooms
+        </button>
         {/* Room header */}
         <div style={{ textAlign: "center", marginBottom: 28 }}>
           <h1

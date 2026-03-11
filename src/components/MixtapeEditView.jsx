@@ -1,4 +1,6 @@
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { palette } from "../lib/palette";
 import NavBar from "./NavBar";
 import MixtapeHeader from "./MixtapeHeader";
 import MixtapeProgress from "./MixtapeProgress";
@@ -86,11 +88,32 @@ export default function MixtapeEditView(props) {
   } = props;
 
   const [showCoverDesigner, setShowCoverDesigner] = useState(false);
+  const navigate = useNavigate();
 
   return (
     <>
       <NavBar />
       <div style={{ maxWidth: 560, margin: "0 auto", padding: "40px 0" }}>
+        <button
+          onClick={() => navigate("/mixtapes")}
+          style={{
+            display: "inline-flex",
+            alignItems: "center",
+            gap: 6,
+            padding: "6px 0",
+            border: "none",
+            background: "transparent",
+            color: palette.textMuted,
+            fontSize: 12,
+            fontWeight: 600,
+            fontFamily: "'Space Mono', monospace",
+            cursor: "pointer",
+            marginBottom: 12,
+            transition: "color 0.15s",
+          }}
+        >
+          ← Back to Mixtapes
+        </button>
         <MixtapeHeader
           mixtapeId={mixtapeId}
           user={user}

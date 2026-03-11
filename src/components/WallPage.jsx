@@ -28,6 +28,8 @@ export default function WallPage() {
   const [justSubmitted, setJustSubmitted] = useState(false);
   const [followerCount, setFollowerCount] = useState(0);
   const [showCelebration, setShowCelebration] = useState(false);
+  const [newSubmissionCount, setNewSubmissionCount] = useState(0);
+  const [lastSubmitterName, setLastSubmitterName] = useState("");
 
   const isOwner = user && profile && user.id === profile.id;
   const ownerName = profile?.display_name || "Someone";
@@ -104,6 +106,7 @@ export default function WallPage() {
             }
             return [payload.new, ...prev];
           });
+          setNewSubmissionCount((c) => c + 1);
         }
       )
       .on(
@@ -157,6 +160,7 @@ export default function WallPage() {
     } catch (e) {
       console.error("Failed to save submission:", e);
     }
+    setLastSubmitterName(submission.submitted_by || "");
     setJustSubmitted(true);
   };
 
@@ -396,6 +400,7 @@ export default function WallPage() {
         justSubmitted ? (
           <ThankYou
             ownerName={ownerName}
+            submitterName={lastSubmitterName}
             onAnother={() => setJustSubmitted(false)}
             onViewWall={() => {
               setJustSubmitted(false);
@@ -418,6 +423,8 @@ export default function WallPage() {
           pinnedIds={pinnedIds}
           onPin={handlePin}
           onUnpin={handleUnpin}
+          newSubmissionCount={newSubmissionCount}
+          onDismissNew={() => setNewSubmissionCount(0)}
         />
       ) : view === "playlist" ? (
         <PlaylistBuilder submissions={submissions} />

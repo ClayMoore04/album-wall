@@ -1,18 +1,36 @@
+import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { palette, getColor } from "../lib/palette";
+import { injectAnimations } from "../lib/animations";
 import FollowButton from "./FollowButton";
+import CompatibilityBadge from "./CompatibilityBadge";
 
-export default function DiscoverWallCard({ wall }) {
+export default function DiscoverWallCard({ wall, entranceIndex }) {
+  const [hovered, setHovered] = useState(false);
+
+  useEffect(() => { injectAnimations(); }, []);
+
+  const entranceDelay = entranceIndex != null ? `${Math.min(entranceIndex, 8) * 0.06}s` : undefined;
+
   return (
     <div
+      onMouseEnter={() => setHovered(true)}
+      onMouseLeave={() => setHovered(false)}
       style={{
         background: palette.cardBg,
-        border: `1px solid ${palette.border}`,
+        border: `1px solid ${hovered ? "rgba(29,185,84,0.3)" : palette.border}`,
         borderRadius: 14,
         padding: 20,
         display: "flex",
         flexDirection: "column",
         gap: 12,
+        transform: hovered ? "translateY(-2px)" : "translateY(0)",
+        boxShadow: hovered ? "0 4px 20px rgba(29,185,84,0.12)" : "none",
+        transition: "transform 0.2s, box-shadow 0.2s, border-color 0.2s",
+        ...(entranceDelay != null ? {
+          animation: "booth-fadeInUp 0.35s ease both",
+          animationDelay: entranceDelay,
+        } : {}),
       }}
     >
       <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
@@ -83,6 +101,8 @@ export default function DiscoverWallCard({ wall }) {
           {wall.bio}
         </div>
       )}
+
+      <CompatibilityBadge userId={wall.id} compact />
 
       <div
         style={{

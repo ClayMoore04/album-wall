@@ -14,6 +14,82 @@ function timeAgo(dateStr) {
   return `${Math.floor(hrs / 24)}d ago`;
 }
 
+function TapeUnboxing({ trade, onOpen }) {
+  const [phase, setPhase] = useState("sealed"); // sealed -> opening -> revealed
+
+  const handleOpen = () => {
+    setPhase("opening");
+    setTimeout(() => {
+      setPhase("revealed");
+      setTimeout(() => onOpen(), 600);
+    }, 800);
+  };
+
+  return (
+    <div
+      style={{
+        padding: 20,
+        background: `linear-gradient(135deg, rgba(255,107,107,0.1), rgba(29,185,84,0.06))`,
+        border: `1px solid ${palette.coral}`,
+        borderRadius: 14,
+        textAlign: "center",
+        cursor: phase === "sealed" ? "pointer" : "default",
+        transition: "all 0.4s ease",
+        transform: phase === "opening" ? "scale(1.03)" : "scale(1)",
+      }}
+      onClick={phase === "sealed" ? handleOpen : undefined}
+    >
+      <div
+        style={{
+          fontSize: phase === "revealed" ? 48 : 36,
+          marginBottom: 10,
+          transition: "all 0.5s ease",
+          transform: phase === "opening" ? "rotateY(180deg) scale(1.2)" : "rotateY(0)",
+        }}
+      >
+        {phase === "revealed" ? "🎶" : "📼"}
+      </div>
+      <div
+        style={{
+          fontSize: 13,
+          fontWeight: 700,
+          marginBottom: 4,
+        }}
+      >
+        {phase === "sealed" && (
+          <>
+            <span style={{ color: palette.coral }}>
+              {trade.sender?.display_name}
+            </span>{" "}
+            made you a mixtape
+          </>
+        )}
+        {phase === "opening" && "Opening..."}
+        {phase === "revealed" && (
+          <Link
+            to={`/mixtape/${trade.sender_mixtape?.id}`}
+            style={{ color: palette.coral, textDecoration: "none", fontSize: 16 }}
+          >
+            {trade.sender_mixtape?.title}
+          </Link>
+        )}
+      </div>
+      {phase === "sealed" && (
+        <div
+          style={{
+            fontSize: 11,
+            color: palette.textMuted,
+            fontFamily: "'Space Mono', monospace",
+            marginTop: 4,
+          }}
+        >
+          tap to open
+        </div>
+      )}
+    </div>
+  );
+}
+
 export default function TapeTradeInbox() {
   const { user } = useAuth();
   const [trades, setTrades] = useState([]);
@@ -22,6 +98,20 @@ export default function TapeTradeInbox() {
   const [respondingId, setRespondingId] = useState(null);
   const [selectedMixtapeId, setSelectedMixtapeId] = useState(null);
   const [processing, setProcessing] = useState(false);
+  const [openedTrades, setOpenedTrades] = useState(() => {
+    try {
+      return new Set(JSON.parse(localStorage.getItem("booth_opened_trades") || "[]"));
+    } catch { return new Set(); }
+  });
+
+  const markTradeOpened = (tradeId) => {
+    setOpenedTrades((prev) => {
+      const next = new Set(prev);
+      next.add(tradeId);
+      localStorage.setItem("booth_opened_trades", JSON.stringify([...next]));
+      return next;
+    });
+  };
 
   useEffect(() => {
     if (!supabase || !user) return;
@@ -129,6 +219,17 @@ export default function TapeTradeInbox() {
         const isPending = trade.status === "pending";
         const isCompleted = trade.status === "completed";
         const isDeclined = trade.status === "declined";
+
+        // Show unboxing animation for incoming trades not yet opened
+        if (isPending && isReceiver && !openedTrades.has(trade.id)) {
+          return (
+            <TapeUnboxing
+              key={trade.id}
+              trade={trade}
+              onOpen={() => markTradeOpened(trade.id)}
+            />
+          );
+        }
 
         return (
           <div

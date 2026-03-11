@@ -9,7 +9,9 @@ import { DashboardCardSkeleton } from "./Skeleton";
 import ActivityFeed from "./ActivityFeed";
 import TapeTradeInbox from "./TapeTradeInbox";
 import QRCode from "./QRCode";
+import EmbedCodeModal from "./EmbedCodeModal";
 import OnboardingChecklist from "./OnboardingChecklist";
+import PushOptIn from "./PushOptIn";
 
 export default function Dashboard() {
   const navigate = useNavigate();
@@ -28,6 +30,7 @@ export default function Dashboard() {
   const [roomCount, setRoomCount] = useState(0);
   const [mixtapeCount, setMixtapeCount] = useState(0);
   const [showQR, setShowQR] = useState(false);
+  const [showEmbed, setShowEmbed] = useState(false);
   const [onboardingDismissed, setOnboardingDismissed] = useState(false);
 
   useEffect(() => {
@@ -208,6 +211,8 @@ export default function Dashboard() {
         />
       )}
 
+      <PushOptIn />
+
       {/* Wall link */}
       <div
         style={{
@@ -247,7 +252,7 @@ export default function Dashboard() {
             {stats.listened} listened
           </span>
         </div>
-        <div style={{ marginTop: 12 }}>
+        <div style={{ marginTop: 12, display: "flex", gap: 8, flexWrap: "wrap" }}>
           <button
             onClick={() => setShowQR(!showQR)}
             style={{
@@ -264,12 +269,35 @@ export default function Dashboard() {
           >
             {showQR ? "Hide QR code" : "Show QR code"}
           </button>
+          <button
+            onClick={() => setShowEmbed(true)}
+            style={{
+              padding: "6px 14px",
+              border: `1px solid ${palette.border}`,
+              borderRadius: 8,
+              background: "transparent",
+              color: palette.textMuted,
+              fontSize: 11,
+              fontWeight: 600,
+              fontFamily: "'Space Mono', monospace",
+              cursor: "pointer",
+            }}
+          >
+            Embed
+          </button>
           {showQR && (
-            <div style={{ marginTop: 14 }}>
+            <div style={{ marginTop: 14, width: "100%" }}>
               <QRCode url={`${window.location.origin}/${profile.slug}`} />
             </div>
           )}
         </div>
+        {showEmbed && (
+          <EmbedCodeModal
+            slug={profile.slug}
+            type="wall"
+            onClose={() => setShowEmbed(false)}
+          />
+        )}
       </div>
 
       {/* Profile settings */}

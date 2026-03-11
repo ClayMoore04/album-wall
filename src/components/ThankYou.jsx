@@ -1,7 +1,11 @@
+import { Link } from "react-router-dom";
+import { useAuth } from "./AuthProvider";
 import { palette } from "../lib/palette";
 import { secondaryBtnStyle } from "../lib/styles";
 
-export default function ThankYou({ onAnother, onViewWall, ownerName = "They" }) {
+export default function ThankYou({ onAnother, onViewWall, ownerName = "They", submitterName = "" }) {
+  const { user } = useAuth();
+
   return (
     <div
       style={{
@@ -42,6 +46,60 @@ export default function ThankYou({ onAnother, onViewWall, ownerName = "They" }) 
           View the Wall →
         </button>
       </div>
+
+      {/* Conversion CTA for non-logged-in visitors */}
+      {!user && (
+        <div
+          style={{
+            marginTop: 40,
+            padding: 24,
+            background: `linear-gradient(135deg, rgba(29,185,84,0.08), rgba(255,107,107,0.06))`,
+            border: `1px solid ${palette.border}`,
+            borderRadius: 14,
+            textAlign: "center",
+          }}
+        >
+          <div
+            style={{
+              fontSize: 15,
+              fontWeight: 700,
+              marginBottom: 6,
+            }}
+          >
+            You clearly have taste<span style={{ color: palette.accent }}>.</span>
+          </div>
+          <p
+            style={{
+              fontSize: 12,
+              color: palette.textMuted,
+              fontFamily: "'Space Mono', monospace",
+              lineHeight: 1.5,
+              marginBottom: 16,
+            }}
+          >
+            Get your own booth and let friends recommend albums to you.
+            <br />
+            Takes 30 seconds.
+          </p>
+          <Link
+            to={`/signup${submitterName ? `?name=${encodeURIComponent(submitterName)}` : ""}`}
+            style={{
+              display: "inline-block",
+              padding: "12px 28px",
+              border: "none",
+              borderRadius: 10,
+              fontSize: 14,
+              fontWeight: 700,
+              fontFamily: "'Space Mono', monospace",
+              textDecoration: "none",
+              background: palette.accent,
+              color: "#000",
+            }}
+          >
+            Open My Booth
+          </Link>
+        </div>
+      )}
     </div>
   );
 }

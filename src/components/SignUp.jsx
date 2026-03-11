@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useNavigate, Link } from "react-router-dom";
+import { useNavigate, Link, useSearchParams } from "react-router-dom";
 import { supabase } from "../lib/supabase";
 import { useAuth } from "./AuthProvider";
 import { palette } from "../lib/palette";
@@ -19,11 +19,13 @@ const RESERVED_SLUGS = [
 
 export default function SignUp() {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const { signUp } = useAuth();
+  const prefillName = searchParams.get("name") || "";
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [displayName, setDisplayName] = useState("");
-  const [slug, setSlug] = useState("");
+  const [displayName, setDisplayName] = useState(prefillName);
+  const [slug, setSlug] = useState(prefillName ? prefillName.toLowerCase().replace(/[^a-z0-9-]/g, "").slice(0, 30) : "");
   const [slugAvailable, setSlugAvailable] = useState(null);
   const [slugChecking, setSlugChecking] = useState(false);
   const [error, setError] = useState(null);

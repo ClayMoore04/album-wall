@@ -1,6 +1,7 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { supabase } from "../lib/supabase";
 import { palette } from "../lib/palette";
+import { injectAnimations } from "../lib/animations";
 
 const REACTIONS = [
   { key: "fire", emoji: "\uD83D\uDD25" },
@@ -11,6 +12,9 @@ const REACTIONS = [
 
 export default function ReactionBar({ submissionId, reactions = {} }) {
   const [counts, setCounts] = useState(reactions);
+  const [poppingKey, setPoppingKey] = useState(null);
+
+  useEffect(() => { injectAnimations(); }, []);
 
   const storageKey = `booth_reactions_${submissionId}`;
 
@@ -26,11 +30,13 @@ export default function ReactionBar({ submissionId, reactions = {} }) {
     const reacted = getReacted();
     if (reacted.includes(key)) return;
 
-    // Optimistic update
+    // Optimistic update + pop animation
     setCounts((prev) => ({
       ...prev,
       [key]: (parseInt(prev[key]) || 0) + 1,
     }));
+    setPoppingKey(key);
+    setTimeout(() => setPoppingKey(null), 350);
 
     // Save to localStorage
     localStorage.setItem(storageKey, JSON.stringify([...reacted, key]));
@@ -77,7 +83,7 @@ export default function ReactionBar({ submissionId, reactions = {} }) {
               opacity: hasReacted ? 0.8 : 1,
             }}
           >
-            <span>{emoji}</span>
+            <span style={poppingKey === key ? { display: "inline-block", animation: "booth-emojiPop 0.35s ease" } : undefined}>{emoji}</span>
             {count > 0 && (
               <span style={{ fontSize: 11, color: palette.textMuted }}>
                 {count}

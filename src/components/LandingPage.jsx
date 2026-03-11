@@ -1,6 +1,7 @@
 import { Link } from "react-router-dom";
 import { useAuth } from "./AuthProvider";
 import { palette } from "../lib/palette";
+import MixtapeOfTheWeek from "./MixtapeOfTheWeek";
 
 export default function LandingPage() {
   const { user, profile } = useAuth();
@@ -123,8 +124,13 @@ export default function LandingPage() {
         )}
       </div>
 
+      {/* Featured Mixtape */}
+      <div style={{ marginTop: 60 }}>
+        <MixtapeOfTheWeek />
+      </div>
+
       {/* Feature showcase */}
-      <div style={{ marginTop: 80 }}>
+      <div style={{ marginTop: 40 }}>
         <h2
           style={{
             textAlign: "center",

@@ -77,6 +77,9 @@ export default function NavBar({ wallSlug, isOwner }) {
           </Link>
           {user && profile ? (
             <>
+              <Link to="/feed" style={linkStyle}>
+                Feed
+              </Link>
               <Link to="/rooms" style={linkStyle}>
                 Rooms
               </Link>

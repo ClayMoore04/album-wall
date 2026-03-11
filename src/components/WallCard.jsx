@@ -1,6 +1,8 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { palette, getColor } from "../lib/palette";
 import { inputStyle } from "../lib/styles";
+import { injectAnimations } from "../lib/animations";
+import { timeAgo } from "../lib/timeAgo";
 import ReactionBar from "./ReactionBar";
 
 function StarRating({ rating, interactive, onRate }) {
@@ -31,12 +33,17 @@ function StarRating({ rating, interactive, onRate }) {
   );
 }
 
-export default function WallCard({ submission, isOwner, ownerName = "Owner", onFeedback, onDelete, onListened, onRate, isPinned, canPin, onPin, onUnpin }) {
+export default function WallCard({ submission, isOwner, ownerName = "Owner", onFeedback, onDelete, onListened, onRate, isPinned, canPin, onPin, onUnpin, entranceIndex }) {
   const sub = submission;
   const [replying, setReplying] = useState(false);
   const [feedbackText, setFeedbackText] = useState("");
   const [sending, setSending] = useState(false);
   const [confirmDelete, setConfirmDelete] = useState(false);
+  const [hovered, setHovered] = useState(false);
+
+  useEffect(() => { injectAnimations(); }, []);
+
+  const entranceDelay = entranceIndex != null ? `${Math.min(entranceIndex, 8) * 0.06}s` : undefined;
 
   const handleSendFeedback = async () => {
     if (!feedbackText.trim()) return;
@@ -49,14 +56,23 @@ export default function WallCard({ submission, isOwner, ownerName = "Owner", onF
 
   return (
     <div
+      onMouseEnter={() => setHovered(true)}
+      onMouseLeave={() => setHovered(false)}
       style={{
         background: palette.cardBg,
-        border: `1px solid ${palette.border}`,
+        border: `1px solid ${hovered ? "rgba(29,185,84,0.3)" : palette.border}`,
         borderLeft: sub.listened
           ? `3px solid ${palette.accent}`
-          : `1px solid ${palette.border}`,
+          : `1px solid ${hovered ? "rgba(29,185,84,0.3)" : palette.border}`,
         borderRadius: 14,
         overflow: "hidden",
+        transform: hovered ? "translateY(-2px)" : "translateY(0)",
+        boxShadow: hovered ? "0 4px 20px rgba(29,185,84,0.12)" : "none",
+        transition: "transform 0.2s, box-shadow 0.2s, border-color 0.2s",
+        ...(entranceDelay != null ? {
+          animation: "booth-fadeInUp 0.35s ease both",
+          animationDelay: entranceDelay,
+        } : {}),
       }}
     >
       {/* Main card content */}
@@ -238,6 +254,11 @@ export default function WallCard({ submission, isOwner, ownerName = "Owner", onF
             }}
           >
             from {sub.submitted_by}
+            {sub.created_at && (
+              <span style={{ color: palette.textDim, marginLeft: 6 }}>
+                {timeAgo(sub.created_at)}
+              </span>
+            )}
           </div>
 
           <ReactionBar submissionId={sub.id} reactions={sub.reactions || {}} />

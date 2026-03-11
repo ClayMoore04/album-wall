@@ -153,10 +153,9 @@ export default function DiscoverPage() {
               gap: 14,
             }}
           >
-            <DiscoverCardSkeleton />
-            <DiscoverCardSkeleton />
-            <DiscoverCardSkeleton />
-            <DiscoverCardSkeleton />
+            {[0, 1, 2, 3].map((i) => (
+              <DiscoverCardSkeleton key={i} delay={i * 0.12} />
+            ))}
           </div>
         ) : filtered.length === 0 ? (
           <div
@@ -180,8 +179,8 @@ export default function DiscoverPage() {
               gap: 14,
             }}
           >
-            {filtered.map((wall) => (
-              <DiscoverWallCard key={wall.id} wall={wall} />
+            {filtered.map((wall, i) => (
+              <DiscoverWallCard key={wall.id} wall={wall} entranceIndex={i} />
             ))}
           </div>
         )}

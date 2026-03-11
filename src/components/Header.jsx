@@ -2,6 +2,8 @@ import { useState, useEffect, useRef } from "react";
 import { palette } from "../lib/palette";
 import { injectAnimations } from "../lib/animations";
 import { useToast } from "./Toast";
+import { useAuth } from "./AuthProvider";
+import CompatibilityBadge from "./CompatibilityBadge";
 
 const boothPhrases = [
   "Step into the booth",
@@ -15,7 +17,9 @@ export default function Header({
   statusText,
   themeAccent,
 }) {
+  const { user } = useAuth();
   const accent = themeAccent || palette.accent;
+  const isOwnWall = user && profile && user.id === profile.id;
   const [boothPhrase] = useState(() => boothPhrases[Math.floor(Math.random() * boothPhrases.length)]);
   const { showToast } = useToast();
   const prevCount = useRef(followerCount);
@@ -107,6 +111,12 @@ export default function Header({
           <span style={pulsing ? { display: "inline-block", animation: "booth-countPulse 0.3s ease" } : undefined}>
             {followerCount} follower{followerCount !== 1 ? "s" : ""}
           </span>
+        </div>
+      )}
+
+      {user && profile && !isOwnWall && (
+        <div style={{ marginTop: 8 }}>
+          <CompatibilityBadge userId={profile.id} />
         </div>
       )}
 

@@ -1,27 +1,12 @@
-import { useEffect, useRef } from "react";
+import { useEffect } from "react";
 import { palette } from "../lib/palette";
-
-let styleInjected = false;
+import { injectAnimations } from "../lib/animations";
 
 export default function Skeleton({ width, height, borderRadius = 6 }) {
-  const ref = useRef(null);
-
-  useEffect(() => {
-    if (styleInjected) return;
-    styleInjected = true;
-    const style = document.createElement("style");
-    style.textContent = `
-      @keyframes skeleton-pulse {
-        0%, 100% { opacity: 0.4; }
-        50% { opacity: 0.8; }
-      }
-    `;
-    document.head.appendChild(style);
-  }, []);
+  useEffect(() => { injectAnimations(); }, []);
 
   return (
     <div
-      ref={ref}
       style={{
         width,
         height,
@@ -34,7 +19,7 @@ export default function Skeleton({ width, height, borderRadius = 6 }) {
   );
 }
 
-export function DiscoverCardSkeleton() {
+export function DiscoverCardSkeleton({ delay = 0 }) {
   return (
     <div
       style={{
@@ -45,6 +30,7 @@ export function DiscoverCardSkeleton() {
         display: "flex",
         flexDirection: "column",
         gap: 12,
+        ...(delay > 0 ? { animation: `booth-fadeInUp 0.35s ease ${delay}s both` } : {}),
       }}
     >
       <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
@@ -86,7 +72,7 @@ export function DashboardCardSkeleton() {
   );
 }
 
-export function WallCardSkeleton() {
+export function WallCardSkeleton({ delay = 0 }) {
   return (
     <div
       style={{
@@ -96,6 +82,7 @@ export function WallCardSkeleton() {
         padding: 16,
         display: "flex",
         gap: 14,
+        ...(delay > 0 ? { animation: `booth-fadeInUp 0.35s ease ${delay}s both` } : {}),
       }}
     >
       <Skeleton width={80} height={80} borderRadius={8} />

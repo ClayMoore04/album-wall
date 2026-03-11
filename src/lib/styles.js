@@ -82,6 +82,7 @@ export const pillBtnStyle = (active) => ({
   fontFamily: "'Space Mono', monospace",
   cursor: "pointer",
   transition: "all 0.15s",
+  boxShadow: active ? "0 0 8px rgba(29,185,84,0.2)" : "none",
 });
 
 export const toggleSwitchStyle = (on) => ({

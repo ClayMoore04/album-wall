@@ -15,6 +15,8 @@ import MixtapeJoinPage from "./components/MixtapeJoinPage";
 import LinerNotesPage from "./components/LinerNotesPage";
 import WallPage from "./components/WallPage";
 import SpotifyCallback from "./components/SpotifyCallback";
+import HomeFeed from "./components/HomeFeed";
+import InstallPrompt from "./components/InstallPrompt";
 
 export default function App() {
   return (
@@ -58,6 +60,7 @@ export default function App() {
             <Route path="/login" element={<Login />} />
             <Route path="/callback" element={<SpotifyCallback />} />
             <Route path="/dashboard" element={<Dashboard />} />
+            <Route path="/feed" element={<HomeFeed />} />
             <Route path="/discover" element={<DiscoverPage />} />
             <Route path="/rooms" element={<RoomListPage />} />
             <Route path="/room/join/:inviteCode" element={<RoomJoinPage />} />
@@ -71,6 +74,7 @@ export default function App() {
           </Routes>
         </ErrorBoundary>
       </div>
+      <InstallPrompt />
     </div>
   );
 }
