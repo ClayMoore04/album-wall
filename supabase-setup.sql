@@ -118,13 +118,16 @@ ALTER TABLE profiles ADD COLUMN discoverable BOOLEAN DEFAULT false;
 CREATE OR REPLACE FUNCTION get_discoverable_walls()
 RETURNS TABLE (
   id UUID, slug TEXT, display_name TEXT, bio TEXT,
-  follower_count BIGINT, submission_count BIGINT
+  follower_count BIGINT, submission_count BIGINT,
+  last_submission_at TIMESTAMPTZ, vibe_tags TEXT[]
 ) AS $$
 BEGIN
   RETURN QUERY
   SELECT p.id, p.slug, p.display_name, p.bio,
     COALESCE((SELECT COUNT(*) FROM follows f WHERE f.following_id = p.id), 0) AS follower_count,
-    COALESCE((SELECT COUNT(*) FROM submissions s WHERE s.wall_id = p.id), 0) AS submission_count
+    COALESCE((SELECT COUNT(*) FROM submissions s WHERE s.wall_id = p.id), 0) AS submission_count,
+    (SELECT MAX(s.created_at) FROM submissions s WHERE s.wall_id = p.id) AS last_submission_at,
+    COALESCE(p.vibe_tags, '{}') AS vibe_tags
   FROM profiles p WHERE p.discoverable = true
   ORDER BY follower_count DESC, submission_count DESC;
 END;

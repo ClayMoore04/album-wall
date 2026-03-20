@@ -404,6 +404,16 @@ export default function useMixtapeData() {
     setMixtape((prev) => ({ ...prev, collab_mode: newMode }));
   };
 
+  const handleToggleVisibility = async () => {
+    if (!supabase || !mixtape) return;
+    const newVal = !mixtape.is_public;
+    await supabase
+      .from("mixtapes")
+      .update({ is_public: newVal, updated_at: new Date().toISOString() })
+      .eq("id", mixtape.id);
+    setMixtape((prev) => ({ ...prev, is_public: newVal }));
+  };
+
   const handleLeave = async () => {
     if (!supabase || !user) return;
     await supabase
@@ -544,6 +554,7 @@ export default function useMixtapeData() {
     handleSaveCustomCover,
     handleDelete,
     handleToggleCollabMode,
+    handleToggleVisibility,
     handleLeave,
 
     // Constants

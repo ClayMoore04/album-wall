@@ -64,6 +64,7 @@ export default function NavBar({ wallSlug, isOwner }) {
 
         {/* Right: Nav links */}
         <div
+          className="desktop-nav-links"
           style={{
             display: "flex",
             alignItems: "center",

@@ -36,13 +36,16 @@ ALTER TABLE profiles ADD COLUMN IF NOT EXISTS discoverable BOOLEAN DEFAULT false
 CREATE OR REPLACE FUNCTION get_discoverable_walls()
 RETURNS TABLE (
   id UUID, slug TEXT, display_name TEXT, bio TEXT,
-  follower_count BIGINT, submission_count BIGINT
+  follower_count BIGINT, submission_count BIGINT,
+  last_submission_at TIMESTAMPTZ, vibe_tags TEXT[]
 ) AS $$
 BEGIN
   RETURN QUERY
   SELECT p.id, p.slug, p.display_name, p.bio,
     COALESCE((SELECT COUNT(*) FROM follows f WHERE f.following_id = p.id), 0) AS follower_count,
-    COALESCE((SELECT COUNT(*) FROM submissions s WHERE s.wall_id = p.id), 0) AS submission_count
+    COALESCE((SELECT COUNT(*) FROM submissions s WHERE s.wall_id = p.id), 0) AS submission_count,
+    (SELECT MAX(s.created_at) FROM submissions s WHERE s.wall_id = p.id) AS last_submission_at,
+    COALESCE(p.vibe_tags, '{}') AS vibe_tags
   FROM profiles p WHERE p.discoverable = true
   ORDER BY follower_count DESC, submission_count DESC;
 END;
@@ -332,6 +335,7 @@ ALTER TABLE profiles ADD COLUMN IF NOT EXISTS banner_style TEXT;
 ALTER TABLE profiles ADD COLUMN IF NOT EXISTS banner_url TEXT;
 ALTER TABLE profiles ADD COLUMN IF NOT EXISTS status_text TEXT;
 ALTER TABLE profiles ADD COLUMN IF NOT EXISTS pinned_submission_ids BIGINT[] DEFAULT '{}';
+ALTER TABLE profiles ADD COLUMN IF NOT EXISTS vibe_tags TEXT[] DEFAULT '{}';
 
 -- ============================================================
 -- 11. COLLABORATIVE MIXTAPES
@@ -461,3 +465,130 @@ BEGIN
   RETURN target_mixtape_id;
 END;
 $$ LANGUAGE plpgsql SECURITY DEFINER;
+
+-- ============================================================
+-- 12. NOTIFICATIONS
+-- ============================================================
+
+CREATE TABLE IF NOT EXISTS notifications (
+  id           UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+  recipient_id UUID NOT NULL REFERENCES profiles(id) ON DELETE CASCADE,
+  actor_id     UUID REFERENCES profiles(id) ON DELETE SET NULL,
+  type         TEXT NOT NULL CHECK (type IN ('new_submission', 'new_follow', 'tape_trade_request', 'collab_invite')),
+  entity_id    TEXT,
+  data         JSONB DEFAULT '{}',
+  read         BOOLEAN DEFAULT false,
+  created_at   TIMESTAMPTZ DEFAULT NOW()
+);
+
+CREATE INDEX IF NOT EXISTS idx_notifications_recipient ON notifications(recipient_id, created_at DESC);
+
+ALTER TABLE notifications ENABLE ROW LEVEL SECURITY;
+
+DROP POLICY IF EXISTS "Users can read own notifications" ON notifications;
+CREATE POLICY "Users can read own notifications" ON notifications
+  FOR SELECT USING (auth.uid() = recipient_id);
+
+DROP POLICY IF EXISTS "Users can update own notifications" ON notifications;
+CREATE POLICY "Users can update own notifications" ON notifications
+  FOR UPDATE USING (auth.uid() = recipient_id);
+
+DROP POLICY IF EXISTS "System can insert notifications" ON notifications;
+CREATE POLICY "System can insert notifications" ON notifications
+  FOR INSERT WITH CHECK (true);
+
+ALTER PUBLICATION supabase_realtime ADD TABLE notifications;
+
+-- Trigger: notify wall owner on new submission
+-- Note: submissions don't have a user_id, so actor_id will be null for anonymous submissions.
+-- The frontend NotificationBell handles null actors gracefully ("Someone recommended ...").
+CREATE OR REPLACE FUNCTION notify_on_submission()
+RETURNS TRIGGER AS $$
+DECLARE
+  album TEXT;
+BEGIN
+  album := COALESCE(NEW.album_name, 'an album');
+
+  INSERT INTO notifications (recipient_id, actor_id, type, data)
+  VALUES (
+    NEW.wall_id,
+    NULL,
+    'new_submission',
+    jsonb_build_object('album_name', album, 'submitted_by', COALESCE(NEW.submitted_by, 'Someone'))
+  );
+  RETURN NEW;
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER;
+
+DROP TRIGGER IF EXISTS trg_notify_submission ON submissions;
+CREATE TRIGGER trg_notify_submission
+  AFTER INSERT ON submissions
+  FOR EACH ROW EXECUTE FUNCTION notify_on_submission();
+
+-- Trigger: notify user on new follow
+CREATE OR REPLACE FUNCTION notify_on_follow()
+RETURNS TRIGGER AS $$
+BEGIN
+  -- Don't notify yourself (shouldn't happen due to CHECK constraint, but be safe)
+  IF NEW.follower_id = NEW.following_id THEN RETURN NEW; END IF;
+
+  INSERT INTO notifications (recipient_id, actor_id, type)
+  VALUES (
+    NEW.following_id,
+    NEW.follower_id,
+    'new_follow'
+  );
+  RETURN NEW;
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER;
+
+DROP TRIGGER IF EXISTS trg_notify_follow ON follows;
+CREATE TRIGGER trg_notify_follow
+  AFTER INSERT ON follows
+  FOR EACH ROW EXECUTE FUNCTION notify_on_follow();
+
+-- Trigger: notify on tape trade request
+CREATE OR REPLACE FUNCTION notify_on_trade()
+RETURNS TRIGGER AS $$
+BEGIN
+  INSERT INTO notifications (recipient_id, actor_id, type, entity_id)
+  VALUES (
+    NEW.receiver_id,
+    NEW.sender_id,
+    'tape_trade_request',
+    NEW.id::TEXT
+  );
+  RETURN NEW;
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER;
+
+DROP TRIGGER IF EXISTS trg_notify_trade ON mixtape_trades;
+CREATE TRIGGER trg_notify_trade
+  AFTER INSERT ON mixtape_trades
+  FOR EACH ROW EXECUTE FUNCTION notify_on_trade();
+
+-- Trigger: notify on collab invite (when someone joins a mixtape)
+CREATE OR REPLACE FUNCTION notify_on_collab_join()
+RETURNS TRIGGER AS $$
+DECLARE
+  owner_id UUID;
+BEGIN
+  SELECT user_id INTO owner_id FROM mixtapes WHERE id = NEW.mixtape_id;
+  -- Don't notify owner about themselves
+  IF NEW.user_id = owner_id THEN RETURN NEW; END IF;
+
+  INSERT INTO notifications (recipient_id, actor_id, type, entity_id)
+  VALUES (
+    owner_id,
+    NEW.user_id,
+    'collab_invite',
+    NEW.mixtape_id::TEXT
+  );
+  RETURN NEW;
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER;
+
+DROP TRIGGER IF EXISTS trg_notify_collab ON mixtape_collaborators;
+CREATE TRIGGER trg_notify_collab
+  AFTER INSERT ON mixtape_collaborators
+  FOR EACH ROW EXECUTE FUNCTION notify_on_collab_join();

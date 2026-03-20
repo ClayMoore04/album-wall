@@ -10,3 +10,26 @@ export const TAGS = [
   "underrated",
   "masterpiece",
 ];
+
+export const VIBE_TAGS = [
+  "hip-hop",
+  "r&b",
+  "indie",
+  "rock",
+  "electronic",
+  "jazz",
+  "soul",
+  "pop",
+  "metal",
+  "punk",
+  "folk",
+  "country",
+  "latin",
+  "afrobeats",
+  "k-pop",
+  "classical",
+  "lo-fi",
+  "ambient",
+  "experimental",
+  "vinyl collector",
+];

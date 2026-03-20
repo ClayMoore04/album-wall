@@ -17,6 +17,7 @@ import WallPage from "./components/WallPage";
 import SpotifyCallback from "./components/SpotifyCallback";
 import HomeFeed from "./components/HomeFeed";
 import InstallPrompt from "./components/InstallPrompt";
+import MobileTabBar from "./components/MobileTabBar";
 
 export default function App() {
   return (
@@ -74,6 +75,7 @@ export default function App() {
           </Routes>
         </ErrorBoundary>
       </div>
+      <MobileTabBar />
       <InstallPrompt />
     </div>
   );

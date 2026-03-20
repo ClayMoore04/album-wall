@@ -102,6 +102,27 @@ export default function DiscoverWallCard({ wall, entranceIndex }) {
         </div>
       )}
 
+      {wall.vibe_tags?.length > 0 && (
+        <div style={{ display: "flex", flexWrap: "wrap", gap: 4 }}>
+          {wall.vibe_tags.map((tag) => (
+            <span
+              key={tag}
+              style={{
+                padding: "2px 8px",
+                borderRadius: 10,
+                border: `1px solid ${palette.border}`,
+                fontSize: 10,
+                fontWeight: 600,
+                fontFamily: "'Space Mono', monospace",
+                color: palette.textMuted,
+              }}
+            >
+              {tag}
+            </span>
+          ))}
+        </div>
+      )}
+
       <CompatibilityBadge userId={wall.id} compact />
 
       <div

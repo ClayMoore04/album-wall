@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { Link } from "react-router-dom";
 import { supabase } from "../lib/supabase";
 import { useAuth } from "./AuthProvider";
@@ -7,6 +7,7 @@ import NavBar from "./NavBar";
 import DiscoverWallCard from "./DiscoverWallCard";
 import MixtapeOfTheWeek from "./MixtapeOfTheWeek";
 import { DiscoverCardSkeleton } from "./Skeleton";
+import { VIBE_TAGS } from "../lib/tags";
 
 export default function DiscoverPage() {
   const { user, profile } = useAuth();
@@ -14,6 +15,7 @@ export default function DiscoverPage() {
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
   const [sort, setSort] = useState("popular");
+  const [selectedTags, setSelectedTags] = useState([]);
 
   useEffect(() => {
     if (!supabase) {
@@ -28,9 +30,20 @@ export default function DiscoverPage() {
     })();
   }, []);
 
+  // Collect all tags actually used by walls for the filter UI
+  const availableTags = useMemo(() => {
+    const tagSet = new Set();
+    walls.forEach((w) => (w.vibe_tags || []).forEach((t) => tagSet.add(t)));
+    return VIBE_TAGS.filter((t) => tagSet.has(t));
+  }, [walls]);
+
   const filtered = walls
     .filter((w) =>
       w.display_name.toLowerCase().includes(search.toLowerCase())
+    )
+    .filter((w) =>
+      selectedTags.length === 0 ||
+      selectedTags.some((t) => (w.vibe_tags || []).includes(t))
     )
     .sort((a, b) => {
       if (sort === "popular") return b.follower_count - a.follower_count;
@@ -144,6 +157,67 @@ export default function DiscoverPage() {
             </button>
           </div>
         </div>
+
+        {availableTags.length > 0 && (
+          <div
+            style={{
+              display: "flex",
+              flexWrap: "wrap",
+              gap: 6,
+              marginBottom: 20,
+            }}
+          >
+            {availableTags.map((tag) => {
+              const active = selectedTags.includes(tag);
+              return (
+                <button
+                  key={tag}
+                  type="button"
+                  onClick={() =>
+                    setSelectedTags((prev) =>
+                      active ? prev.filter((t) => t !== tag) : [...prev, tag]
+                    )
+                  }
+                  style={{
+                    padding: "4px 12px",
+                    borderRadius: 16,
+                    border: active
+                      ? `1px solid ${palette.accent}`
+                      : `1px solid ${palette.border}`,
+                    background: active ? "rgba(29,185,84,0.15)" : "transparent",
+                    color: active ? palette.accent : palette.textMuted,
+                    fontSize: 11,
+                    fontWeight: 600,
+                    fontFamily: "'Space Mono', monospace",
+                    cursor: "pointer",
+                    transition: "all 0.15s",
+                  }}
+                >
+                  {tag}
+                </button>
+              );
+            })}
+            {selectedTags.length > 0 && (
+              <button
+                type="button"
+                onClick={() => setSelectedTags([])}
+                style={{
+                  padding: "4px 10px",
+                  borderRadius: 16,
+                  border: "none",
+                  background: "transparent",
+                  color: palette.textDim,
+                  fontSize: 11,
+                  fontWeight: 600,
+                  fontFamily: "'Space Mono', monospace",
+                  cursor: "pointer",
+                }}
+              >
+                Clear
+              </button>
+            )}
+          </div>
+        )}
 
         {loading ? (
           <div

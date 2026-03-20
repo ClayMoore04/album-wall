@@ -12,6 +12,7 @@ import QRCode from "./QRCode";
 import EmbedCodeModal from "./EmbedCodeModal";
 import OnboardingChecklist from "./OnboardingChecklist";
 import PushOptIn from "./PushOptIn";
+import { VIBE_TAGS } from "../lib/tags";
 
 export default function Dashboard() {
   const navigate = useNavigate();
@@ -29,6 +30,7 @@ export default function Dashboard() {
   const [statusText, setStatusText] = useState("");
   const [roomCount, setRoomCount] = useState(0);
   const [mixtapeCount, setMixtapeCount] = useState(0);
+  const [vibeTags, setVibeTags] = useState([]);
   const [showQR, setShowQR] = useState(false);
   const [showEmbed, setShowEmbed] = useState(false);
   const [onboardingDismissed, setOnboardingDismissed] = useState(false);
@@ -48,6 +50,7 @@ export default function Dashboard() {
       setBannerStyle(profile.banner_style || "none");
       setBannerUrl(profile.banner_url || "");
       setStatusText(profile.status_text || "");
+      setVibeTags(profile.vibe_tags || []);
       loadStats(profile.id);
       loadFollowing(user.id);
       loadRoomCount(user.id);
@@ -129,6 +132,7 @@ export default function Dashboard() {
           banner_style: bannerStyle === "none" ? null : bannerStyle,
           banner_url: bannerUrl.trim() || null,
           status_text: statusText.trim() || null,
+          vibe_tags: vibeTags,
         })
         .eq("id", user.id);
       if (error) throw error;
@@ -339,6 +343,69 @@ export default function Dashboard() {
             rows={3}
             style={{ ...inputStyle, resize: "vertical", minHeight: 80 }}
           />
+        </div>
+
+        {/* Vibe tags */}
+        <div style={{ marginBottom: 20 }}>
+          <label style={labelStyle}>Vibes</label>
+          <div
+            style={{
+              fontSize: 11,
+              color: palette.textDim,
+              fontFamily: "'Space Mono', monospace",
+              marginBottom: 8,
+            }}
+          >
+            What genres define your booth? (shown on Discover)
+          </div>
+          <div style={{ display: "flex", flexWrap: "wrap", gap: 6 }}>
+            {VIBE_TAGS.map((tag) => {
+              const active = vibeTags.includes(tag);
+              return (
+                <button
+                  key={tag}
+                  type="button"
+                  onClick={() =>
+                    setVibeTags((prev) =>
+                      active
+                        ? prev.filter((t) => t !== tag)
+                        : prev.length < 5
+                          ? [...prev, tag]
+                          : prev
+                    )
+                  }
+                  style={{
+                    padding: "5px 12px",
+                    borderRadius: 16,
+                    border: active
+                      ? `1px solid ${palette.accent}`
+                      : `1px solid ${palette.border}`,
+                    background: active ? "rgba(29,185,84,0.15)" : "transparent",
+                    color: active ? palette.accent : palette.textMuted,
+                    fontSize: 11,
+                    fontWeight: 600,
+                    fontFamily: "'Space Mono', monospace",
+                    cursor: "pointer",
+                    transition: "all 0.15s",
+                  }}
+                >
+                  {tag}
+                </button>
+              );
+            })}
+          </div>
+          {vibeTags.length >= 5 && (
+            <div
+              style={{
+                fontSize: 10,
+                color: palette.textDim,
+                fontFamily: "'Space Mono', monospace",
+                marginTop: 6,
+              }}
+            >
+              Max 5 tags selected
+            </div>
+          )}
         </div>
 
         {/* Discoverable toggle */}

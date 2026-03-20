@@ -14,7 +14,7 @@ function timeAgo(dateStr) {
 }
 
 function getNotificationText(n) {
-  const name = n.actor?.display_name || "Someone";
+  const name = n.actor?.display_name || n.data?.submitted_by || "Someone";
   switch (n.type) {
     case "new_submission":
       return `${name} recommended ${n.data?.album_name || "an album"}`;

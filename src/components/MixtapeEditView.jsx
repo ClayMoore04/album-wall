@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { palette } from "../lib/palette";
+import { toggleSwitchStyle } from "../lib/styles";
 import NavBar from "./NavBar";
 import MixtapeHeader from "./MixtapeHeader";
 import MixtapeProgress from "./MixtapeProgress";
@@ -83,6 +84,7 @@ export default function MixtapeEditView(props) {
     handleSaveCustomCover,
     handleDelete,
     handleToggleCollabMode,
+    handleToggleVisibility,
     handleLeave,
     startSpotifyAuth,
   } = props;
@@ -147,6 +149,52 @@ export default function MixtapeEditView(props) {
           handleDelete={handleDelete}
           onOpenCoverDesigner={() => setShowCoverDesigner(true)}
         />
+
+        {isOwner && (
+          <div
+            style={{
+              display: "flex",
+              alignItems: "center",
+              gap: 10,
+              padding: "12px 16px",
+              background: palette.cardBg,
+              border: `1px solid ${palette.border}`,
+              borderRadius: 10,
+              marginBottom: 16,
+            }}
+          >
+            <div
+              onClick={handleToggleVisibility}
+              style={toggleSwitchStyle(mixtape?.is_public !== false).outer}
+            >
+              <div style={toggleSwitchStyle(mixtape?.is_public !== false).knob} />
+            </div>
+            <div>
+              <div
+                style={{
+                  fontSize: 12,
+                  fontWeight: 600,
+                  fontFamily: "'Space Mono', monospace",
+                  color: palette.text,
+                }}
+              >
+                {mixtape?.is_public !== false ? "Public" : "Private"}
+              </div>
+              <div
+                style={{
+                  fontSize: 10,
+                  color: palette.textDim,
+                  fontFamily: "'Space Mono', monospace",
+                  marginTop: 2,
+                }}
+              >
+                {mixtape?.is_public !== false
+                  ? "Anyone can view this mixtape"
+                  : "Only you and collaborators can view"}
+              </div>
+            </div>
+          </div>
+        )}
 
         <MixtapeProgress
           tracks={tracks}
