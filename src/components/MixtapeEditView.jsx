@@ -1,9 +1,9 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { palette } from "../lib/palette";
-import { toggleSwitchStyle } from "../lib/styles";
 import NavBar from "./NavBar";
 import MixtapeHeader from "./MixtapeHeader";
+import MixtapeVisibilityToggle from "./MixtapeVisibilityToggle";
 import MixtapeProgress from "./MixtapeProgress";
 import MixtapeTrackList from "./MixtapeTrackList";
 import MixtapeExportModal from "./MixtapeExportModal";
@@ -151,49 +151,10 @@ export default function MixtapeEditView(props) {
         />
 
         {isOwner && (
-          <div
-            style={{
-              display: "flex",
-              alignItems: "center",
-              gap: 10,
-              padding: "12px 16px",
-              background: palette.cardBg,
-              border: `1px solid ${palette.border}`,
-              borderRadius: 10,
-              marginBottom: 16,
-            }}
-          >
-            <div
-              onClick={handleToggleVisibility}
-              style={toggleSwitchStyle(mixtape?.is_public !== false).outer}
-            >
-              <div style={toggleSwitchStyle(mixtape?.is_public !== false).knob} />
-            </div>
-            <div>
-              <div
-                style={{
-                  fontSize: 12,
-                  fontWeight: 600,
-                  fontFamily: "'Space Mono', monospace",
-                  color: palette.text,
-                }}
-              >
-                {mixtape?.is_public !== false ? "Public" : "Private"}
-              </div>
-              <div
-                style={{
-                  fontSize: 10,
-                  color: palette.textDim,
-                  fontFamily: "'Space Mono', monospace",
-                  marginTop: 2,
-                }}
-              >
-                {mixtape?.is_public !== false
-                  ? "Anyone can view this mixtape"
-                  : "Only you and collaborators can view"}
-              </div>
-            </div>
-          </div>
+          <MixtapeVisibilityToggle
+            mixtape={mixtape}
+            onToggle={handleToggleVisibility}
+          />
         )}
 
         <MixtapeProgress

@@ -6,6 +6,7 @@ export default function TabToggle({ view, setView, count }) {
   const tabs = [
     { key: "submit", label: "Submit", icon: "🎵" },
     { key: "wall", label: `Wall (${count})`, icon: "🧱" },
+    { key: "guestbook", label: "Guest Book", icon: "📝" },
     { key: "playlist", label: "Playlist", icon: "🎧" },
     { key: "stats", label: "Stats", icon: "📊" },
   ];
@@ -44,8 +45,8 @@ export default function TabToggle({ view, setView, count }) {
           position: "absolute",
           top: 4,
           bottom: 4,
-          left: `calc(4px + ${activeIdx} * 25%)`,
-          width: "calc(25% - 4px)",
+          left: `calc(4px + ${activeIdx} * 20%)`,
+          width: "calc(20% - 4px)",
           background: palette.accent,
           borderRadius: 8,
           transition: "left 0.25s ease",

@@ -13,6 +13,7 @@ import EmbedCodeModal from "./EmbedCodeModal";
 import OnboardingChecklist from "./OnboardingChecklist";
 import PushOptIn from "./PushOptIn";
 import { VIBE_TAGS } from "../lib/tags";
+import { pillBtnStyle, toggleSwitchStyle } from "../lib/styles";
 
 export default function Dashboard() {
   const navigate = useNavigate();
@@ -374,20 +375,7 @@ export default function Dashboard() {
                           : prev
                     )
                   }
-                  style={{
-                    padding: "5px 12px",
-                    borderRadius: 16,
-                    border: active
-                      ? `1px solid ${palette.accent}`
-                      : `1px solid ${palette.border}`,
-                    background: active ? "rgba(29,185,84,0.15)" : "transparent",
-                    color: active ? palette.accent : palette.textMuted,
-                    fontSize: 11,
-                    fontWeight: 600,
-                    fontFamily: "'Space Mono', monospace",
-                    cursor: "pointer",
-                    transition: "all 0.15s",
-                  }}
+                  style={{ ...pillBtnStyle(active), fontSize: 11, padding: "5px 12px" }}
                 >
                   {tag}
                 </button>
@@ -421,29 +409,8 @@ export default function Dashboard() {
             }}
             onClick={handleDiscoverableToggle}
           >
-            <div
-              style={{
-                width: 36,
-                height: 20,
-                borderRadius: 10,
-                background: discoverable ? palette.accent : palette.border,
-                position: "relative",
-                transition: "background 0.2s",
-                flexShrink: 0,
-              }}
-            >
-              <div
-                style={{
-                  width: 16,
-                  height: 16,
-                  borderRadius: 8,
-                  background: "#fff",
-                  position: "absolute",
-                  top: 2,
-                  left: discoverable ? 18 : 2,
-                  transition: "left 0.2s",
-                }}
-              />
+            <div style={toggleSwitchStyle(discoverable).outer}>
+              <div style={toggleSwitchStyle(discoverable).knob} />
             </div>
             List on Discovery
           </label>

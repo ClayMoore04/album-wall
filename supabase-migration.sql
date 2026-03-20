@@ -467,7 +467,37 @@ END;
 $$ LANGUAGE plpgsql SECURITY DEFINER;
 
 -- ============================================================
--- 12. NOTIFICATIONS
+-- 12. GUEST BOOK
+-- ============================================================
+
+CREATE TABLE IF NOT EXISTS guestbook (
+  id          BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+  wall_id     UUID NOT NULL REFERENCES profiles(id) ON DELETE CASCADE,
+  author_name TEXT NOT NULL,
+  message     VARCHAR(280) NOT NULL,
+  created_at  TIMESTAMPTZ DEFAULT NOW()
+);
+
+CREATE INDEX IF NOT EXISTS idx_guestbook_wall ON guestbook(wall_id, created_at DESC);
+
+ALTER TABLE guestbook ENABLE ROW LEVEL SECURITY;
+
+DROP POLICY IF EXISTS "Anyone can read guestbook" ON guestbook;
+CREATE POLICY "Anyone can read guestbook" ON guestbook
+  FOR SELECT USING (true);
+
+DROP POLICY IF EXISTS "Anyone can sign guestbook" ON guestbook;
+CREATE POLICY "Anyone can sign guestbook" ON guestbook
+  FOR INSERT WITH CHECK (true);
+
+DROP POLICY IF EXISTS "Wall owner can delete guestbook entries" ON guestbook;
+CREATE POLICY "Wall owner can delete guestbook entries" ON guestbook
+  FOR DELETE USING (auth.uid() = wall_id);
+
+ALTER PUBLICATION supabase_realtime ADD TABLE guestbook;
+
+-- ============================================================
+-- 13. NOTIFICATIONS
 -- ============================================================
 
 CREATE TABLE IF NOT EXISTS notifications (

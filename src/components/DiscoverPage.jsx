@@ -8,6 +8,7 @@ import DiscoverWallCard from "./DiscoverWallCard";
 import MixtapeOfTheWeek from "./MixtapeOfTheWeek";
 import { DiscoverCardSkeleton } from "./Skeleton";
 import { VIBE_TAGS } from "../lib/tags";
+import { pillBtnStyle } from "../lib/styles";
 
 export default function DiscoverPage() {
   const { user, profile } = useAuth();
@@ -178,20 +179,7 @@ export default function DiscoverPage() {
                       active ? prev.filter((t) => t !== tag) : [...prev, tag]
                     )
                   }
-                  style={{
-                    padding: "4px 12px",
-                    borderRadius: 16,
-                    border: active
-                      ? `1px solid ${palette.accent}`
-                      : `1px solid ${palette.border}`,
-                    background: active ? "rgba(29,185,84,0.15)" : "transparent",
-                    color: active ? palette.accent : palette.textMuted,
-                    fontSize: 11,
-                    fontWeight: 600,
-                    fontFamily: "'Space Mono', monospace",
-                    cursor: "pointer",
-                    transition: "all 0.15s",
-                  }}
+                  style={{ ...pillBtnStyle(active), fontSize: 11, padding: "4px 12px" }}
                 >
                   {tag}
                 </button>

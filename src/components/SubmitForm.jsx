@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { palette } from "../lib/palette";
-import { inputStyle, labelStyle } from "../lib/styles";
+import { inputStyle, labelStyle, pillBtnStyle } from "../lib/styles";
 import { TAGS } from "../lib/tags";
 import SpotifySearch from "./SpotifySearch";
 import AlbumPreview from "./AlbumPreview";
@@ -120,20 +120,7 @@ export default function SubmitForm({ onSubmit, ownerName = "them" }) {
                 key={tag}
                 type="button"
                 onClick={() => toggleTag(tag)}
-                style={{
-                  padding: "6px 14px",
-                  borderRadius: 20,
-                  border: active
-                    ? `1px solid ${palette.accent}`
-                    : `1px solid ${palette.border}`,
-                  background: active ? "rgba(29,185,84,0.15)" : "transparent",
-                  color: active ? palette.accent : palette.textMuted,
-                  fontSize: 12,
-                  fontWeight: 600,
-                  fontFamily: "'Space Mono', monospace",
-                  cursor: "pointer",
-                  transition: "all 0.15s",
-                }}
+                style={pillBtnStyle(active)}
               >
                 {tag}
               </button>

@@ -55,25 +55,23 @@ export default function App() {
           padding: "32px 20px 80px",
         }}
       >
-        <ErrorBoundary>
-          <Routes>
-            <Route path="/signup" element={<SignUp />} />
-            <Route path="/login" element={<Login />} />
-            <Route path="/callback" element={<SpotifyCallback />} />
-            <Route path="/dashboard" element={<Dashboard />} />
-            <Route path="/feed" element={<HomeFeed />} />
-            <Route path="/discover" element={<DiscoverPage />} />
-            <Route path="/rooms" element={<RoomListPage />} />
-            <Route path="/room/join/:inviteCode" element={<RoomJoinPage />} />
-            <Route path="/room/:roomId" element={<RoomPage />} />
-            <Route path="/mixtapes" element={<MixtapeListPage />} />
-            <Route path="/mixtape/join/:inviteCode" element={<MixtapeJoinPage />} />
-            <Route path="/mixtape/:id/notes" element={<LinerNotesPage />} />
-            <Route path="/mixtape/:id" element={<MixtapePage />} />
-            <Route path="/:slug" element={<WallPage />} />
-            <Route path="/" element={<LandingPage />} />
-          </Routes>
-        </ErrorBoundary>
+        <Routes>
+          <Route path="/signup" element={<ErrorBoundary><SignUp /></ErrorBoundary>} />
+          <Route path="/login" element={<ErrorBoundary><Login /></ErrorBoundary>} />
+          <Route path="/callback" element={<ErrorBoundary><SpotifyCallback /></ErrorBoundary>} />
+          <Route path="/dashboard" element={<ErrorBoundary><Dashboard /></ErrorBoundary>} />
+          <Route path="/feed" element={<ErrorBoundary><HomeFeed /></ErrorBoundary>} />
+          <Route path="/discover" element={<ErrorBoundary><DiscoverPage /></ErrorBoundary>} />
+          <Route path="/rooms" element={<ErrorBoundary><RoomListPage /></ErrorBoundary>} />
+          <Route path="/room/join/:inviteCode" element={<ErrorBoundary><RoomJoinPage /></ErrorBoundary>} />
+          <Route path="/room/:roomId" element={<ErrorBoundary><RoomPage /></ErrorBoundary>} />
+          <Route path="/mixtapes" element={<ErrorBoundary><MixtapeListPage /></ErrorBoundary>} />
+          <Route path="/mixtape/join/:inviteCode" element={<ErrorBoundary><MixtapeJoinPage /></ErrorBoundary>} />
+          <Route path="/mixtape/:id/notes" element={<ErrorBoundary><LinerNotesPage /></ErrorBoundary>} />
+          <Route path="/mixtape/:id" element={<ErrorBoundary><MixtapePage /></ErrorBoundary>} />
+          <Route path="/:slug" element={<ErrorBoundary><WallPage /></ErrorBoundary>} />
+          <Route path="/" element={<ErrorBoundary><LandingPage /></ErrorBoundary>} />
+        </Routes>
       </div>
       <MobileTabBar />
       <InstallPrompt />

@@ -14,6 +14,7 @@ import Wall from "./Wall";
 import Stats from "./Stats";
 import PlaylistBuilder from "./PlaylistBuilder";
 import Celebration from "./Celebration";
+import GuestBook from "./GuestBook";
 
 export default function WallPage() {
   const { slug } = useParams();
@@ -426,6 +427,8 @@ export default function WallPage() {
           newSubmissionCount={newSubmissionCount}
           onDismissNew={() => setNewSubmissionCount(0)}
         />
+      ) : view === "guestbook" ? (
+        <GuestBook wallId={profile.id} isOwner={isOwner} />
       ) : view === "playlist" ? (
         <PlaylistBuilder submissions={submissions} />
       ) : (
