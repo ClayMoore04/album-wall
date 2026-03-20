@@ -14,6 +14,7 @@ import OnboardingChecklist from "./OnboardingChecklist";
 import PushOptIn from "./PushOptIn";
 import { VIBE_TAGS } from "../lib/tags";
 import { pillBtnStyle, toggleSwitchStyle } from "../lib/styles";
+import TasteCard from "./TasteCard";
 
 export default function Dashboard() {
   const navigate = useNavigate();
@@ -23,6 +24,7 @@ export default function Dashboard() {
   const { showToast } = useToast();
   const [saving, setSaving] = useState(false);
   const [stats, setStats] = useState({ total: 0, listened: 0 });
+  const [submissions, setSubmissions] = useState([]);
   const [following, setFollowing] = useState([]);
   const [discoverable, setDiscoverable] = useState(false);
   const [theme, setTheme] = useState("default");
@@ -63,9 +65,10 @@ export default function Dashboard() {
     if (!supabase) return;
     const { data } = await supabase
       .from("submissions")
-      .select("listened")
+      .select("*")
       .eq("wall_id", wallId);
     if (data) {
+      setSubmissions(data);
       setStats({
         total: data.length,
         listened: data.filter((s) => s.listened).length,
@@ -304,6 +307,8 @@ export default function Dashboard() {
           />
         )}
       </div>
+
+      <TasteCard profile={profile} submissions={submissions} />
 
       {/* Profile settings */}
       <div

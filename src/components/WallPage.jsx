@@ -15,6 +15,7 @@ import Stats from "./Stats";
 import PlaylistBuilder from "./PlaylistBuilder";
 import Celebration from "./Celebration";
 import GuestBook from "./GuestBook";
+import TasteCard from "./TasteCard";
 
 export default function WallPage() {
   const { slug } = useParams();
@@ -432,7 +433,10 @@ export default function WallPage() {
       ) : view === "playlist" ? (
         <PlaylistBuilder submissions={submissions} />
       ) : (
-        <Stats submissions={submissions} />
+        <>
+          <Stats submissions={submissions} />
+          {isOwner && <TasteCard profile={profile} submissions={submissions} />}
+        </>
       )}
     </>
   );
