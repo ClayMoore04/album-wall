@@ -4,7 +4,7 @@ import { supabase } from "../lib/supabase";
 import { useAuth } from "./AuthProvider";
 import { palette } from "../lib/palette";
 import { formatMs } from "../hooks/useMixtapeData";
-import NavBar from "./NavBar";
+
 import MixtapeCoverArt from "./MixtapeCoverArt";
 import { MixtapeRowSkeleton } from "./Skeleton";
 import SpotifyPlaylistImportModal from "./SpotifyPlaylistImportModal";
@@ -249,7 +249,6 @@ export default function MixtapeListPage() {
 
   return (
     <>
-      <NavBar />
       <div style={{ maxWidth: 520, margin: "0 auto", padding: "40px 0" }}>
         <h1
           style={{

@@ -18,6 +18,8 @@ import SpotifyCallback from "./components/SpotifyCallback";
 import HomeFeed from "./components/HomeFeed";
 import InstallPrompt from "./components/InstallPrompt";
 import MobileTabBar from "./components/MobileTabBar";
+import Sidebar from "./components/Sidebar";
+import NavBar from "./components/NavBar";
 
 export default function App() {
   return (
@@ -46,7 +48,10 @@ export default function App() {
         }}
       />
 
+      <Sidebar />
+      <NavBar />
       <div
+        className="app-content"
         style={{
           position: "relative",
           zIndex: 1,

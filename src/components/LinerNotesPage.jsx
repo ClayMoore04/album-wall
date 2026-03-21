@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { useParams, Link } from "react-router-dom";
 import { supabase } from "../lib/supabase";
 import { palette } from "../lib/palette";
-import NavBar from "./NavBar";
+
 import MixtapeCoverArt from "./MixtapeCoverArt";
 
 export default function LinerNotesPage() {
@@ -74,7 +74,6 @@ export default function LinerNotesPage() {
 
   return (
     <>
-      <NavBar />
       <div style={{ maxWidth: 480, margin: "0 auto", padding: "40px 20px" }}>
         {/* Header */}
         <div style={{ textAlign: "center", marginBottom: 32 }}>

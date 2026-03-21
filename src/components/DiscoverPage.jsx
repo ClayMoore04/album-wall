@@ -4,7 +4,7 @@ import { supabase } from "../lib/supabase";
 import { palette } from "../lib/palette";
 import { getThemeAccent } from "../lib/themes";
 import { VIBE_TAGS } from "../lib/tags";
-import NavBar from "./NavBar";
+
 import DiscoverWallCard from "./DiscoverWallCard";
 import MixtapeOfTheWeek from "./MixtapeOfTheWeek";
 import { DiscoverCardSkeleton } from "./Skeleton";
@@ -101,7 +101,6 @@ export default function DiscoverPage() {
 
   return (
     <>
-      <NavBar />
       <div style={{ maxWidth: 560, margin: "0 auto", padding: "40px 0" }}>
 
         {/* MixtapeOfTheWeek */}

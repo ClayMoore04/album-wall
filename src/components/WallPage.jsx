@@ -2,14 +2,13 @@ import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { supabase } from "../lib/supabase";
 import { useAuth } from "./AuthProvider";
+import { useToast } from "./Toast";
 import { palette } from "../lib/palette";
 import { getThemeAccent, getBannerCss } from "../lib/themes";
 import Header from "./Header";
-import NavBar from "./NavBar";
 import FollowButton from "./FollowButton";
 import TabToggle from "./TabToggle";
 import SubmitForm from "./SubmitForm";
-import ThankYou from "./ThankYou";
 import Wall from "./Wall";
 import Stats from "./Stats";
 import PlaylistBuilder from "./PlaylistBuilder";
@@ -26,12 +25,12 @@ export default function WallPage() {
   const [notFound, setNotFound] = useState(false);
   const [submissions, setSubmissions] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [view, setView] = useState("submit");
-  const [justSubmitted, setJustSubmitted] = useState(false);
+  const [view, setView] = useState("wall");
+  const [showSubmitDrawer, setShowSubmitDrawer] = useState(false);
   const [followerCount, setFollowerCount] = useState(0);
   const [showCelebration, setShowCelebration] = useState(false);
   const [newSubmissionCount, setNewSubmissionCount] = useState(0);
-  const [lastSubmitterName, setLastSubmitterName] = useState("");
+  const { showToast } = useToast();
 
   const isOwner = user && profile && user.id === profile.id;
   const ownerName = profile?.display_name || "Someone";
@@ -162,8 +161,8 @@ export default function WallPage() {
     } catch (e) {
       console.error("Failed to save submission:", e);
     }
-    setLastSubmitterName(submission.submitted_by || "");
-    setJustSubmitted(true);
+    setShowSubmitDrawer(false);
+    showToast("Album dropped! 🎵");
   };
 
   const handleFeedback = async (
@@ -360,7 +359,6 @@ export default function WallPage() {
         />
       )}
 
-      <NavBar wallSlug={slug} isOwner={isOwner} />
 
       <Header
         profile={profile}
@@ -396,23 +394,19 @@ export default function WallPage() {
         </div>
       )}
 
-      <TabToggle view={view} setView={setView} count={submissions.length} />
+      <TabToggle
+        view={view}
+        setView={setView}
+        accent={themeAccent}
+        tabs={[
+          { key: "wall", label: `Wall (${submissions.length})`, icon: "🧱" },
+          { key: "guestbook", label: "Guest Book", icon: "📝" },
+          { key: "playlist", label: "Playlist", icon: "🎧" },
+          { key: "stats", label: "Stats", icon: "📊" },
+        ]}
+      />
 
-      {view === "submit" ? (
-        justSubmitted ? (
-          <ThankYou
-            ownerName={ownerName}
-            submitterName={lastSubmitterName}
-            onAnother={() => setJustSubmitted(false)}
-            onViewWall={() => {
-              setJustSubmitted(false);
-              setView("wall");
-            }}
-          />
-        ) : (
-          <SubmitForm onSubmit={addSubmission} ownerName={ownerName} />
-        )
-      ) : view === "wall" ? (
+      {view === "wall" ? (
         <Wall
           submissions={submissions}
           loading={loading}
@@ -436,6 +430,85 @@ export default function WallPage() {
         <>
           <Stats submissions={submissions} />
           {isOwner && <TasteCard profile={profile} submissions={submissions} />}
+        </>
+      )}
+
+      {/* Floating "Drop a rec" button — visitors only */}
+      {!isOwner && !showSubmitDrawer && (
+        <button
+          onClick={() => setShowSubmitDrawer(true)}
+          style={{
+            position: "fixed",
+            bottom: 76,
+            right: 20,
+            zIndex: 150,
+            background: themeAccent,
+            color: "#000",
+            border: "none",
+            borderRadius: 28,
+            padding: "12px 20px",
+            fontFamily: "'Space Mono', monospace",
+            fontSize: 11,
+            fontWeight: 700,
+            letterSpacing: "0.06em",
+            cursor: "pointer",
+            boxShadow: `0 4px 20px rgba(0,0,0,0.4), 0 0 20px ${themeAccent}33`,
+            display: "flex",
+            alignItems: "center",
+            gap: 6,
+            transition: "transform 0.15s, box-shadow 0.15s",
+          }}
+        >
+          🎵 DROP A REC
+        </button>
+      )}
+
+      {/* Submit drawer overlay */}
+      {showSubmitDrawer && (
+        <>
+          {/* Backdrop */}
+          <div
+            onClick={() => setShowSubmitDrawer(false)}
+            style={{
+              position: "fixed",
+              top: 0, left: 0, right: 0, bottom: 0,
+              background: "rgba(0,0,0,0.6)",
+              zIndex: 300,
+            }}
+          />
+          {/* Drawer */}
+          <div
+            style={{
+              position: "fixed",
+              bottom: 0, left: 0, right: 0,
+              maxHeight: "85vh",
+              overflowY: "auto",
+              background: "#0a0a0a",
+              borderTop: `2px solid ${themeAccent}`,
+              borderRadius: "16px 16px 0 0",
+              zIndex: 301,
+              padding: "0 20px 20px",
+              paddingBottom: "calc(20px + env(safe-area-inset-bottom))",
+            }}
+          >
+            {/* Drawer handle */}
+            <div style={{
+              display: "flex", justifyContent: "center",
+              padding: "12px 0 16px",
+              cursor: "pointer",
+            }}
+              onClick={() => setShowSubmitDrawer(false)}
+            >
+              <div style={{
+                width: 36, height: 4,
+                borderRadius: 2,
+                background: "#333",
+              }} />
+            </div>
+            <div style={{ maxWidth: 560, margin: "0 auto" }}>
+              <SubmitForm onSubmit={addSubmission} ownerName={ownerName} accent={themeAccent} />
+            </div>
+          </div>
         </>
       )}
     </>

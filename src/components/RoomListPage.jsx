@@ -3,7 +3,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { supabase } from "../lib/supabase";
 import { useAuth } from "./AuthProvider";
 import { palette } from "../lib/palette";
-import NavBar from "./NavBar";
+
 
 export default function RoomListPage() {
   const navigate = useNavigate();
@@ -141,7 +141,6 @@ export default function RoomListPage() {
 
   return (
     <>
-      <NavBar />
       <div style={{ maxWidth: 520, margin: "0 auto", padding: "40px 0" }}>
         <h1
           style={{

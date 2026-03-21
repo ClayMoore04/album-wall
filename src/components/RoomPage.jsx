@@ -4,7 +4,7 @@ import { supabase } from "../lib/supabase";
 import { useAuth } from "./AuthProvider";
 import { palette } from "../lib/palette";
 import { useToast } from "./Toast";
-import NavBar from "./NavBar";
+
 import SpotifySearch from "./SpotifySearch";
 import RoomTrackCard from "./RoomTrackCard";
 
@@ -230,7 +230,6 @@ export default function RoomPage() {
 
   return (
     <>
-      <NavBar />
       <div style={{ maxWidth: 560, margin: "0 auto", padding: "40px 0" }}>
         <button
           onClick={() => navigate("/rooms")}

@@ -59,16 +59,23 @@ function NavLink({ to, label, isActive, accent, accentRgb }) {
   );
 }
 
-export default function NavBar({ wallSlug, isOwner }) {
+const HIDDEN_PATHS = ["/", "/login", "/signup", "/callback"];
+
+export default function NavBar() {
   injectNavCss();
 
   const location = useLocation();
   const { user, profile, signOut } = useAuth();
   const [brandHov, setBrandHov] = useState(false);
 
+  // Hide on auth pages when not logged in
+  if (!user && HIDDEN_PATHS.includes(location.pathname)) return null;
+
   const accent = getThemeAccent(profile?.theme);
   const accentRgb = hexToRgb(accent);
   const isActive = (path) => location.pathname === path;
+  // Determine if user is on their own wall
+  const isOwner = profile && location.pathname === `/${profile.slug}`;
 
   return (
     <nav style={{

@@ -6,7 +6,7 @@ import { palette, getColor } from "../lib/palette";
 import { timeAgo } from "../lib/timeAgo";
 import { injectAnimations } from "../lib/animations";
 import MixtapeCoverArt from "./MixtapeCoverArt";
-import NavBar from "./NavBar";
+
 import Skeleton from "./Skeleton";
 
 function FeedCardSkeleton({ delay = 0 }) {
@@ -209,7 +209,6 @@ export default function HomeFeed() {
 
   return (
     <>
-      <NavBar />
       {/* Header */}
       <div
         style={{

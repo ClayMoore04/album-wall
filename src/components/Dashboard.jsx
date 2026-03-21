@@ -130,6 +130,49 @@ function SaveBtn({ onClick, saving, saved, accent, accentRgb }) {
   );
 }
 
+function AccordionSection({ title, sectionKey, openSection, setOpenSection, accent, accentRgb, children }) {
+  const isOpen = openSection === sectionKey;
+  return (
+    <div style={{
+      background: "#111",
+      borderRadius: 12,
+      border: `1px solid ${isOpen ? `rgba(${accentRgb},0.2)` : "#1a1a1a"}`,
+      marginBottom: 10,
+      overflow: "hidden",
+      transition: "border-color 0.2s",
+    }}>
+      <div style={{ height: 2, background: isOpen ? `linear-gradient(90deg, rgba(${accentRgb},0.5), transparent)` : `rgba(${accentRgb},0.15)` }} />
+      <button
+        onClick={() => setOpenSection(isOpen ? null : sectionKey)}
+        style={{
+          width: "100%",
+          display: "flex", alignItems: "center", justifyContent: "space-between",
+          padding: "14px 16px",
+          background: "none", border: "none",
+          cursor: "pointer",
+          color: "#e8e6e3",
+        }}
+      >
+        <span style={{
+          fontFamily: "'Syne', sans-serif",
+          fontSize: 14, fontWeight: 700,
+        }}>{title}</span>
+        <span style={{
+          fontFamily: "'Space Mono', monospace",
+          fontSize: 12, color: "#333",
+          transform: isOpen ? "rotate(180deg)" : "rotate(0deg)",
+          transition: "transform 0.2s",
+        }}>▾</span>
+      </button>
+      {isOpen && (
+        <div style={{ padding: "0 16px 16px", animation: "itb-fadeInUp 0.2s ease both" }}>
+          {children}
+        </div>
+      )}
+    </div>
+  );
+}
+
 export default function Dashboard() {
   injectDashCss();
 
@@ -155,6 +198,7 @@ export default function Dashboard() {
   const [showQR, setShowQR] = useState(false);
   const [showEmbed, setShowEmbed] = useState(false);
   const [onboardingDismissed, setOnboardingDismissed] = useState(false);
+  const [openSection, setOpenSection] = useState("booth");
 
   const [profileSaving, setProfileSaving] = useState(false);
   const [profileSaved, setProfileSaved] = useState(false);
@@ -337,21 +381,9 @@ export default function Dashboard() {
           <PushOptIn />
         </div>
 
-        {/* Your Booth */}
-        <DashCard
-          title="Your Booth"
-          subtitle={profile.slug ? `${window.location.host}/${profile.slug}` : undefined}
-          accent={accent} accentRgb={accentRgb} delay={0.05}
-          action={
-            profile.slug && (
-              <Link to={`/${profile.slug}`} style={{
-                fontFamily: "'Space Mono', monospace",
-                fontSize: 8, letterSpacing: "0.06em",
-                color: accent, textDecoration: "none",
-              }}>VISIT →</Link>
-            )
-          }
-        >
+        {/* Accordion sections */}
+        <AccordionSection title="Your Booth" sectionKey="booth" openSection={openSection} setOpenSection={setOpenSection} accent={accent} accentRgb={accentRgb}>
+          {/* Stats */}
           <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 8, marginBottom: 14 }}>
             {[
               { label: "Albums", value: stats.total },
@@ -367,7 +399,17 @@ export default function Dashboard() {
               </div>
             ))}
           </div>
-          <div style={{ display: "flex", gap: 6 }}>
+          {/* Booth link */}
+          {profile.slug && (
+            <div style={{ marginBottom: 12 }}>
+              <Link to={`/${profile.slug}`} style={{
+                fontFamily: "'Space Mono', monospace", fontSize: 9, letterSpacing: "0.06em",
+                color: accent, textDecoration: "none",
+              }}>{window.location.host}/{profile.slug} →</Link>
+            </div>
+          )}
+          {/* QR + Embed */}
+          <div style={{ display: "flex", gap: 6, marginBottom: 12 }}>
             <button onClick={() => setShowQR(!showQR)} style={{
               background: showQR ? `rgba(${accentRgb},0.1)` : "transparent",
               border: `1px solid ${showQR ? `rgba(${accentRgb},0.3)` : "#1e1e1e"}`,
@@ -382,207 +424,176 @@ export default function Dashboard() {
               padding: "6px 12px", cursor: "pointer",
             }}>EMBED</button>
           </div>
-          {showQR && profile.slug && (
-            <div style={{ marginTop: 12 }}>
-              <QRCode url={`${window.location.origin}/${profile.slug}`} />
-            </div>
-          )}
-        </DashCard>
+          {showQR && profile.slug && <QRCode url={`${window.location.origin}/${profile.slug}`} />}
+          <TasteCard profile={profile} submissions={submissions} />
+        </AccordionSection>
 
-        <TasteCard profile={profile} submissions={submissions} />
-
-        {/* Profile settings */}
-        <DashCard
-          title="Profile" accent={accent} accentRgb={accentRgb} delay={0.1}
-          action={<SaveBtn onClick={saveProfile} saving={profileSaving} saved={profileSaved} accent={accent} accentRgb={accentRgb} />}
-        >
-          <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
-            <div>
-              <label style={{ ...labelStyle, color: accent }}>Display name</label>
-              <DashInput value={displayName} onChange={setDisplayName} placeholder="Your name" maxLength={50} accent={accent} />
+        <AccordionSection title="Settings" sectionKey="settings" openSection={openSection} setOpenSection={setOpenSection} accent={accent} accentRgb={accentRgb}>
+          {/* Profile */}
+          <div style={{ marginBottom: 20 }}>
+            <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 12 }}>
+              <span style={{ fontFamily: "'Space Mono', monospace", fontSize: 8, color: accent, letterSpacing: "0.1em", textTransform: "uppercase" }}>PROFILE</span>
+              <SaveBtn onClick={saveProfile} saving={profileSaving} saved={profileSaved} accent={accent} accentRgb={accentRgb} />
             </div>
-            <div>
-              <label style={{ ...labelStyle, color: accent }}>Bio</label>
-              <DashInput value={bio} onChange={setBio} placeholder="A line about your taste..." maxLength={200} multiline accent={accent} />
-              <div style={{ fontFamily: "'Space Mono', monospace", fontSize: 7, color: "#252525", textAlign: "right", marginTop: 3 }}>{bio.length}/200</div>
-            </div>
-            <div>
-              <label style={{ ...labelStyle, color: accent }}>Vibe tags (max 5)</label>
-              <div style={{
-                background: "#0e0e0e", border: "1px solid #1e1e1e", borderRadius: 8,
-                padding: "6px 10px", display: "flex", flexWrap: "wrap", gap: 5,
-                alignItems: "center", minHeight: 44,
-              }}>
-                {vibeTags.map((tag) => (
-                  <span key={tag} style={{
-                    fontFamily: "'Space Mono', monospace", fontSize: 8, letterSpacing: "0.06em",
-                    textTransform: "uppercase", color: accent,
-                    background: `rgba(${accentRgb},0.1)`, border: `1px solid rgba(${accentRgb},0.3)`,
-                    borderRadius: 3, padding: "2px 6px",
-                    display: "flex", alignItems: "center", gap: 4,
-                  }}>
-                    {tag}
-                    <span onClick={() => setVibeTags(vibeTags.filter((t) => t !== tag))} style={{ cursor: "pointer", opacity: 0.6, fontSize: 10 }}>×</span>
-                  </span>
-                ))}
-                {vibeTags.length < 5 && (
-                  <input
-                    type="text" value={vibeInput}
-                    onChange={(e) => setVibeInput(e.target.value)}
-                    onKeyDown={(e) => { if (e.key === "Enter" || e.key === ",") { e.preventDefault(); addVibeTag(); } }}
-                    onBlur={addVibeTag}
-                    placeholder={vibeTags.length === 0 ? "jazz, late-night..." : ""}
-                    style={{
-                      background: "none", border: "none", outline: "none",
-                      color: "#e8e6e3", fontFamily: "'Syne', sans-serif",
-                      fontSize: 12, flex: 1, minWidth: 80, padding: 0,
-                    }}
-                  />
-                )}
-              </div>
-            </div>
-            <div onClick={handleDiscoverableToggle} style={{ cursor: "pointer" }}>
-              <Toggle checked={discoverable} onChange={() => {}} accent={accent} label="Discoverable — appear in the Discover feed" />
-            </div>
-          </div>
-        </DashCard>
-
-        {/* Customize booth */}
-        <DashCard
-          title="Customize Your Booth" accent={accent} accentRgb={accentRgb} delay={0.15}
-          action={<SaveBtn onClick={saveCustomization} saving={customSaving} saved={customSaved} accent={accent} accentRgb={accentRgb} />}
-        >
-          <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
-            <div>
-              <label style={{ ...labelStyle, color: accent }}>Accent color</label>
-              <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
-                {Object.entries(THEMES).map(([key, t]) => {
-                  const active = theme === key;
-                  return (
-                    <button key={key} onClick={() => {
-                      setTheme(key);
-                      document.documentElement.style.setProperty("--itb-dash-accent", t.accent);
-                    }} title={t.name} style={{
-                      width: 28, height: 28, borderRadius: "50%",
-                      background: t.accent,
-                      border: active ? "3px solid #e8e6e3" : "2px solid transparent",
-                      cursor: "pointer",
-                      transform: active ? "scale(1.1)" : "scale(1)",
-                      transition: "transform 0.12s, border 0.12s",
-                      outline: "none", padding: 0,
-                    }} />
-                  );
-                })}
-              </div>
-            </div>
-            <div>
-              <label style={{ ...labelStyle, color: accent }}>Status</label>
-              <DashInput value={statusText} onChange={(v) => v.length <= 100 && setStatusText(v)} placeholder="Currently listening to..." maxLength={100} accent={accent} />
-              <div style={{ fontFamily: "'Space Mono', monospace", fontSize: 7, color: "#252525", textAlign: "right", marginTop: 3 }}>{statusText.length}/100</div>
-            </div>
-            <div>
-              <label style={{ ...labelStyle, color: accent }}>Banner</label>
-              <div style={{ display: "flex", flexWrap: "wrap", gap: 6 }}>
-                {BANNER_PRESETS.map((b) => {
-                  const active = bannerStyle === b.key && !bannerUrl;
-                  return (
-                    <button key={b.key} onClick={() => { setBannerStyle(b.key); if (b.key !== "none") setBannerUrl(""); }} style={{
-                      width: 56, height: 32, borderRadius: 6,
-                      background: b.css === "none" ? "#1a1a1a" : b.css,
-                      border: `1.5px solid ${active ? accent : "#222"}`,
-                      cursor: "pointer", position: "relative", overflow: "hidden", padding: 0,
-                    }}>
-                      {active && <span style={{ position: "absolute", inset: 0, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 12, color: "#fff", background: "rgba(0,0,0,0.3)" }}>✓</span>}
-                      {b.key === "none" && <span style={{ fontFamily: "'Space Mono', monospace", fontSize: 7, color: "#333" }}>None</span>}
-                    </button>
-                  );
-                })}
-              </div>
-              <div style={{ marginTop: 10 }}>
-                <label style={{ ...labelStyle, fontSize: 10, color: palette.textDim }}>Or paste an image URL</label>
-                <DashInput value={bannerUrl} onChange={(v) => { setBannerUrl(v); if (v) setBannerStyle("none"); }} placeholder="https://..." accent={accent} />
-              </div>
-            </div>
-            {(bannerStyle !== "none" || bannerUrl) && (
+            <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
               <div>
-                <label style={{ ...labelStyle, fontSize: 10, color: accent }}>Preview</label>
-                <div style={{ height: 60, borderRadius: 8, background: getBannerCss(bannerStyle, bannerUrl), border: `1px solid ${palette.border}` }} />
+                <label style={{ ...labelStyle, color: accent }}>Display name</label>
+                <DashInput value={displayName} onChange={setDisplayName} placeholder="Your name" maxLength={50} accent={accent} />
               </div>
-            )}
-          </div>
-        </DashCard>
-
-        {/* Rooms + Mixtapes */}
-        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12, marginBottom: 12 }}>
-          {[
-            { label: "Rooms", count: roomCount, path: "/rooms", emoji: "🎙" },
-            { label: "Mixtapes", count: mixtapeCount, path: "/mixtapes", emoji: "📼" },
-          ].map(({ label, count, path, emoji }) => (
-            <Link key={path} to={path} style={{ textDecoration: "none" }}>
-              <div style={{
-                background: "#111", borderRadius: 12, border: "1px solid #1a1a1a",
-                padding: 16, animation: "itb-fadeInUp 0.3s ease both",
-              }}>
-                <div style={{ fontSize: 20, marginBottom: 6 }}>{emoji}</div>
-                <div style={{ fontFamily: "'Syne', sans-serif", fontSize: 20, fontWeight: 800, color: accent, lineHeight: 1, marginBottom: 2 }}>{count}</div>
-                <div style={{ fontFamily: "'Space Mono', monospace", fontSize: 8, color: "#333", letterSpacing: "0.08em", textTransform: "uppercase" }}>{label}</div>
+              <div>
+                <label style={{ ...labelStyle, color: accent }}>Bio</label>
+                <DashInput value={bio} onChange={setBio} placeholder="A line about your taste..." maxLength={200} multiline accent={accent} />
               </div>
-            </Link>
-          ))}
-        </div>
-
-        {/* Tape Trades */}
-        <DashCard title="Tape Trades" accent={accent} accentRgb={accentRgb} delay={0.2}>
-          <TapeTradeInbox />
-        </DashCard>
-
-        {/* Following */}
-        {following.length > 0 && (
-          <DashCard
-            title="Following"
-            subtitle={`${following.length} booth${following.length !== 1 ? "s" : ""}`}
-            accent={accent} accentRgb={accentRgb} delay={0.25}
-          >
-            <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
-              {following.map((f) => (
-                <div key={f.following_id} style={{
-                  display: "flex", alignItems: "center",
-                  justifyContent: "space-between", gap: 10,
+              <div>
+                <label style={{ ...labelStyle, color: accent }}>Vibe tags (max 5)</label>
+                <div style={{
+                  background: "#0e0e0e", border: "1px solid #1e1e1e", borderRadius: 8,
+                  padding: "6px 10px", display: "flex", flexWrap: "wrap", gap: 5,
+                  alignItems: "center", minHeight: 44,
                 }}>
-                  <Link to={`/${f.profiles.slug}`} style={{
-                    fontFamily: "'Syne', sans-serif", fontSize: 13,
-                    color: "#888", textDecoration: "none",
-                  }}>
+                  {vibeTags.map((tag) => (
+                    <span key={tag} style={{
+                      fontFamily: "'Space Mono', monospace", fontSize: 8, letterSpacing: "0.06em",
+                      textTransform: "uppercase", color: accent,
+                      background: `rgba(${accentRgb},0.1)`, border: `1px solid rgba(${accentRgb},0.3)`,
+                      borderRadius: 3, padding: "2px 6px", display: "flex", alignItems: "center", gap: 4,
+                    }}>
+                      {tag}
+                      <span onClick={() => setVibeTags(vibeTags.filter((t) => t !== tag))} style={{ cursor: "pointer", opacity: 0.6, fontSize: 10 }}>×</span>
+                    </span>
+                  ))}
+                  {vibeTags.length < 5 && (
+                    <input type="text" value={vibeInput}
+                      onChange={(e) => setVibeInput(e.target.value)}
+                      onKeyDown={(e) => { if (e.key === "Enter" || e.key === ",") { e.preventDefault(); addVibeTag(); } }}
+                      onBlur={addVibeTag}
+                      placeholder={vibeTags.length === 0 ? "jazz, late-night..." : ""}
+                      style={{ background: "none", border: "none", outline: "none", color: "#e8e6e3", fontFamily: "'Syne', sans-serif", fontSize: 12, flex: 1, minWidth: 80, padding: 0 }}
+                    />
+                  )}
+                </div>
+              </div>
+              <div onClick={handleDiscoverableToggle} style={{ cursor: "pointer" }}>
+                <Toggle checked={discoverable} onChange={() => {}} accent={accent} label="Discoverable — appear in Discover" />
+              </div>
+            </div>
+          </div>
+          {/* Customize */}
+          <div style={{ borderTop: "1px solid #1a1a1a", paddingTop: 16 }}>
+            <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 12 }}>
+              <span style={{ fontFamily: "'Space Mono', monospace", fontSize: 8, color: accent, letterSpacing: "0.1em", textTransform: "uppercase" }}>CUSTOMIZE</span>
+              <SaveBtn onClick={saveCustomization} saving={customSaving} saved={customSaved} accent={accent} accentRgb={accentRgb} />
+            </div>
+            <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+              <div>
+                <label style={{ ...labelStyle, color: accent }}>Accent color</label>
+                <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
+                  {Object.entries(THEMES).map(([key, t]) => {
+                    const active = theme === key;
+                    return (
+                      <button key={key} onClick={() => { setTheme(key); document.documentElement.style.setProperty("--itb-dash-accent", t.accent); }} title={t.name} style={{
+                        width: 28, height: 28, borderRadius: "50%", background: t.accent,
+                        border: active ? "3px solid #e8e6e3" : "2px solid transparent",
+                        cursor: "pointer", transform: active ? "scale(1.1)" : "scale(1)",
+                        transition: "transform 0.12s, border 0.12s", outline: "none", padding: 0,
+                      }} />
+                    );
+                  })}
+                </div>
+              </div>
+              <div>
+                <label style={{ ...labelStyle, color: accent }}>Status</label>
+                <DashInput value={statusText} onChange={(v) => v.length <= 100 && setStatusText(v)} placeholder="Currently listening to..." maxLength={100} accent={accent} />
+              </div>
+              <div>
+                <label style={{ ...labelStyle, color: accent }}>Banner</label>
+                <div style={{ display: "flex", flexWrap: "wrap", gap: 6 }}>
+                  {BANNER_PRESETS.map((b) => {
+                    const active = bannerStyle === b.key && !bannerUrl;
+                    return (
+                      <button key={b.key} onClick={() => { setBannerStyle(b.key); if (b.key !== "none") setBannerUrl(""); }} style={{
+                        width: 56, height: 32, borderRadius: 6, background: b.css === "none" ? "#1a1a1a" : b.css,
+                        border: `1.5px solid ${active ? accent : "#222"}`, cursor: "pointer", position: "relative", overflow: "hidden", padding: 0,
+                      }}>
+                        {active && <span style={{ position: "absolute", inset: 0, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 12, color: "#fff", background: "rgba(0,0,0,0.3)" }}>✓</span>}
+                        {b.key === "none" && <span style={{ fontFamily: "'Space Mono', monospace", fontSize: 7, color: "#333" }}>None</span>}
+                      </button>
+                    );
+                  })}
+                </div>
+                <div style={{ marginTop: 8 }}>
+                  <label style={{ ...labelStyle, fontSize: 10, color: palette.textDim }}>Or paste an image URL</label>
+                  <DashInput value={bannerUrl} onChange={(v) => { setBannerUrl(v); if (v) setBannerStyle("none"); }} placeholder="https://..." accent={accent} />
+                </div>
+              </div>
+              {(bannerStyle !== "none" || bannerUrl) && (
+                <div>
+                  <label style={{ ...labelStyle, fontSize: 10, color: accent }}>Preview</label>
+                  <div style={{ height: 60, borderRadius: 8, background: getBannerCss(bannerStyle, bannerUrl), border: `1px solid ${palette.border}` }} />
+                </div>
+              )}
+            </div>
+          </div>
+        </AccordionSection>
+
+        <AccordionSection title="Activity" sectionKey="activity" openSection={openSection} setOpenSection={setOpenSection} accent={accent} accentRgb={accentRgb}>
+          {/* Rooms + Mixtapes */}
+          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10, marginBottom: 14 }}>
+            {[
+              { label: "Rooms", count: roomCount, path: "/rooms", emoji: "🎙" },
+              { label: "Mixtapes", count: mixtapeCount, path: "/mixtapes", emoji: "📼" },
+            ].map(({ label, count, path, emoji }) => (
+              <Link key={path} to={path} style={{ textDecoration: "none" }}>
+                <div style={{ background: "#0e0e0e", borderRadius: 8, border: "1px solid #1a1a1a", padding: 14 }}>
+                  <div style={{ fontSize: 18, marginBottom: 4 }}>{emoji}</div>
+                  <div style={{ fontFamily: "'Syne', sans-serif", fontSize: 18, fontWeight: 800, color: accent, lineHeight: 1, marginBottom: 2 }}>{count}</div>
+                  <div style={{ fontFamily: "'Space Mono', monospace", fontSize: 7, color: "#333", letterSpacing: "0.08em", textTransform: "uppercase" }}>{label}</div>
+                </div>
+              </Link>
+            ))}
+          </div>
+          {/* Tape Trades */}
+          <div style={{ borderTop: "1px solid #1a1a1a", paddingTop: 14 }}>
+            <div style={{ fontFamily: "'Space Mono', monospace", fontSize: 8, color: accent, letterSpacing: "0.1em", textTransform: "uppercase", marginBottom: 10 }}>TAPE TRADES</div>
+            <TapeTradeInbox />
+          </div>
+        </AccordionSection>
+
+        <AccordionSection title="Social" sectionKey="social" openSection={openSection} setOpenSection={setOpenSection} accent={accent} accentRgb={accentRgb}>
+          {/* Following */}
+          <div style={{ fontFamily: "'Space Mono', monospace", fontSize: 8, color: accent, letterSpacing: "0.1em", textTransform: "uppercase", marginBottom: 10 }}>
+            FOLLOWING {following.length > 0 && `(${following.length})`}
+          </div>
+          {following.length === 0 ? (
+            <p style={{ fontSize: 12, color: palette.textMuted, fontFamily: "'Space Mono', monospace", margin: "0 0 16px" }}>
+              You're not following any walls yet.{" "}
+              <Link to="/discover" style={{ color: accent, textDecoration: "none" }}>Discover booths</Link>
+            </p>
+          ) : (
+            <div style={{ display: "flex", flexDirection: "column", gap: 8, marginBottom: 16 }}>
+              {following.map((f) => (
+                <div key={f.following_id} style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 10 }}>
+                  <Link to={`/${f.profiles.slug}`} style={{ fontFamily: "'Syne', sans-serif", fontSize: 13, color: "#888", textDecoration: "none" }}>
                     {f.profiles.display_name}
                   </Link>
                   <button onClick={() => handleUnfollow(f.following_id)} style={{
-                    background: "transparent", border: "1px solid #1e1e1e",
-                    borderRadius: 5, color: "#2a2a2a",
-                    fontFamily: "'Space Mono', monospace",
-                    fontSize: 7, letterSpacing: "0.06em",
-                    padding: "3px 8px", cursor: "pointer",
+                    background: "transparent", border: "1px solid #1e1e1e", borderRadius: 5, color: "#2a2a2a",
+                    fontFamily: "'Space Mono', monospace", fontSize: 7, letterSpacing: "0.06em", padding: "3px 8px", cursor: "pointer",
                   }}>UNFOLLOW</button>
                 </div>
               ))}
             </div>
-          </DashCard>
-        )}
-
-        {following.length === 0 && (
-          <DashCard title="Following" accent={accent} accentRgb={accentRgb} delay={0.25}>
-            <p style={{ fontSize: 12, color: palette.textMuted, fontFamily: "'Space Mono', monospace", margin: 0 }}>
-              You're not following any walls yet.{" "}
-              <Link to="/discover" style={{ color: accent, textDecoration: "none" }}>Discover booths</Link>
-            </p>
-          </DashCard>
-        )}
-
-        {/* Activity Feed */}
-        {following.length > 0 && (
-          <DashCard title="Activity" accent={accent} accentRgb={accentRgb} delay={0.3}>
-            <ActivityFeed followedWallIds={following.map((f) => f.following_id)} />
-          </DashCard>
-        )}
+          )}
+          {/* Activity Feed */}
+          {following.length > 0 && (
+            <>
+              <div style={{ borderTop: "1px solid #1a1a1a", paddingTop: 14 }}>
+                <div style={{ fontFamily: "'Space Mono', monospace", fontSize: 8, color: accent, letterSpacing: "0.1em", textTransform: "uppercase", marginBottom: 10 }}>ACTIVITY</div>
+                <ActivityFeed followedWallIds={following.map((f) => f.following_id)} />
+              </div>
+            </>
+          )}
+        </AccordionSection>
       </div>
 
       {showEmbed && (

@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { palette } from "../lib/palette";
-import NavBar from "./NavBar";
+
 import MixtapeHeader from "./MixtapeHeader";
 import MixtapeVisibilityToggle from "./MixtapeVisibilityToggle";
 import MixtapeProgress from "./MixtapeProgress";
@@ -94,7 +94,6 @@ export default function MixtapeEditView(props) {
 
   return (
     <>
-      <NavBar />
       <div style={{ maxWidth: 560, margin: "0 auto", padding: "40px 0" }}>
         <button
           onClick={() => navigate("/mixtapes")}
