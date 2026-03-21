@@ -1,0 +1,17 @@
+{
+  "appId": "com.thebooth.app",
+  "appName": "TheBooth",
+  "webDir": "dist",
+  "server": {
+    "hostname": "inthebooth.vercel.app",
+    "androidScheme": "https",
+    "iosScheme": "https"
+  },
+  "ios": {
+    "contentInset": "always",
+    "backgroundColor": "#0a0a0a"
+  },
+  "android": {
+    "backgroundColor": "#0a0a0a"
+  }
+}
