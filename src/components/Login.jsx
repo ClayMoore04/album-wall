@@ -1,11 +1,46 @@
 import { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { useAuth } from "./AuthProvider";
-import { palette } from "../lib/palette";
+
+const ACCENT = "#ec4899";
+const ACCENT_RGB = "236,72,153";
+
+let loginCssInjected = false;
+function injectLoginCss() {
+  if (loginCssInjected || typeof document === "undefined") return;
+  const tag = document.createElement("style");
+  tag.textContent = `
+    @keyframes itb-fadeInUp {
+      from { opacity: 0; transform: translateY(12px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+    .itb-login-input:focus {
+      outline: none;
+      border-color: ${ACCENT} !important;
+    }
+    .itb-login-btn:active { transform: scale(0.97); }
+  `;
+  document.head.appendChild(tag);
+  loginCssInjected = true;
+}
+
+const inputStyle = {
+  width: "100%",
+  padding: "11px 14px",
+  background: "#0e0e0e",
+  border: "1px solid #1e1e1e",
+  borderRadius: 8,
+  color: "#e8e6e3",
+  fontSize: 13,
+  fontFamily: "'Syne', sans-serif",
+  boxSizing: "border-box",
+  transition: "border-color 0.15s",
+};
 
 export default function Login() {
+  injectLoginCss();
   const navigate = useNavigate();
-  const { signIn, profile } = useAuth();
+  const { signIn } = useAuth();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState(null);
@@ -15,27 +50,21 @@ export default function Login() {
     e.preventDefault();
     setError(null);
     setSubmitting(true);
-
     try {
       await signIn({ email, password });
-      // Check for pending room join redirect
       const pendingJoin = sessionStorage.getItem("room_join_return");
       if (pendingJoin) {
         sessionStorage.removeItem("room_join_return");
         navigate(`/room/join/${pendingJoin}`, { replace: true });
         return;
       }
-      // Check for pending mixtape join redirect
       const mixtapeJoin = sessionStorage.getItem("mixtape_join_return");
       if (mixtapeJoin) {
         sessionStorage.removeItem("mixtape_join_return");
         navigate(`/mixtape/join/${mixtapeJoin}`, { replace: true });
         return;
       }
-      // Profile will load via onAuthStateChange — navigate after a tick
-      setTimeout(() => {
-        navigate("/dashboard");
-      }, 300);
+      setTimeout(() => navigate("/dashboard"), 300);
     } catch (err) {
       setError(err.message || "Login failed. Check your email and password.");
     } finally {
@@ -43,125 +72,127 @@ export default function Login() {
     }
   };
 
-  const inputStyle = {
-    width: "100%",
-    padding: "12px 14px",
-    background: palette.bg,
-    border: `1px solid ${palette.border}`,
-    borderRadius: 10,
-    color: palette.text,
-    fontSize: 14,
-    fontFamily: "'Syne', sans-serif",
-    outline: "none",
-    boxSizing: "border-box",
-  };
-
-  const labelStyle = {
-    display: "block",
-    fontSize: 12,
-    fontWeight: 600,
-    color: palette.textMuted,
-    fontFamily: "'Space Mono', monospace",
-    marginBottom: 6,
-    letterSpacing: "0.03em",
-  };
-
   return (
-    <div style={{ maxWidth: 400, margin: "0 auto", padding: "60px 20px" }}>
-      <div style={{ textAlign: "center", marginBottom: 40 }}>
-        <div style={{ fontSize: 36, marginBottom: 8 }}>💿</div>
-        <h1 style={{ fontSize: 28, fontWeight: 800, marginBottom: 8 }}>
-          Log In
-        </h1>
-        <p
-          style={{
-            color: palette.textMuted,
+    <div style={{ minHeight: "100vh", background: "#0a0a0a" }}>
+      <div style={{
+        maxWidth: 380, margin: "0 auto", padding: "80px 20px",
+        animation: "itb-fadeInUp 0.4s ease both",
+      }}>
+        {/* Accent strip */}
+        <div style={{
+          width: 32, height: 3,
+          background: ACCENT,
+          borderRadius: 2,
+          margin: "0 auto 20px",
+        }} />
+
+        <div style={{ textAlign: "center", marginBottom: 36 }}>
+          <h1 style={{
+            fontFamily: "'Syne', sans-serif",
+            fontSize: 28, fontWeight: 800,
+            color: "#e8e6e3",
+            letterSpacing: "-0.02em",
+            margin: "0 0 6px",
+          }}>
+            Log In
+          </h1>
+          <p style={{
             fontFamily: "'Space Mono', monospace",
-            fontSize: 13,
-          }}
-        >
-          Welcome back to the booth
-        </p>
-      </div>
-
-      <form onSubmit={handleSubmit}>
-        <div style={{ marginBottom: 20 }}>
-          <label style={labelStyle}>Email</label>
-          <input
-            type="email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            placeholder="you@example.com"
-            required
-            autoFocus
-            style={inputStyle}
-          />
+            fontSize: 9, color: "#2e2e2e",
+            letterSpacing: "0.08em",
+            margin: 0,
+          }}>
+            WELCOME BACK TO THE BOOTH
+          </p>
         </div>
 
-        <div style={{ marginBottom: 28 }}>
-          <label style={labelStyle}>Password</label>
-          <input
-            type="password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            placeholder="Your password"
-            required
-            style={inputStyle}
-          />
-        </div>
-
-        {error && (
-          <div
-            style={{
-              fontSize: 12,
-              color: palette.coral,
+        <form onSubmit={handleSubmit}>
+          <div style={{ marginBottom: 16 }}>
+            <label style={{
+              display: "block",
               fontFamily: "'Space Mono', monospace",
-              marginBottom: 16,
+              fontSize: 8, letterSpacing: "0.1em",
+              textTransform: "uppercase",
+              color: ACCENT, marginBottom: 6,
+            }}>Email</label>
+            <input
+              className="itb-login-input"
+              type="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              placeholder="you@example.com"
+              required
+              autoFocus
+              style={inputStyle}
+            />
+          </div>
+
+          <div style={{ marginBottom: 24 }}>
+            <label style={{
+              display: "block",
+              fontFamily: "'Space Mono', monospace",
+              fontSize: 8, letterSpacing: "0.1em",
+              textTransform: "uppercase",
+              color: ACCENT, marginBottom: 6,
+            }}>Password</label>
+            <input
+              className="itb-login-input"
+              type="password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              placeholder="Your password"
+              required
+              style={inputStyle}
+            />
+          </div>
+
+          {error && (
+            <p style={{
+              fontFamily: "'Space Mono', monospace",
+              fontSize: 9, color: "#ef4444",
+              letterSpacing: "0.04em",
               textAlign: "center",
+              marginBottom: 16,
+            }}>
+              {error}
+            </p>
+          )}
+
+          <button
+            className="itb-login-btn"
+            type="submit"
+            disabled={submitting}
+            style={{
+              width: "100%",
+              padding: "13px",
+              border: "none",
+              borderRadius: 8,
+              background: ACCENT,
+              color: "#000",
+              fontFamily: "'Space Mono', monospace",
+              fontSize: 11, fontWeight: 700,
+              letterSpacing: "0.1em",
+              cursor: submitting ? "not-allowed" : "pointer",
+              opacity: submitting ? 0.6 : 1,
+              transition: "opacity 0.15s, transform 0.1s",
             }}
           >
-            {error}
-          </div>
-        )}
+            {submitting ? "LOGGING IN..." : "LOG IN"}
+          </button>
+        </form>
 
-        <button
-          type="submit"
-          disabled={submitting}
-          style={{
-            width: "100%",
-            padding: "14px",
-            border: "none",
-            borderRadius: 12,
-            fontSize: 15,
-            fontWeight: 700,
-            fontFamily: "'Space Mono', monospace",
-            cursor: submitting ? "not-allowed" : "pointer",
-            background: palette.accent,
-            color: "#000",
-            opacity: submitting ? 0.6 : 1,
-            transition: "opacity 0.2s",
-          }}
-        >
-          {submitting ? "Logging in..." : "Log In"}
-        </button>
-      </form>
-
-      <div
-        style={{
+        <div style={{
           textAlign: "center",
           marginTop: 24,
-          fontSize: 13,
-          color: palette.textMuted,
           fontFamily: "'Space Mono', monospace",
-        }}
-      >
-        Don't have a wall?{" "}
-        <Link
-          to="/signup"
-          style={{ color: palette.accent, textDecoration: "none" }}
-        >
-          Create one
-        </Link>
+          fontSize: 9, color: "#2e2e2e",
+          letterSpacing: "0.04em",
+        }}>
+          Don't have a wall?{" "}
+          <Link to="/signup" style={{ color: ACCENT, textDecoration: "none" }}>
+            Create one
+          </Link>
+        </div>
       </div>
     </div>
   );
