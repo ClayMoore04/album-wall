@@ -1,150 +1,201 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { Link } from "react-router-dom";
-import { palette, getColor } from "../lib/palette";
+import { getColor } from "../lib/palette";
 import { injectAnimations } from "../lib/animations";
 import FollowButton from "./FollowButton";
 import CompatibilityBadge from "./CompatibilityBadge";
 
-export default function DiscoverWallCard({ wall, entranceIndex }) {
+let discoverCssInjected = false;
+function injectDiscoverCss() {
+  if (discoverCssInjected || typeof document === "undefined") return;
+  const tag = document.createElement("style");
+  tag.textContent = `
+    @keyframes itb-shimmer {
+      0%   { background-position: -100% 0; }
+      100% { background-position: 200% 0; }
+    }
+  `;
+  document.head.appendChild(tag);
+  discoverCssInjected = true;
+}
+
+function hexToRgb(hex = "#ec4899") {
+  const h = hex.replace("#", "");
+  const full = h.length === 3 ? h.split("").map((c) => c + c).join("") : h;
+  const n = parseInt(full, 16);
+  return `${(n >> 16) & 255},${(n >> 8) & 255},${n & 255}`;
+}
+
+function nameToGradient(name = "") {
+  const GRADIENTS = [
+    ["#f97316", "#ec4899"],
+    ["#a855f7", "#3b82f6"],
+    ["#06b6d4", "#1DB954"],
+    ["#f5d547", "#f97316"],
+    ["#ec4899", "#a855f7"],
+    ["#3b82f6", "#06b6d4"],
+    ["#1DB954", "#059669"],
+    ["#dc2626", "#f97316"],
+  ];
+  let hash = 0;
+  for (let i = 0; i < name.length; i++) hash = name.charCodeAt(i) + ((hash << 5) - hash);
+  const [a, b] = GRADIENTS[Math.abs(hash) % GRADIENTS.length];
+  return { gradient: `linear-gradient(135deg, ${a}, ${b})`, accent: a };
+}
+
+export default function DiscoverWallCard({ wall, entranceIndex = 0 }) {
+  injectDiscoverCss();
+  injectAnimations();
+
   const [hovered, setHovered] = useState(false);
-
-  useEffect(() => { injectAnimations(); }, []);
-
-  const entranceDelay = entranceIndex != null ? `${Math.min(entranceIndex, 8) * 0.06}s` : undefined;
+  const { gradient, accent } = nameToGradient(wall.display_name);
+  const accentRgb = hexToRgb(accent);
+  const initials = (wall.display_name || "?")
+    .split(" ").map((w) => w[0] ?? "").join("").slice(0, 2).toUpperCase();
 
   return (
     <div
       onMouseEnter={() => setHovered(true)}
       onMouseLeave={() => setHovered(false)}
       style={{
-        background: palette.cardBg,
-        border: `1px solid ${hovered ? "rgba(29,185,84,0.3)" : palette.border}`,
-        borderRadius: 14,
-        padding: 20,
+        position: "relative",
+        background: "#111",
+        borderRadius: 12,
+        border: `1px solid ${hovered ? `rgba(${accentRgb},0.35)` : "#1e1e1e"}`,
+        overflow: "hidden",
+        transition: "transform 0.18s ease, border-color 0.18s ease, box-shadow 0.18s ease",
+        transform: hovered ? "translateY(-3px)" : "translateY(0)",
+        boxShadow: hovered ? `0 8px 24px rgba(${accentRgb},0.08)` : "none",
+        animation: "booth-fadeInUp 0.3s ease both",
+        animationDelay: `${entranceIndex * 0.04}s`,
         display: "flex",
         flexDirection: "column",
-        gap: 12,
-        transform: hovered ? "translateY(-2px)" : "translateY(0)",
-        boxShadow: hovered ? "0 4px 20px rgba(29,185,84,0.12)" : "none",
-        transition: "transform 0.2s, box-shadow 0.2s, border-color 0.2s",
-        ...(entranceDelay != null ? {
-          animation: "booth-fadeInUp 0.35s ease both",
-          animationDelay: entranceDelay,
-        } : {}),
       }}
     >
-      <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
-        <div
-          style={{
-            width: 40,
-            height: 40,
-            borderRadius: 20,
-            background: `linear-gradient(135deg, ${getColor(wall.display_name)}, ${getColor(wall.slug)})`,
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            fontSize: 16,
-            fontWeight: 800,
-            color: "rgba(255,255,255,0.9)",
-            fontFamily: "'Syne', sans-serif",
-            flexShrink: 0,
-          }}
-        >
-          {wall.display_name[0]?.toUpperCase()}
-        </div>
-        <div style={{ flex: 1, minWidth: 0 }}>
-          <div
-            style={{
-              fontSize: 15,
-              fontWeight: 700,
-              whiteSpace: "nowrap",
-              overflow: "hidden",
-              textOverflow: "ellipsis",
-            }}
-          >
-            {wall.display_name}
-          </div>
-          <div
-            style={{
-              fontSize: 11,
-              color: palette.textMuted,
-              fontFamily: "'Space Mono', monospace",
-              display: "flex",
-              gap: 10,
-            }}
-          >
-            <span>
-              {wall.follower_count} follower
-              {wall.follower_count !== 1 ? "s" : ""}
-            </span>
-            <span>
-              {wall.submission_count} album
-              {wall.submission_count !== 1 ? "s" : ""}
-            </span>
-          </div>
-        </div>
-      </div>
+      {/* Static trim */}
+      <div style={{
+        position: "absolute",
+        top: 0, left: 0, right: 0, height: 2,
+        background: `rgba(${accentRgb},0.35)`,
+        opacity: hovered ? 0 : 1,
+        transition: "opacity 0.2s",
+        zIndex: 1, pointerEvents: "none",
+      }} />
+      {/* Shimmer trim */}
+      <div style={{
+        position: "absolute",
+        top: 0, left: 0, right: 0, height: 2,
+        background: `linear-gradient(90deg,
+          transparent 0%,
+          rgba(${accentRgb},0.3) 20%,
+          rgba(${accentRgb},1) 50%,
+          rgba(${accentRgb},0.3) 80%,
+          transparent 100%)`,
+        backgroundSize: "200% 100%",
+        opacity: hovered ? 1 : 0,
+        transition: "opacity 0.2s",
+        animation: hovered ? "itb-shimmer 1.2s ease infinite" : "none",
+        zIndex: 2, pointerEvents: "none",
+      }} />
 
-      {wall.bio && (
-        <div
-          style={{
-            fontSize: 12,
-            color: palette.textMuted,
-            fontFamily: "'Space Mono', monospace",
-            lineHeight: 1.5,
-            overflow: "hidden",
+      <div style={{ padding: "14px 14px 12px", flex: 1, display: "flex", flexDirection: "column" }}>
+        {/* Avatar + name row */}
+        <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 10 }}>
+          <div style={{
+            width: 40, height: 40,
+            borderRadius: "50%",
+            background: gradient,
+            flexShrink: 0,
+            display: "flex", alignItems: "center", justifyContent: "center",
+            fontFamily: "'Syne', sans-serif",
+            fontSize: 14, fontWeight: 800,
+            color: "rgba(255,255,255,0.85)",
+            userSelect: "none",
+          }}>
+            {initials}
+          </div>
+          <div style={{ minWidth: 0, flex: 1 }}>
+            <div style={{
+              fontFamily: "'Syne', sans-serif",
+              fontSize: 14, fontWeight: 700,
+              color: "#e8e6e3",
+              whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis",
+              lineHeight: 1.2,
+            }}>
+              {wall.display_name}
+            </div>
+            <div style={{
+              display: "flex", gap: 8, marginTop: 3,
+              fontFamily: "'Space Mono', monospace",
+              fontSize: 8, color: "#3a3a3a",
+              letterSpacing: "0.05em",
+            }}>
+              <span style={{ color: accent }}>{wall.follower_count ?? 0}</span>
+              <span>followers</span>
+              <span style={{ color: "#252525" }}>·</span>
+              <span style={{ color: accent }}>{wall.submission_count ?? 0}</span>
+              <span>albums</span>
+            </div>
+          </div>
+        </div>
+
+        {/* Bio */}
+        {wall.bio && (
+          <p style={{
+            fontFamily: "'Syne', sans-serif",
+            fontSize: 11, color: "#444",
+            lineHeight: 1.55, marginBottom: 10,
             display: "-webkit-box",
             WebkitLineClamp: 2,
             WebkitBoxOrient: "vertical",
-          }}
-        >
-          {wall.bio}
-        </div>
-      )}
+            overflow: "hidden",
+          }}>
+            {wall.bio}
+          </p>
+        )}
 
-      {wall.vibe_tags?.length > 0 && (
-        <div style={{ display: "flex", flexWrap: "wrap", gap: 4 }}>
-          {wall.vibe_tags.map((tag) => (
-            <span
-              key={tag}
-              style={{
-                padding: "2px 8px",
-                borderRadius: 10,
-                border: `1px solid ${palette.border}`,
-                fontSize: 10,
-                fontWeight: 600,
+        {/* Vibe tags */}
+        {wall.vibe_tags?.length > 0 && (
+          <div style={{ display: "flex", flexWrap: "wrap", gap: 4, marginBottom: 10 }}>
+            {wall.vibe_tags.slice(0, 4).map((tag) => (
+              <span key={tag} style={{
                 fontFamily: "'Space Mono', monospace",
-                color: palette.textMuted,
-              }}
-            >
-              {tag}
-            </span>
-          ))}
-        </div>
-      )}
+                fontSize: 7,
+                letterSpacing: "0.08em",
+                textTransform: "uppercase",
+                color: accent,
+                border: `1px solid rgba(${accentRgb},0.25)`,
+                borderRadius: 3,
+                padding: "2px 5px",
+              }}>{tag}</span>
+            ))}
+          </div>
+        )}
 
-      <CompatibilityBadge userId={wall.id} compact />
+        <CompatibilityBadge userId={wall.id} compact />
 
-      <div
-        style={{
-          display: "flex",
+        {/* Footer */}
+        <div style={{
+          display: "flex", alignItems: "center",
           justifyContent: "space-between",
-          alignItems: "center",
-        }}
-      >
-        <Link
-          to={`/${wall.slug}`}
-          style={{
-            fontSize: 12,
-            fontWeight: 600,
-            fontFamily: "'Space Mono', monospace",
-            color: palette.accent,
-            textDecoration: "none",
-          }}
-        >
-          Visit wall {"\u2192"}
-        </Link>
-        <FollowButton wallId={wall.id} />
+          marginTop: "auto",
+          paddingTop: 10,
+          borderTop: "1px solid #181818",
+        }}>
+          <Link
+            to={`/${wall.slug}`}
+            style={{
+              fontFamily: "'Space Mono', monospace",
+              fontSize: 9, letterSpacing: "0.06em",
+              color: accent,
+              textDecoration: "none",
+              display: "flex", alignItems: "center", gap: 4,
+            }}
+          >
+            VISIT WALL <span style={{ fontSize: 11 }}>→</span>
+          </Link>
+          <FollowButton wallId={wall.id} />
+        </div>
       </div>
     </div>
   );

@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { supabase } from "../lib/supabase";
 import { useAuth } from "./AuthProvider";
@@ -13,40 +13,164 @@ import EmbedCodeModal from "./EmbedCodeModal";
 import OnboardingChecklist from "./OnboardingChecklist";
 import PushOptIn from "./PushOptIn";
 import { VIBE_TAGS } from "../lib/tags";
-import { pillBtnStyle, toggleSwitchStyle } from "../lib/styles";
 import TasteCard from "./TasteCard";
 
+function hexToRgb(hex = "#ec4899") {
+  const h = hex.replace("#", "");
+  const full = h.length === 3 ? h.split("").map((c) => c + c).join("") : h;
+  const n = parseInt(full, 16);
+  return `${(n >> 16) & 255},${(n >> 8) & 255},${n & 255}`;
+}
+
+let dashCssInjected = false;
+function injectDashCss() {
+  if (dashCssInjected || typeof document === "undefined") return;
+  const tag = document.createElement("style");
+  tag.textContent = `
+    @keyframes itb-shimmer {
+      0%   { background-position: -100% 0; }
+      100% { background-position: 200% 0; }
+    }
+    @keyframes itb-fadeInUp {
+      from { opacity: 0; transform: translateY(10px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+    .itb-dash-input:focus  { outline: none; border-color: var(--itb-dash-accent) !important; }
+    .itb-dash-ta:focus     { outline: none; border-color: var(--itb-dash-accent) !important; }
+  `;
+  document.head.appendChild(tag);
+  dashCssInjected = true;
+}
+
+const cardStyle = () => ({
+  background: "#111",
+  borderRadius: 12,
+  border: "1px solid #1a1a1a",
+  overflow: "hidden",
+  marginBottom: 12,
+  animation: "itb-fadeInUp 0.3s ease both",
+});
+
+const cardHeaderStyle = { padding: "14px 16px 12px", borderBottom: "1px solid #161616" };
+const cardBodyStyle = { padding: "14px 16px" };
+
+const labelStyle = {
+  fontFamily: "'Space Mono', monospace",
+  fontSize: 8, letterSpacing: "0.1em",
+  textTransform: "uppercase",
+  display: "block", marginBottom: 6,
+};
+
+function DashCard({ title, subtitle, children, accent, accentRgb, delay = 0, action }) {
+  return (
+    <div style={{ ...cardStyle(), animationDelay: `${delay}s` }}>
+      <div style={{ height: 2, background: `linear-gradient(90deg, rgba(${accentRgb},0.5), transparent)` }} />
+      <div style={cardHeaderStyle}>
+        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+          <div>
+            <h2 style={{ fontFamily: "'Syne', sans-serif", fontSize: 14, fontWeight: 700, color: "#e8e6e3", margin: 0, lineHeight: 1.2 }}>{title}</h2>
+            {subtitle && <p style={{ fontFamily: "'Space Mono', monospace", fontSize: 8, color: "#2e2e2e", letterSpacing: "0.06em", margin: "3px 0 0" }}>{subtitle}</p>}
+          </div>
+          {action}
+        </div>
+      </div>
+      <div style={cardBodyStyle}>{children}</div>
+    </div>
+  );
+}
+
+function DashInput({ value, onChange, placeholder, multiline = false, maxLength, accent }) {
+  const base = {
+    width: "100%", background: "#0e0e0e", border: "1px solid #1e1e1e",
+    borderRadius: 8, color: "#e8e6e3", fontFamily: "'Syne', sans-serif",
+    fontSize: 13, padding: "9px 12px", boxSizing: "border-box",
+    transition: "border-color 0.15s", lineHeight: 1.5,
+    resize: multiline ? "vertical" : "none",
+  };
+  return multiline ? (
+    <textarea className="itb-dash-ta" value={value} onChange={(e) => onChange(e.target.value)} placeholder={placeholder} maxLength={maxLength} rows={3} style={base} />
+  ) : (
+    <input className="itb-dash-input" type="text" value={value} onChange={(e) => onChange(e.target.value)} placeholder={placeholder} maxLength={maxLength} style={base} />
+  );
+}
+
+function Toggle({ checked, onChange, accent, label }) {
+  return (
+    <label style={{ display: "flex", alignItems: "center", gap: 10, cursor: "pointer", userSelect: "none" }}>
+      <div style={{ position: "relative", width: 36, height: 20 }}>
+        <div style={{
+          position: "absolute", inset: 0, borderRadius: 10,
+          background: checked ? accent : "#1e1e1e",
+          border: "1px solid #2a2a2a", transition: "background 0.2s",
+        }} />
+        <div style={{
+          position: "absolute", top: 2, left: checked ? 18 : 2,
+          width: 14, height: 14, borderRadius: "50%",
+          background: "#fff", transition: "left 0.2s",
+        }} />
+      </div>
+      {label && <span style={{ fontFamily: "'Syne', sans-serif", fontSize: 12, color: "#777" }}>{label}</span>}
+    </label>
+  );
+}
+
+function SaveBtn({ onClick, saving, saved, accent, accentRgb }) {
+  return (
+    <button onClick={onClick} disabled={saving} style={{
+      background: saved ? `rgba(${accentRgb},0.1)` : accent,
+      border: saved ? `1px solid rgba(${accentRgb},0.4)` : "none",
+      borderRadius: 7, color: saved ? accent : "#000",
+      fontFamily: "'Space Mono', monospace", fontSize: 9, fontWeight: 700,
+      letterSpacing: "0.08em", padding: "7px 16px",
+      cursor: saving ? "default" : "pointer",
+      opacity: saving ? 0.6 : 1, transition: "all 0.15s",
+    }}>
+      {saving ? "SAVING..." : saved ? "✓ SAVED" : "SAVE"}
+    </button>
+  );
+}
+
 export default function Dashboard() {
+  injectDashCss();
+
   const navigate = useNavigate();
   const { user, profile, loading, signOut, loadProfile } = useAuth();
+  const { showToast } = useToast();
+
   const [displayName, setDisplayName] = useState("");
   const [bio, setBio] = useState("");
-  const { showToast } = useToast();
-  const [saving, setSaving] = useState(false);
-  const [stats, setStats] = useState({ total: 0, listened: 0 });
-  const [submissions, setSubmissions] = useState([]);
-  const [following, setFollowing] = useState([]);
-  const [discoverable, setDiscoverable] = useState(false);
   const [theme, setTheme] = useState("default");
   const [bannerStyle, setBannerStyle] = useState("none");
   const [bannerUrl, setBannerUrl] = useState("");
   const [statusText, setStatusText] = useState("");
+  const [vibeTags, setVibeTags] = useState([]);
+  const [vibeInput, setVibeInput] = useState("");
+  const [discoverable, setDiscoverable] = useState(false);
+
+  const [stats, setStats] = useState({ total: 0, listened: 0 });
+  const [submissions, setSubmissions] = useState([]);
+  const [following, setFollowing] = useState([]);
   const [roomCount, setRoomCount] = useState(0);
   const [mixtapeCount, setMixtapeCount] = useState(0);
-  const [vibeTags, setVibeTags] = useState([]);
   const [showQR, setShowQR] = useState(false);
   const [showEmbed, setShowEmbed] = useState(false);
   const [onboardingDismissed, setOnboardingDismissed] = useState(false);
 
+  const [profileSaving, setProfileSaving] = useState(false);
+  const [profileSaved, setProfileSaved] = useState(false);
+  const [customSaving, setCustomSaving] = useState(false);
+  const [customSaved, setCustomSaved] = useState(false);
+
+  const accent = THEMES[theme]?.accent || palette.accent;
+  const accentRgb = hexToRgb(accent);
+
   useEffect(() => {
-    if (!loading && !user) {
-      navigate("/login");
-    }
+    if (!loading && !user) navigate("/login");
   }, [user, loading, navigate]);
 
   useEffect(() => {
     if (profile) {
-      setDisplayName(profile.display_name);
+      setDisplayName(profile.display_name || "");
       setBio(profile.bio || "");
       setDiscoverable(profile.discoverable || false);
       setTheme(profile.theme || "default");
@@ -54,6 +178,7 @@ export default function Dashboard() {
       setBannerUrl(profile.banner_url || "");
       setStatusText(profile.status_text || "");
       setVibeTags(profile.vibe_tags || []);
+      document.documentElement.style.setProperty("--itb-dash-accent", THEMES[profile.theme]?.accent || palette.accent);
       loadStats(profile.id);
       loadFollowing(user.id);
       loadRoomCount(user.id);
@@ -63,90 +188,91 @@ export default function Dashboard() {
 
   const loadStats = async (wallId) => {
     if (!supabase) return;
-    const { data } = await supabase
-      .from("submissions")
-      .select("*")
-      .eq("wall_id", wallId);
+    const { data } = await supabase.from("submissions").select("*").eq("wall_id", wallId);
     if (data) {
       setSubmissions(data);
-      setStats({
-        total: data.length,
-        listened: data.filter((s) => s.listened).length,
-      });
+      setStats({ total: data.length, listened: data.filter((s) => s.listened).length });
     }
   };
 
   const loadFollowing = async (userId) => {
     if (!supabase) return;
-    const { data } = await supabase
-      .from("follows")
-      .select("following_id, profiles!following_id(id, slug, display_name)")
-      .eq("follower_id", userId);
+    const { data } = await supabase.from("follows").select("following_id, profiles!following_id(id, slug, display_name)").eq("follower_id", userId);
     setFollowing(data || []);
   };
 
   const loadRoomCount = async (userId) => {
     if (!supabase) return;
-    const { count } = await supabase
-      .from("room_members")
-      .select("*", { count: "exact", head: true })
-      .eq("user_id", userId);
+    const { count } = await supabase.from("room_members").select("*", { count: "exact", head: true }).eq("user_id", userId);
     setRoomCount(count || 0);
   };
 
   const loadMixtapeCount = async (userId) => {
     if (!supabase) return;
-    const { count } = await supabase
-      .from("mixtapes")
-      .select("*", { count: "exact", head: true })
-      .eq("user_id", userId);
+    const { count } = await supabase.from("mixtapes").select("*", { count: "exact", head: true }).eq("user_id", userId);
     setMixtapeCount(count || 0);
   };
 
-  const handleUnfollow = async (followingId) => {
-    if (!supabase || !user) return;
-    await supabase
-      .from("follows")
-      .delete()
-      .eq("follower_id", user.id)
-      .eq("following_id", followingId);
-    setFollowing((prev) => prev.filter((f) => f.following_id !== followingId));
+  const addVibeTag = () => {
+    const t = vibeInput.trim().toLowerCase().replace(/\s+/g, "-");
+    if (t && !vibeTags.includes(t) && vibeTags.length < 5) {
+      setVibeTags([...vibeTags, t]);
+      setVibeInput("");
+    }
   };
+
+  const saveProfile = useCallback(async () => {
+    if (!supabase || !user) return;
+    setProfileSaving(true);
+    try {
+      await supabase.from("profiles").update({
+        display_name: displayName.trim(),
+        bio: bio.trim(),
+        vibe_tags: vibeTags,
+        discoverable,
+      }).eq("id", user.id);
+      await loadProfile(user.id);
+      showToast("Saved!");
+    } catch (e) {
+      console.error("Failed to save:", e);
+    }
+    setProfileSaving(false);
+    setProfileSaved(true);
+    setTimeout(() => setProfileSaved(false), 2500);
+  }, [user, displayName, bio, vibeTags, discoverable, loadProfile, showToast]);
+
+  const saveCustomization = useCallback(async () => {
+    if (!supabase || !user) return;
+    setCustomSaving(true);
+    try {
+      await supabase.from("profiles").update({
+        theme,
+        banner_style: bannerStyle === "none" ? null : bannerStyle,
+        banner_url: bannerUrl.trim() || null,
+        status_text: statusText.trim() || null,
+      }).eq("id", user.id);
+      document.documentElement.style.setProperty("--itb-dash-accent", THEMES[theme]?.accent || palette.accent);
+      await loadProfile(user.id);
+      showToast("Saved!");
+    } catch (e) {
+      console.error("Failed to save:", e);
+    }
+    setCustomSaving(false);
+    setCustomSaved(true);
+    setTimeout(() => setCustomSaved(false), 2500);
+  }, [user, theme, bannerStyle, bannerUrl, statusText, loadProfile, showToast]);
 
   const handleDiscoverableToggle = async () => {
     if (!supabase || !user) return;
     const newVal = !discoverable;
     setDiscoverable(newVal);
-    await supabase
-      .from("profiles")
-      .update({ discoverable: newVal })
-      .eq("id", user.id);
+    await supabase.from("profiles").update({ discoverable: newVal }).eq("id", user.id);
   };
 
-  const handleSave = async () => {
+  const handleUnfollow = async (followingId) => {
     if (!supabase || !user) return;
-    setSaving(true);
-    try {
-      const { error } = await supabase
-        .from("profiles")
-        .update({
-          display_name: displayName.trim(),
-          bio: bio.trim(),
-          theme,
-          banner_style: bannerStyle === "none" ? null : bannerStyle,
-          banner_url: bannerUrl.trim() || null,
-          status_text: statusText.trim() || null,
-          vibe_tags: vibeTags,
-        })
-        .eq("id", user.id);
-      if (error) throw error;
-      await loadProfile(user.id);
-      showToast("Saved!");
-    } catch (e) {
-      console.error("Failed to update profile:", e);
-    } finally {
-      setSaving(false);
-    }
+    await supabase.from("follows").delete().eq("follower_id", user.id).eq("following_id", followingId);
+    setFollowing((prev) => prev.filter((f) => f.following_id !== followingId));
   };
 
   if (loading || !profile) {
@@ -159,694 +285,308 @@ export default function Dashboard() {
     );
   }
 
-  const inputStyle = {
-    width: "100%",
-    padding: "12px 14px",
-    background: palette.bg,
-    border: `1px solid ${palette.border}`,
-    borderRadius: 10,
-    color: palette.text,
-    fontSize: 14,
-    fontFamily: "'Syne', sans-serif",
-    outline: "none",
-    boxSizing: "border-box",
-  };
-
-  const labelStyle = {
-    display: "block",
-    fontSize: 12,
-    fontWeight: 600,
-    color: palette.textMuted,
-    fontFamily: "'Space Mono', monospace",
-    marginBottom: 6,
-    letterSpacing: "0.03em",
-  };
-
   return (
-    <div style={{ maxWidth: 480, margin: "0 auto", padding: "40px 20px" }}>
-      <div
-        style={{
-          display: "flex",
+    <div style={{ minHeight: "100vh", background: "#0a0a0a", paddingBottom: 80 }}>
+      <div style={{ maxWidth: 640, margin: "0 auto", padding: "0 20px" }}>
+
+        {/* Page header */}
+        <div style={{
+          paddingTop: 28, paddingBottom: 24,
+          borderBottom: "1px solid #141414",
+          marginBottom: 20,
+          display: "flex", alignItems: "flex-end",
           justifyContent: "space-between",
-          alignItems: "center",
-          marginBottom: 32,
-        }}
-      >
-        <h1 style={{ fontSize: 24, fontWeight: 800, margin: 0 }}>Dashboard</h1>
-        <button
-          onClick={signOut}
-          style={{
-            padding: "6px 14px",
-            border: `1px solid ${palette.border}`,
-            borderRadius: 8,
-            fontSize: 11,
-            fontWeight: 600,
-            fontFamily: "'Space Mono', monospace",
-            cursor: "pointer",
-            background: "transparent",
-            color: palette.textMuted,
-          }}
-        >
-          Log out
-        </button>
-      </div>
-
-      {!profile.onboarding_completed_at && !onboardingDismissed && (
-        <OnboardingChecklist
-          profile={profile}
-          stats={stats}
-          onDismiss={() => setOnboardingDismissed(true)}
-        />
-      )}
-
-      <PushOptIn />
-
-      {/* Wall link */}
-      <div
-        style={{
-          background: palette.cardBg,
-          border: `1px solid ${palette.border}`,
-          borderRadius: 12,
-          padding: 20,
-          marginBottom: 24,
-        }}
-      >
-        <div style={labelStyle}>Your Booth</div>
-        <Link
-          to={`/${profile.slug}`}
-          style={{
-            color: palette.accent,
-            fontSize: 15,
-            fontWeight: 600,
-            fontFamily: "'Space Mono', monospace",
-            textDecoration: "none",
-          }}
-        >
-          {window.location.host}/{profile.slug}
-        </Link>
-        <div
-          style={{
-            display: "flex",
-            gap: 16,
-            marginTop: 12,
-            fontSize: 13,
-            fontFamily: "'Space Mono', monospace",
-          }}
-        >
-          <span style={{ color: palette.textMuted }}>
-            {stats.total} album{stats.total !== 1 ? "s" : ""}
-          </span>
-          <span style={{ color: palette.accent }}>
-            {stats.listened} listened
-          </span>
-        </div>
-        <div style={{ marginTop: 12, display: "flex", gap: 8, flexWrap: "wrap" }}>
-          <button
-            onClick={() => setShowQR(!showQR)}
-            style={{
-              padding: "6px 14px",
-              border: `1px solid ${palette.border}`,
-              borderRadius: 8,
-              background: "transparent",
-              color: palette.textMuted,
-              fontSize: 11,
-              fontWeight: 600,
+        }}>
+          <div>
+            <div style={{ width: 32, height: 3, background: accent, borderRadius: 2, marginBottom: 10 }} />
+            <h1 style={{
+              fontFamily: "'Syne', sans-serif",
+              fontSize: "clamp(28px, 8vw, 38px)",
+              fontWeight: 800, color: "#e8e6e3",
+              letterSpacing: "-0.02em", lineHeight: 1, margin: 0,
+            }}>Dashboard</h1>
+            <p style={{
               fontFamily: "'Space Mono', monospace",
-              cursor: "pointer",
-            }}
-          >
-            {showQR ? "Hide QR code" : "Show QR code"}
-          </button>
+              fontSize: 9, color: "#2a2a2a",
+              letterSpacing: "0.08em", marginTop: 6, marginBottom: 0,
+            }}>{profile.display_name || user?.email}</p>
+          </div>
           <button
-            onClick={() => setShowEmbed(true)}
+            onClick={signOut}
             style={{
-              padding: "6px 14px",
-              border: `1px solid ${palette.border}`,
-              borderRadius: 8,
-              background: "transparent",
-              color: palette.textMuted,
-              fontSize: 11,
-              fontWeight: 600,
+              background: "transparent", border: "1px solid #1e1e1e",
+              borderRadius: 7, color: "#2a2a2a",
               fontFamily: "'Space Mono', monospace",
-              cursor: "pointer",
+              fontSize: 8, letterSpacing: "0.06em",
+              padding: "6px 12px", cursor: "pointer",
             }}
-          >
-            Embed
-          </button>
-          {showQR && (
-            <div style={{ marginTop: 14, width: "100%" }}>
-              <QRCode url={`${window.location.origin}/${profile.slug}`} />
-            </div>
-          )}
+          >LOG OUT</button>
         </div>
-        {showEmbed && (
-          <EmbedCodeModal
-            slug={profile.slug}
-            type="wall"
-            onClose={() => setShowEmbed(false)}
-          />
+
+        {!profile.onboarding_completed_at && !onboardingDismissed && (
+          <div style={{ marginBottom: 12 }}>
+            <OnboardingChecklist
+              profile={profile}
+              stats={stats}
+              onDismiss={() => setOnboardingDismissed(true)}
+            />
+          </div>
         )}
-      </div>
 
-      <TasteCard profile={profile} submissions={submissions} />
-
-      {/* Profile settings */}
-      <div
-        style={{
-          background: palette.cardBg,
-          border: `1px solid ${palette.border}`,
-          borderRadius: 12,
-          padding: 20,
-        }}
-      >
-        <h2
-          style={{
-            fontSize: 16,
-            fontWeight: 700,
-            marginBottom: 20,
-            marginTop: 0,
-          }}
-        >
-          Profile Settings
-        </h2>
-
-        <div style={{ marginBottom: 16 }}>
-          <label style={labelStyle}>Display Name</label>
-          <input
-            type="text"
-            value={displayName}
-            onChange={(e) => setDisplayName(e.target.value)}
-            style={inputStyle}
-          />
+        <div style={{ marginBottom: 12 }}>
+          <PushOptIn />
         </div>
 
-        <div style={{ marginBottom: 20 }}>
-          <label style={labelStyle}>Bio</label>
-          <textarea
-            value={bio}
-            onChange={(e) => setBio(e.target.value)}
-            placeholder="Tell visitors about your booth..."
-            rows={3}
-            style={{ ...inputStyle, resize: "vertical", minHeight: 80 }}
-          />
-        </div>
-
-        {/* Vibe tags */}
-        <div style={{ marginBottom: 20 }}>
-          <label style={labelStyle}>Vibes</label>
-          <div
-            style={{
-              fontSize: 11,
-              color: palette.textDim,
-              fontFamily: "'Space Mono', monospace",
-              marginBottom: 8,
-            }}
-          >
-            What genres define your booth? (shown on Discover)
-          </div>
-          <div style={{ display: "flex", flexWrap: "wrap", gap: 6 }}>
-            {VIBE_TAGS.map((tag) => {
-              const active = vibeTags.includes(tag);
-              return (
-                <button
-                  key={tag}
-                  type="button"
-                  onClick={() =>
-                    setVibeTags((prev) =>
-                      active
-                        ? prev.filter((t) => t !== tag)
-                        : prev.length < 5
-                          ? [...prev, tag]
-                          : prev
-                    )
-                  }
-                  style={{ ...pillBtnStyle(active), fontSize: 11, padding: "5px 12px" }}
-                >
-                  {tag}
-                </button>
-              );
-            })}
-          </div>
-          {vibeTags.length >= 5 && (
-            <div
-              style={{
-                fontSize: 10,
-                color: palette.textDim,
+        {/* Your Booth */}
+        <DashCard
+          title="Your Booth"
+          subtitle={profile.slug ? `${window.location.host}/${profile.slug}` : undefined}
+          accent={accent} accentRgb={accentRgb} delay={0.05}
+          action={
+            profile.slug && (
+              <Link to={`/${profile.slug}`} style={{
                 fontFamily: "'Space Mono', monospace",
-                marginTop: 6,
-              }}
-            >
-              Max 5 tags selected
-            </div>
-          )}
-        </div>
-
-        {/* Discoverable toggle */}
-        <div style={{ marginBottom: 20 }}>
-          <label
-            style={{
-              ...labelStyle,
-              display: "flex",
-              alignItems: "center",
-              gap: 10,
-              cursor: "pointer",
-              marginBottom: 0,
-            }}
-            onClick={handleDiscoverableToggle}
-          >
-            <div style={toggleSwitchStyle(discoverable).outer}>
-              <div style={toggleSwitchStyle(discoverable).knob} />
-            </div>
-            List on Discovery
-          </label>
-          <div
-            style={{
-              fontSize: 11,
-              color: palette.textDim,
-              fontFamily: "'Space Mono', monospace",
-              marginTop: 4,
-              marginLeft: 46,
-            }}
-          >
-            Let others find your booth on the Discover page
-          </div>
-        </div>
-
-      </div>
-
-      {/* Customize Your Booth */}
-      <div
-        style={{
-          background: palette.cardBg,
-          border: `1px solid ${palette.border}`,
-          borderRadius: 12,
-          padding: 20,
-          marginTop: 24,
-        }}
-      >
-        <h2
-          style={{
-            fontSize: 16,
-            fontWeight: 700,
-            marginBottom: 20,
-            marginTop: 0,
-          }}
+                fontSize: 8, letterSpacing: "0.06em",
+                color: accent, textDecoration: "none",
+              }}>VISIT →</Link>
+            )
+          }
         >
-          Customize Your Booth
-        </h2>
-
-        {/* Theme picker */}
-        <div style={{ marginBottom: 20 }}>
-          <label style={labelStyle}>Theme</label>
-          <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
-            {Object.entries(THEMES).map(([key, t]) => (
-              <button
-                key={key}
-                onClick={() => setTheme(key)}
-                title={t.name}
-                style={{
-                  width: 36,
-                  height: 36,
-                  borderRadius: 18,
-                  border:
-                    theme === key
-                      ? `2px solid ${palette.text}`
-                      : `2px solid ${palette.border}`,
-                  background: t.accent,
-                  cursor: "pointer",
-                  transition: "all 0.15s",
-                  transform: theme === key ? "scale(1.15)" : "scale(1)",
-                  boxShadow:
-                    theme === key
-                      ? `0 0 12px ${t.accent}66`
-                      : "none",
-                }}
-              />
-            ))}
-          </div>
-          <div
-            style={{
-              fontSize: 11,
-              color: palette.textDim,
-              fontFamily: "'Space Mono', monospace",
-              marginTop: 6,
-            }}
-          >
-            {THEMES[theme]?.name || "Default"}
-          </div>
-        </div>
-
-        {/* Status text */}
-        <div style={{ marginBottom: 20 }}>
-          <label style={labelStyle}>Status</label>
-          <input
-            type="text"
-            value={statusText}
-            onChange={(e) =>
-              e.target.value.length <= 100 && setStatusText(e.target.value)
-            }
-            placeholder='e.g. "currently spinning Blonde on repeat"'
-            style={inputStyle}
-          />
-          <div
-            style={{
-              fontSize: 10,
-              color: palette.textDim,
-              fontFamily: "'Space Mono', monospace",
-              marginTop: 4,
-              textAlign: "right",
-            }}
-          >
-            {statusText.length}/100
-          </div>
-        </div>
-
-        {/* Banner picker */}
-        <div style={{ marginBottom: 20 }}>
-          <label style={labelStyle}>Banner</label>
-          <div
-            style={{
-              display: "grid",
-              gridTemplateColumns: "repeat(4, 1fr)",
-              gap: 8,
-            }}
-          >
-            {BANNER_PRESETS.map((b) => (
-              <button
-                key={b.key}
-                onClick={() => {
-                  setBannerStyle(b.key);
-                  if (b.key !== "none") setBannerUrl("");
-                }}
-                style={{
-                  height: 40,
-                  borderRadius: 8,
-                  border:
-                    bannerStyle === b.key && !bannerUrl
-                      ? `2px solid ${palette.text}`
-                      : `2px solid ${palette.border}`,
-                  background:
-                    b.css === "none" ? palette.surface : b.css,
-                  cursor: "pointer",
-                  transition: "all 0.15s",
-                  position: "relative",
-                  overflow: "hidden",
-                }}
-              >
-                {b.key === "none" && (
-                  <span
-                    style={{
-                      fontSize: 10,
-                      color: palette.textDim,
-                      fontFamily: "'Space Mono', monospace",
-                    }}
-                  >
-                    None
-                  </span>
-                )}
-              </button>
-            ))}
-          </div>
-          <div
-            style={{
-              fontSize: 11,
-              color: palette.textDim,
-              fontFamily: "'Space Mono', monospace",
-              marginTop: 6,
-            }}
-          >
-            {BANNER_PRESETS.find((b) => b.key === bannerStyle)?.label || "None"}
-          </div>
-
-          {/* Custom banner URL */}
-          <div style={{ marginTop: 10 }}>
-            <label
-              style={{
-                ...labelStyle,
-                fontSize: 10,
-                color: palette.textDim,
-              }}
-            >
-              Or paste an image URL
-            </label>
-            <input
-              type="url"
-              value={bannerUrl}
-              onChange={(e) => {
-                setBannerUrl(e.target.value);
-                if (e.target.value) setBannerStyle("none");
-              }}
-              placeholder="https://..."
-              style={{ ...inputStyle, fontSize: 12 }}
-            />
-          </div>
-        </div>
-
-        {/* Banner preview */}
-        {(bannerStyle !== "none" || bannerUrl) && (
-          <div style={{ marginBottom: 10 }}>
-            <label style={{ ...labelStyle, fontSize: 10 }}>Preview</label>
-            <div
-              style={{
-                height: 60,
-                borderRadius: 8,
-                background: getBannerCss(bannerStyle, bannerUrl),
-                border: `1px solid ${palette.border}`,
-              }}
-            />
-          </div>
-        )}
-
-        <button
-          onClick={handleSave}
-          disabled={saving}
-          style={{
-            padding: "12px 24px",
-            border: "none",
-            borderRadius: 10,
-            fontSize: 13,
-            fontWeight: 700,
-            fontFamily: "'Space Mono', monospace",
-            cursor: saving ? "not-allowed" : "pointer",
-            background: palette.accent,
-            color: "#000",
-            opacity: saving ? 0.6 : 1,
-            transition: "all 0.2s",
-            marginTop: 10,
-          }}
-        >
-          {saving ? "Saving..." : "Save Changes"}
-        </button>
-      </div>
-
-      {/* Collaborative Rooms */}
-      <div
-        style={{
-          background: palette.cardBg,
-          border: `1px solid ${palette.border}`,
-          borderRadius: 12,
-          padding: 20,
-          marginTop: 24,
-        }}
-      >
-        <div
-          style={{
-            display: "flex",
-            justifyContent: "space-between",
-            alignItems: "center",
-          }}
-        >
-          <h2 style={{ fontSize: 16, fontWeight: 700, margin: 0 }}>
-            Collaborative Rooms
-          </h2>
-          <Link
-            to="/rooms"
-            style={{
-              fontSize: 12,
-              fontWeight: 600,
-              fontFamily: "'Space Mono', monospace",
-              color: palette.accent,
-              textDecoration: "none",
-            }}
-          >
-            {roomCount > 0
-              ? `${roomCount} room${roomCount !== 1 ? "s" : ""}`
-              : "Create one"}
-            {" \u2192"}
-          </Link>
-        </div>
-        <p
-          style={{
-            fontSize: 12,
-            color: palette.textMuted,
-            fontFamily: "'Space Mono', monospace",
-            margin: "8px 0 0",
-          }}
-        >
-          Build collaborative playlists with friends in real time.
-        </p>
-      </div>
-
-      {/* Mixtapes */}
-      <div
-        style={{
-          background: palette.cardBg,
-          border: `1px solid ${palette.border}`,
-          borderRadius: 12,
-          padding: 20,
-          marginTop: 24,
-        }}
-      >
-        <div
-          style={{
-            display: "flex",
-            justifyContent: "space-between",
-            alignItems: "center",
-          }}
-        >
-          <h2 style={{ fontSize: 16, fontWeight: 700, margin: 0 }}>
-            Mixtapes
-          </h2>
-          <Link
-            to="/mixtapes"
-            style={{
-              fontSize: 12,
-              fontWeight: 600,
-              fontFamily: "'Space Mono', monospace",
-              color: palette.coral,
-              textDecoration: "none",
-            }}
-          >
-            {mixtapeCount > 0
-              ? `${mixtapeCount} tape${mixtapeCount !== 1 ? "s" : ""}`
-              : "Make one"}
-            {" \u2192"}
-          </Link>
-        </div>
-        <p
-          style={{
-            fontSize: 12,
-            color: palette.textMuted,
-            fontFamily: "'Space Mono', monospace",
-            margin: "8px 0 0",
-          }}
-        >
-          90 minutes. Liner notes. Export to Spotify.
-        </p>
-      </div>
-
-      {/* Tape Trades */}
-      <div
-        style={{
-          background: palette.cardBg,
-          border: `1px solid ${palette.border}`,
-          borderRadius: 12,
-          padding: 20,
-          marginTop: 24,
-        }}
-      >
-        <h2 style={{ fontSize: 16, fontWeight: 700, margin: "0 0 16px" }}>
-          Tape Trades
-        </h2>
-        <TapeTradeInbox />
-      </div>
-
-      {/* Following */}
-      <div
-        style={{
-          background: palette.cardBg,
-          border: `1px solid ${palette.border}`,
-          borderRadius: 12,
-          padding: 20,
-          marginTop: 24,
-        }}
-      >
-        <h2 style={{ fontSize: 16, fontWeight: 700, margin: "0 0 16px" }}>
-          Following
-        </h2>
-        {following.length === 0 ? (
-          <p
-            style={{
-              fontSize: 12,
-              color: palette.textMuted,
-              fontFamily: "'Space Mono', monospace",
-              margin: 0,
-            }}
-          >
-            You're not following any walls yet.{" "}
-            <Link
-              to="/discover"
-              style={{ color: palette.accent, textDecoration: "none" }}
-            >
-              Discover booths
-            </Link>
-          </p>
-        ) : (
-          <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
-            {following.map((f) => (
-              <div
-                key={f.following_id}
-                style={{
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "space-between",
-                  padding: "8px 12px",
-                  background: palette.surface,
-                  borderRadius: 8,
-                  border: `1px solid ${palette.border}`,
-                }}
-              >
-                <Link
-                  to={`/${f.profiles.slug}`}
-                  style={{
-                    color: palette.text,
-                    textDecoration: "none",
-                    fontSize: 14,
-                    fontWeight: 600,
-                  }}
-                >
-                  {f.profiles.display_name}
-                </Link>
-                <button
-                  onClick={() => handleUnfollow(f.following_id)}
-                  style={{
-                    padding: "4px 10px",
-                    border: `1px solid ${palette.border}`,
-                    borderRadius: 6,
-                    background: "transparent",
-                    color: palette.textMuted,
-                    fontSize: 10,
-                    fontWeight: 600,
-                    fontFamily: "'Space Mono', monospace",
-                    cursor: "pointer",
-                  }}
-                >
-                  Unfollow
-                </button>
+          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 8, marginBottom: 14 }}>
+            {[
+              { label: "Albums", value: stats.total },
+              { label: "Listened", value: stats.listened },
+              { label: "Pending", value: stats.total - stats.listened },
+            ].map(({ label, value }) => (
+              <div key={label} style={{
+                background: "#0e0e0e", borderRadius: 8,
+                border: "1px solid #1a1a1a", padding: "10px 12px", textAlign: "center",
+              }}>
+                <div style={{ fontFamily: "'Syne', sans-serif", fontSize: 22, fontWeight: 800, color: accent, lineHeight: 1, marginBottom: 3 }}>{value}</div>
+                <div style={{ fontFamily: "'Space Mono', monospace", fontSize: 7, color: "#2e2e2e", letterSpacing: "0.08em", textTransform: "uppercase" }}>{label}</div>
               </div>
             ))}
           </div>
+          <div style={{ display: "flex", gap: 6 }}>
+            <button onClick={() => setShowQR(!showQR)} style={{
+              background: showQR ? `rgba(${accentRgb},0.1)` : "transparent",
+              border: `1px solid ${showQR ? `rgba(${accentRgb},0.3)` : "#1e1e1e"}`,
+              borderRadius: 7, color: showQR ? accent : "#333",
+              fontFamily: "'Space Mono', monospace", fontSize: 8, letterSpacing: "0.06em",
+              padding: "6px 12px", cursor: "pointer",
+            }}>QR CODE</button>
+            <button onClick={() => setShowEmbed(true)} style={{
+              background: "transparent", border: "1px solid #1e1e1e",
+              borderRadius: 7, color: "#333",
+              fontFamily: "'Space Mono', monospace", fontSize: 8, letterSpacing: "0.06em",
+              padding: "6px 12px", cursor: "pointer",
+            }}>EMBED</button>
+          </div>
+          {showQR && profile.slug && (
+            <div style={{ marginTop: 12 }}>
+              <QRCode url={`${window.location.origin}/${profile.slug}`} />
+            </div>
+          )}
+        </DashCard>
+
+        <TasteCard profile={profile} submissions={submissions} />
+
+        {/* Profile settings */}
+        <DashCard
+          title="Profile" accent={accent} accentRgb={accentRgb} delay={0.1}
+          action={<SaveBtn onClick={saveProfile} saving={profileSaving} saved={profileSaved} accent={accent} accentRgb={accentRgb} />}
+        >
+          <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
+            <div>
+              <label style={{ ...labelStyle, color: accent }}>Display name</label>
+              <DashInput value={displayName} onChange={setDisplayName} placeholder="Your name" maxLength={50} accent={accent} />
+            </div>
+            <div>
+              <label style={{ ...labelStyle, color: accent }}>Bio</label>
+              <DashInput value={bio} onChange={setBio} placeholder="A line about your taste..." maxLength={200} multiline accent={accent} />
+              <div style={{ fontFamily: "'Space Mono', monospace", fontSize: 7, color: "#252525", textAlign: "right", marginTop: 3 }}>{bio.length}/200</div>
+            </div>
+            <div>
+              <label style={{ ...labelStyle, color: accent }}>Vibe tags (max 5)</label>
+              <div style={{
+                background: "#0e0e0e", border: "1px solid #1e1e1e", borderRadius: 8,
+                padding: "6px 10px", display: "flex", flexWrap: "wrap", gap: 5,
+                alignItems: "center", minHeight: 44,
+              }}>
+                {vibeTags.map((tag) => (
+                  <span key={tag} style={{
+                    fontFamily: "'Space Mono', monospace", fontSize: 8, letterSpacing: "0.06em",
+                    textTransform: "uppercase", color: accent,
+                    background: `rgba(${accentRgb},0.1)`, border: `1px solid rgba(${accentRgb},0.3)`,
+                    borderRadius: 3, padding: "2px 6px",
+                    display: "flex", alignItems: "center", gap: 4,
+                  }}>
+                    {tag}
+                    <span onClick={() => setVibeTags(vibeTags.filter((t) => t !== tag))} style={{ cursor: "pointer", opacity: 0.6, fontSize: 10 }}>×</span>
+                  </span>
+                ))}
+                {vibeTags.length < 5 && (
+                  <input
+                    type="text" value={vibeInput}
+                    onChange={(e) => setVibeInput(e.target.value)}
+                    onKeyDown={(e) => { if (e.key === "Enter" || e.key === ",") { e.preventDefault(); addVibeTag(); } }}
+                    onBlur={addVibeTag}
+                    placeholder={vibeTags.length === 0 ? "jazz, late-night..." : ""}
+                    style={{
+                      background: "none", border: "none", outline: "none",
+                      color: "#e8e6e3", fontFamily: "'Syne', sans-serif",
+                      fontSize: 12, flex: 1, minWidth: 80, padding: 0,
+                    }}
+                  />
+                )}
+              </div>
+            </div>
+            <div onClick={handleDiscoverableToggle} style={{ cursor: "pointer" }}>
+              <Toggle checked={discoverable} onChange={() => {}} accent={accent} label="Discoverable — appear in the Discover feed" />
+            </div>
+          </div>
+        </DashCard>
+
+        {/* Customize booth */}
+        <DashCard
+          title="Customize Your Booth" accent={accent} accentRgb={accentRgb} delay={0.15}
+          action={<SaveBtn onClick={saveCustomization} saving={customSaving} saved={customSaved} accent={accent} accentRgb={accentRgb} />}
+        >
+          <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
+            <div>
+              <label style={{ ...labelStyle, color: accent }}>Accent color</label>
+              <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
+                {Object.entries(THEMES).map(([key, t]) => {
+                  const active = theme === key;
+                  return (
+                    <button key={key} onClick={() => {
+                      setTheme(key);
+                      document.documentElement.style.setProperty("--itb-dash-accent", t.accent);
+                    }} title={t.name} style={{
+                      width: 28, height: 28, borderRadius: "50%",
+                      background: t.accent,
+                      border: active ? "3px solid #e8e6e3" : "2px solid transparent",
+                      cursor: "pointer",
+                      transform: active ? "scale(1.1)" : "scale(1)",
+                      transition: "transform 0.12s, border 0.12s",
+                      outline: "none", padding: 0,
+                    }} />
+                  );
+                })}
+              </div>
+            </div>
+            <div>
+              <label style={{ ...labelStyle, color: accent }}>Status</label>
+              <DashInput value={statusText} onChange={(v) => v.length <= 100 && setStatusText(v)} placeholder="Currently listening to..." maxLength={100} accent={accent} />
+              <div style={{ fontFamily: "'Space Mono', monospace", fontSize: 7, color: "#252525", textAlign: "right", marginTop: 3 }}>{statusText.length}/100</div>
+            </div>
+            <div>
+              <label style={{ ...labelStyle, color: accent }}>Banner</label>
+              <div style={{ display: "flex", flexWrap: "wrap", gap: 6 }}>
+                {BANNER_PRESETS.map((b) => {
+                  const active = bannerStyle === b.key && !bannerUrl;
+                  return (
+                    <button key={b.key} onClick={() => { setBannerStyle(b.key); if (b.key !== "none") setBannerUrl(""); }} style={{
+                      width: 56, height: 32, borderRadius: 6,
+                      background: b.css === "none" ? "#1a1a1a" : b.css,
+                      border: `1.5px solid ${active ? accent : "#222"}`,
+                      cursor: "pointer", position: "relative", overflow: "hidden", padding: 0,
+                    }}>
+                      {active && <span style={{ position: "absolute", inset: 0, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 12, color: "#fff", background: "rgba(0,0,0,0.3)" }}>✓</span>}
+                      {b.key === "none" && <span style={{ fontFamily: "'Space Mono', monospace", fontSize: 7, color: "#333" }}>None</span>}
+                    </button>
+                  );
+                })}
+              </div>
+              <div style={{ marginTop: 10 }}>
+                <label style={{ ...labelStyle, fontSize: 10, color: palette.textDim }}>Or paste an image URL</label>
+                <DashInput value={bannerUrl} onChange={(v) => { setBannerUrl(v); if (v) setBannerStyle("none"); }} placeholder="https://..." accent={accent} />
+              </div>
+            </div>
+            {(bannerStyle !== "none" || bannerUrl) && (
+              <div>
+                <label style={{ ...labelStyle, fontSize: 10, color: accent }}>Preview</label>
+                <div style={{ height: 60, borderRadius: 8, background: getBannerCss(bannerStyle, bannerUrl), border: `1px solid ${palette.border}` }} />
+              </div>
+            )}
+          </div>
+        </DashCard>
+
+        {/* Rooms + Mixtapes */}
+        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12, marginBottom: 12 }}>
+          {[
+            { label: "Rooms", count: roomCount, path: "/rooms", emoji: "🎙" },
+            { label: "Mixtapes", count: mixtapeCount, path: "/mixtapes", emoji: "📼" },
+          ].map(({ label, count, path, emoji }) => (
+            <Link key={path} to={path} style={{ textDecoration: "none" }}>
+              <div style={{
+                background: "#111", borderRadius: 12, border: "1px solid #1a1a1a",
+                padding: 16, animation: "itb-fadeInUp 0.3s ease both",
+              }}>
+                <div style={{ fontSize: 20, marginBottom: 6 }}>{emoji}</div>
+                <div style={{ fontFamily: "'Syne', sans-serif", fontSize: 20, fontWeight: 800, color: accent, lineHeight: 1, marginBottom: 2 }}>{count}</div>
+                <div style={{ fontFamily: "'Space Mono', monospace", fontSize: 8, color: "#333", letterSpacing: "0.08em", textTransform: "uppercase" }}>{label}</div>
+              </div>
+            </Link>
+          ))}
+        </div>
+
+        {/* Tape Trades */}
+        <DashCard title="Tape Trades" accent={accent} accentRgb={accentRgb} delay={0.2}>
+          <TapeTradeInbox />
+        </DashCard>
+
+        {/* Following */}
+        {following.length > 0 && (
+          <DashCard
+            title="Following"
+            subtitle={`${following.length} booth${following.length !== 1 ? "s" : ""}`}
+            accent={accent} accentRgb={accentRgb} delay={0.25}
+          >
+            <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+              {following.map((f) => (
+                <div key={f.following_id} style={{
+                  display: "flex", alignItems: "center",
+                  justifyContent: "space-between", gap: 10,
+                }}>
+                  <Link to={`/${f.profiles.slug}`} style={{
+                    fontFamily: "'Syne', sans-serif", fontSize: 13,
+                    color: "#888", textDecoration: "none",
+                  }}>
+                    {f.profiles.display_name}
+                  </Link>
+                  <button onClick={() => handleUnfollow(f.following_id)} style={{
+                    background: "transparent", border: "1px solid #1e1e1e",
+                    borderRadius: 5, color: "#2a2a2a",
+                    fontFamily: "'Space Mono', monospace",
+                    fontSize: 7, letterSpacing: "0.06em",
+                    padding: "3px 8px", cursor: "pointer",
+                  }}>UNFOLLOW</button>
+                </div>
+              ))}
+            </div>
+          </DashCard>
+        )}
+
+        {following.length === 0 && (
+          <DashCard title="Following" accent={accent} accentRgb={accentRgb} delay={0.25}>
+            <p style={{ fontSize: 12, color: palette.textMuted, fontFamily: "'Space Mono', monospace", margin: 0 }}>
+              You're not following any walls yet.{" "}
+              <Link to="/discover" style={{ color: accent, textDecoration: "none" }}>Discover booths</Link>
+            </p>
+          </DashCard>
+        )}
+
+        {/* Activity Feed */}
+        {following.length > 0 && (
+          <DashCard title="Activity" accent={accent} accentRgb={accentRgb} delay={0.3}>
+            <ActivityFeed followedWallIds={following.map((f) => f.following_id)} />
+          </DashCard>
         )}
       </div>
 
-      {/* Activity Feed */}
-      {following.length > 0 && (
-        <div
-          style={{
-            background: palette.cardBg,
-            border: `1px solid ${palette.border}`,
-            borderRadius: 12,
-            padding: 20,
-            marginTop: 24,
-          }}
-        >
-          <h2 style={{ fontSize: 16, fontWeight: 700, margin: "0 0 16px" }}>
-            Activity Feed
-          </h2>
-          <ActivityFeed
-            followedWallIds={following.map((f) => f.following_id)}
-          />
-        </div>
+      {showEmbed && (
+        <EmbedCodeModal slug={profile.slug} type="wall" onClose={() => setShowEmbed(false)} />
       )}
     </div>
   );

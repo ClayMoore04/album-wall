@@ -5,33 +5,59 @@ import { useToast } from "./Toast";
 import { useAuth } from "./AuthProvider";
 import CompatibilityBadge from "./CompatibilityBadge";
 
-const boothPhrases = [
-  "Step into the booth",
-  "Drop into the booth",
-  "Get into the booth",
+const BOOTH_PHRASES = [
+  "Step into the booth.",
+  "Drop into the booth.",
+  "Get into the booth.",
+  "Welcome to the booth.",
 ];
 
-export default function Header({
-  profile,
-  followerCount,
-  statusText,
-  themeAccent,
-}) {
-  const { user } = useAuth();
-  const accent = themeAccent || palette.accent;
-  const isOwnWall = user && profile && user.id === profile.id;
-  const [boothPhrase] = useState(() => boothPhrases[Math.floor(Math.random() * boothPhrases.length)]);
-  const { showToast } = useToast();
-  const prevCount = useRef(followerCount);
-  const [pulsing, setPulsing] = useState(false);
+function hexToRgb(hex = "#ec4899") {
+  const h = hex.replace("#", "");
+  const full = h.length === 3 ? h.split("").map((c) => c + c).join("") : h;
+  const n = parseInt(full, 16);
+  return `${(n >> 16) & 255},${(n >> 8) & 255},${n & 255}`;
+}
 
+function getBoothPhrase(slug = "") {
+  let hash = 0;
+  for (let i = 0; i < slug.length; i++) hash = slug.charCodeAt(i) + ((hash << 5) - hash);
+  return BOOTH_PHRASES[Math.abs(hash) % BOOTH_PHRASES.length];
+}
+
+let headerCssInjected = false;
+function injectHeaderCss() {
+  if (headerCssInjected || typeof document === "undefined") return;
+  const tag = document.createElement("style");
+  tag.textContent = `
+    @keyframes itb-follower-pulse {
+      0%   { transform: scale(1); }
+      30%  { transform: scale(1.18); }
+      100% { transform: scale(1); }
+    }
+  `;
+  document.head.appendChild(tag);
+  headerCssInjected = true;
+}
+
+export default function Header({ profile, followerCount, statusText, themeAccent }) {
+  injectHeaderCss();
   useEffect(() => { injectAnimations(); }, []);
+  const { user } = useAuth();
+  const { showToast } = useToast();
+  const [pulsing, setPulsing] = useState(false);
+  const prevCount = useRef(followerCount);
+
+  const accent = themeAccent || palette.accent;
+  const accentRgb = hexToRgb(accent);
+  const isOwnWall = user && profile && user.id === profile.id;
+  const phrase = getBoothPhrase(profile?.slug || "");
 
   useEffect(() => {
     if (prevCount.current !== followerCount) {
       prevCount.current = followerCount;
       setPulsing(true);
-      const t = setTimeout(() => setPulsing(false), 300);
+      const t = setTimeout(() => setPulsing(false), 400);
       return () => clearTimeout(t);
     }
   }, [followerCount]);
@@ -42,102 +68,157 @@ export default function Header({
   };
 
   return (
-    <header style={{ textAlign: "center", marginBottom: 40, paddingTop: 24 }}>
-      <div
-        style={{
-          display: "inline-flex",
-          alignItems: "center",
-          gap: 8,
-          fontSize: 11,
+    <header style={{ marginBottom: 24, position: "relative" }}>
+
+      {/* Accent strip */}
+      <div style={{
+        width: "100%",
+        height: 3,
+        background: `linear-gradient(90deg, ${accent}, rgba(${accentRgb},0.1))`,
+        borderRadius: 2,
+        marginBottom: 20,
+      }} />
+
+      {/* Main header content */}
+      <div style={{ padding: "0 0px" }}>
+
+        {/* Booth label */}
+        <div style={{
           fontFamily: "'Space Mono', monospace",
-          letterSpacing: 3,
+          fontSize: 9,
+          letterSpacing: "0.14em",
           textTransform: "uppercase",
           color: accent,
-          marginBottom: 12,
-          opacity: 0.8,
-        }}
-      >
-        <span style={{ fontSize: 16 }}>🎙</span> {profile?.display_name || "Someone"}'s Booth
-      </div>
-      <h1
-        style={{
-          fontSize: "clamp(28px, 6vw, 42px)",
+          marginBottom: 6,
+          display: "flex",
+          alignItems: "center",
+          gap: 6,
+        }}>
+          <span>🎙</span>
+          <span>{profile?.display_name ? `${profile.display_name}'s Booth` : "The Booth"}</span>
+        </div>
+
+        {/* Big name */}
+        <h1 style={{
+          fontFamily: "'Syne', sans-serif",
+          fontSize: "clamp(28px, 8vw, 42px)",
           fontWeight: 800,
-          lineHeight: 1.1,
-          margin: "0 0 12px",
+          color: "#e8e6e3",
+          lineHeight: 1.05,
           letterSpacing: "-0.02em",
-        }}
-      >
-        {boothPhrase}<span style={{ color: accent }}>.</span>
-      </h1>
-      <p
-        style={{
+          margin: "0 0 4px",
+        }}>
+          {profile?.display_name || "Anonymous"}
+        </h1>
+
+        {/* Phrase */}
+        <p style={{
+          fontFamily: "'Syne', sans-serif",
+          fontSize: 14,
+          color: `rgba(${accentRgb},0.6)`,
+          margin: "0 0 12px",
+          fontStyle: "italic",
+        }}>
+          {phrase}
+        </p>
+
+        {/* Bio */}
+        <p style={{
+          fontFamily: "'Space Mono', monospace",
           color: palette.textMuted,
           fontSize: 15,
           lineHeight: 1.5,
           maxWidth: 440,
-          margin: "0 auto",
-          fontFamily: "'Space Mono', monospace",
-        }}
-      >
-        {profile?.bio || "Search for your favorite album on Spotify and tell me why I need to hear it."}
-      </p>
+          margin: "0 0 8px",
+        }}>
+          {profile?.bio || "Search for your favorite album on Spotify and tell me why I need to hear it."}
+        </p>
 
-      {/* Status text */}
-      {statusText && (
-        <div
-          style={{
-            marginTop: 10,
+        {/* Status text */}
+        {statusText && (
+          <p style={{
+            fontFamily: "'Syne', sans-serif",
             fontSize: 12,
-            fontFamily: "'Space Mono', monospace",
-            color: accent,
+            color: "#444",
             fontStyle: "italic",
-            opacity: 0.7,
-          }}
-        >
-          {statusText}
-        </div>
-      )}
+            margin: "0 0 12px",
+          }}>
+            "{statusText}"
+          </p>
+        )}
 
-      {followerCount > 0 && (
-        <div
-          style={{
-            marginTop: 8,
-            fontSize: 11,
-            fontFamily: "'Space Mono', monospace",
-            color: palette.textDim,
-          }}
-        >
-          <span style={pulsing ? { display: "inline-block", animation: "booth-countPulse 0.3s ease" } : undefined}>
-            {followerCount} follower{followerCount !== 1 ? "s" : ""}
-          </span>
-        </div>
-      )}
+        {/* Vibe tags */}
+        {profile?.vibe_tags?.length > 0 && (
+          <div style={{ display: "flex", flexWrap: "wrap", gap: 5, marginBottom: 14 }}>
+            {profile.vibe_tags.map((tag) => (
+              <span key={tag} style={{
+                fontFamily: "'Space Mono', monospace",
+                fontSize: 8,
+                letterSpacing: "0.08em",
+                textTransform: "uppercase",
+                color: accent,
+                border: `1px solid rgba(${accentRgb},0.3)`,
+                borderRadius: 3,
+                padding: "2px 7px",
+              }}>{tag}</span>
+            ))}
+          </div>
+        )}
 
-      {user && profile && !isOwnWall && (
-        <div style={{ marginTop: 8 }}>
-          <CompatibilityBadge userId={profile.id} />
-        </div>
-      )}
+        {/* Footer row: follower count + actions */}
+        <div style={{
+          display: "flex",
+          alignItems: "center",
+          gap: 12,
+          flexWrap: "wrap",
+        }}>
+          {followerCount > 0 && (
+            <div style={{
+              fontFamily: "'Space Mono', monospace",
+              fontSize: 9,
+              color: "#3a3a3a",
+              letterSpacing: "0.06em",
+              display: "flex",
+              alignItems: "center",
+              gap: 4,
+            }}>
+              <span
+                style={{
+                  color: accent,
+                  fontWeight: 700,
+                  display: "inline-block",
+                  ...(pulsing ? { animation: "itb-follower-pulse 0.4s ease" } : {}),
+                }}
+              >
+                {followerCount}
+              </span>
+              <span>FOLLOWERS</span>
+            </div>
+          )}
 
-      <button
-        onClick={handleCopyLink}
-        style={{
-          marginTop: 12,
-          padding: "8px 16px",
-          borderRadius: 8,
-          border: `1px solid ${palette.border}`,
-          background: "transparent",
-          color: palette.textMuted,
-          fontSize: 11,
-          fontWeight: 600,
-          fontFamily: "'Space Mono', monospace",
-          cursor: "pointer",
-          transition: "color 0.2s",
-        }}
-      >
-        Copy booth link
-      </button>
+          <button
+            onClick={handleCopyLink}
+            style={{
+              background: "transparent",
+              border: "1px solid #222",
+              borderRadius: 6,
+              color: "#333",
+              fontFamily: "'Space Mono', monospace",
+              fontSize: 8,
+              letterSpacing: "0.06em",
+              padding: "4px 10px",
+              cursor: "pointer",
+              transition: "all 0.15s",
+            }}
+          >
+            COPY LINK
+          </button>
+
+          {user && profile && !isOwnWall && (
+            <CompatibilityBadge userId={profile.id} />
+          )}
+        </div>
+      </div>
     </header>
   );
 }

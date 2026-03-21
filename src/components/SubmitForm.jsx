@@ -1,11 +1,97 @@
 import { useState } from "react";
 import { palette } from "../lib/palette";
-import { inputStyle, labelStyle, pillBtnStyle } from "../lib/styles";
 import { TAGS } from "../lib/tags";
 import SpotifySearch from "./SpotifySearch";
 import AlbumPreview from "./AlbumPreview";
 
-export default function SubmitForm({ onSubmit, ownerName = "them" }) {
+function hexToRgb(hex = "#ec4899") {
+  const h = hex.replace("#", "");
+  const full = h.length === 3 ? h.split("").map((c) => c + c).join("") : h;
+  const n = parseInt(full, 16);
+  return `${(n >> 16) & 255},${(n >> 8) & 255},${n & 255}`;
+}
+
+let submitCssInjected = false;
+function injectSubmitCss() {
+  if (submitCssInjected || typeof document === "undefined") return;
+  const tag = document.createElement("style");
+  tag.textContent = `
+    @keyframes itb-slot-in {
+      from { opacity: 0; transform: translateY(8px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+    @keyframes itb-shimmer {
+      0%   { background-position: -100% 0; }
+      100% { background-position: 200% 0; }
+    }
+    .itb-submit-input:focus {
+      outline: none;
+      border-color: var(--itb-submit-accent) !important;
+    }
+    .itb-submit-textarea:focus {
+      outline: none;
+      border-color: var(--itb-submit-accent) !important;
+    }
+    .itb-submit-btn:active { transform: scale(0.97); }
+  `;
+  document.head.appendChild(tag);
+  submitCssInjected = true;
+}
+
+const SLOT_COPY = [
+  "Drop an album into the booth.",
+  "What should they hear next?",
+  "Slide a record into the slot.",
+  "Leave something worth listening to.",
+  "What's the one they need to hear?",
+];
+
+function getSlotCopy(name = "") {
+  let hash = 0;
+  for (let i = 0; i < name.length; i++) hash = name.charCodeAt(i) + ((hash << 5) - hash);
+  return SLOT_COPY[Math.abs(hash) % SLOT_COPY.length];
+}
+
+function Field({ label, children, accent }) {
+  return (
+    <div style={{ marginBottom: 14, animation: "itb-slot-in 0.25s ease both" }}>
+      <label style={{
+        display: "block",
+        fontFamily: "'Space Mono', monospace",
+        fontSize: 8,
+        letterSpacing: "0.1em",
+        textTransform: "uppercase",
+        color: accent,
+        marginBottom: 6,
+      }}>
+        {label}
+      </label>
+      {children}
+    </div>
+  );
+}
+
+const inputBase = {
+  width: "100%",
+  background: "#0e0e0e",
+  border: "1px solid #1e1e1e",
+  borderRadius: 8,
+  color: "#e8e6e3",
+  fontFamily: "'Syne', sans-serif",
+  fontSize: 13,
+  padding: "10px 12px",
+  boxSizing: "border-box",
+  transition: "border-color 0.15s",
+  lineHeight: 1.4,
+  outline: "none",
+};
+
+export default function SubmitForm({ onSubmit, ownerName = "them", accent = palette.accent }) {
+  injectSubmitCss();
+
+  const accentRgb = hexToRgb(accent);
+  const slotCopy = getSlotCopy(ownerName);
+
   const [selectedAlbum, setSelectedAlbum] = useState(null);
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
@@ -13,6 +99,11 @@ export default function SubmitForm({ onSubmit, ownerName = "them" }) {
   const [selectedTags, setSelectedTags] = useState([]);
   const [submitting, setSubmitting] = useState(false);
   const [honeypot, setHoneypot] = useState("");
+  const [hovering, setHovering] = useState(false);
+
+  if (typeof document !== "undefined") {
+    document.documentElement.style.setProperty("--itb-submit-accent", accent);
+  }
 
   const toggleTag = (tag) => {
     setSelectedTags((prev) =>
@@ -41,8 +132,19 @@ export default function SubmitForm({ onSubmit, ownerName = "them" }) {
   };
 
   return (
-    <div>
-      {/* Honeypot — hidden from real users */}
+    <div
+      onMouseEnter={() => setHovering(true)}
+      onMouseLeave={() => setHovering(false)}
+      style={{
+        position: "relative",
+        background: "#111",
+        borderRadius: 12,
+        border: `1px solid ${hovering ? `rgba(${accentRgb},0.25)` : "#1e1e1e"}`,
+        overflow: "hidden",
+        transition: "border-color 0.2s",
+      }}
+    >
+      {/* Honeypot */}
       <input
         type="text"
         name="website"
@@ -54,110 +156,168 @@ export default function SubmitForm({ onSubmit, ownerName = "them" }) {
         style={{ position: "absolute", left: "-9999px", opacity: 0, height: 0, width: 0 }}
       />
 
-      {/* Spotify Search or Preview */}
-      {selectedAlbum ? (
-        <AlbumPreview
-          album={selectedAlbum}
-          onClear={() => setSelectedAlbum(null)}
-        />
-      ) : (
-        <SpotifySearch onSelect={setSelectedAlbum} />
-      )}
+      {/* Static trim */}
+      <div style={{
+        position: "absolute",
+        top: 0, left: 0, right: 0, height: 2,
+        background: `rgba(${accentRgb},0.35)`,
+        opacity: hovering ? 0 : 1,
+        transition: "opacity 0.2s",
+        zIndex: 1, pointerEvents: "none",
+      }} />
+      {/* Shimmer trim */}
+      <div style={{
+        position: "absolute",
+        top: 0, left: 0, right: 0, height: 2,
+        background: `linear-gradient(90deg,
+          transparent 0%,
+          rgba(${accentRgb},0.3) 20%,
+          rgba(${accentRgb},1) 50%,
+          rgba(${accentRgb},0.3) 80%,
+          transparent 100%)`,
+        backgroundSize: "200% 100%",
+        opacity: hovering ? 1 : 0,
+        transition: "opacity 0.2s",
+        animation: hovering ? "itb-shimmer 1.2s ease infinite" : "none",
+        zIndex: 2, pointerEvents: "none",
+      }} />
 
-      {/* Your Name */}
-      <div style={{ marginBottom: 16 }}>
-        <label style={labelStyle}>
-          Your name <span style={{ color: palette.coral }}>*</span>
-        </label>
-        <input
-          type="text"
-          value={name}
-          onChange={(e) => setName(e.target.value)}
-          placeholder={`So ${ownerName} knows who sent this`}
-          style={inputStyle}
-        />
-      </div>
+      <div style={{ padding: "18px 18px 16px" }}>
 
-      {/* Email */}
-      <div style={{ marginBottom: 16 }}>
-        <label style={labelStyle}>
-          Your email <span style={{ color: palette.coral }}>*</span>
-        </label>
-        <input
-          type="email"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-          placeholder={`So ${ownerName} can let you know what they think`}
-          style={inputStyle}
-        />
-      </div>
-
-      {/* Note */}
-      <div style={{ marginBottom: 28 }}>
-        <label style={labelStyle}>
-          Why this album?{" "}
-          <span style={{ color: palette.textDim }}>(optional)</span>
-        </label>
-        <textarea
-          value={note}
-          onChange={(e) => setNote(e.target.value)}
-          placeholder="Changed my life, perfect road trip album, you NEED to hear track 5..."
-          rows={3}
-          style={{ ...inputStyle, resize: "vertical", minHeight: 80 }}
-        />
-      </div>
-
-      {/* Tags */}
-      <div style={{ marginBottom: 28 }}>
-        <label style={labelStyle}>
-          Vibes <span style={{ color: palette.textDim }}>(optional)</span>
-        </label>
-        <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
-          {TAGS.map((tag) => {
-            const active = selectedTags.includes(tag);
-            return (
-              <button
-                key={tag}
-                type="button"
-                onClick={() => toggleTag(tag)}
-                style={pillBtnStyle(active)}
-              >
-                {tag}
-              </button>
-            );
-          })}
+        {/* Header copy */}
+        <div style={{ marginBottom: 20 }}>
+          <div style={{
+            fontFamily: "'Space Mono', monospace",
+            fontSize: 8,
+            letterSpacing: "0.12em",
+            textTransform: "uppercase",
+            color: `rgba(${accentRgb},0.6)`,
+            marginBottom: 4,
+          }}>
+            REC SUBMISSION
+          </div>
+          <h2 style={{
+            fontFamily: "'Syne', sans-serif",
+            fontSize: 18, fontWeight: 800,
+            color: "#e8e6e3",
+            letterSpacing: "-0.01em",
+            margin: 0,
+          }}>
+            {slotCopy}
+          </h2>
+          <p style={{
+            fontFamily: "'Space Mono', monospace",
+            fontSize: 9, color: "#2e2e2e",
+            letterSpacing: "0.04em",
+            margin: "4px 0 0",
+          }}>
+            submitting to <span style={{ color: "#444" }}>{ownerName}</span>
+          </p>
         </div>
+
+        {/* Spotify Search or Preview */}
+        <div style={{ marginBottom: 16 }}>
+          {selectedAlbum ? (
+            <AlbumPreview
+              album={selectedAlbum}
+              onClear={() => setSelectedAlbum(null)}
+            />
+          ) : (
+            <SpotifySearch onSelect={setSelectedAlbum} />
+          )}
+        </div>
+
+        {/* Your Name */}
+        <Field label="Your name *" accent={accent}>
+          <input
+            className="itb-submit-input"
+            type="text"
+            value={name}
+            onChange={(e) => setName(e.target.value)}
+            placeholder={`So ${ownerName} knows who sent this`}
+            style={inputBase}
+          />
+        </Field>
+
+        {/* Email */}
+        <Field label="Your email *" accent={accent}>
+          <input
+            className="itb-submit-input"
+            type="email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            placeholder={`So ${ownerName} can let you know what they think`}
+            style={inputBase}
+          />
+        </Field>
+
+        {/* Note */}
+        <Field label="Why this album? (optional)" accent={accent}>
+          <textarea
+            className="itb-submit-textarea"
+            value={note}
+            onChange={(e) => setNote(e.target.value)}
+            placeholder="Changed my life, perfect road trip album, you NEED to hear track 5..."
+            rows={3}
+            style={{ ...inputBase, resize: "vertical", minHeight: 80 }}
+          />
+        </Field>
+
+        {/* Tags */}
+        <Field label="Vibes (optional)" accent={accent}>
+          <div style={{ display: "flex", flexWrap: "wrap", gap: 6 }}>
+            {TAGS.map((tag) => {
+              const active = selectedTags.includes(tag);
+              return (
+                <button
+                  key={tag}
+                  type="button"
+                  onClick={() => toggleTag(tag)}
+                  style={{
+                    fontFamily: "'Space Mono', monospace",
+                    fontSize: 8,
+                    letterSpacing: "0.06em",
+                    textTransform: "uppercase",
+                    padding: "4px 10px",
+                    borderRadius: 20,
+                    border: `1px solid ${active ? `rgba(${accentRgb},0.5)` : "#1e1e1e"}`,
+                    background: active ? `rgba(${accentRgb},0.1)` : "transparent",
+                    color: active ? accent : "#333",
+                    cursor: "pointer",
+                    transition: "all 0.15s",
+                  }}
+                >
+                  {tag}
+                </button>
+              );
+            })}
+          </div>
+        </Field>
+
+        {/* Submit */}
+        <button
+          className="itb-submit-btn"
+          onClick={handleSubmit}
+          disabled={!canSubmit || submitting}
+          style={{
+            width: "100%",
+            background: !canSubmit ? "#1a1a1a" : accent,
+            border: "none",
+            borderRadius: 8,
+            color: !canSubmit ? "#333" : "#000",
+            fontFamily: "'Space Mono', monospace",
+            fontSize: 11,
+            fontWeight: 700,
+            letterSpacing: "0.1em",
+            padding: "13px",
+            cursor: !canSubmit ? "not-allowed" : "pointer",
+            transition: "background 0.2s, color 0.2s, transform 0.1s",
+            transform: submitting ? "scale(0.98)" : "scale(1)",
+          }}
+        >
+          {submitting ? "DROPPING..." : `DROP IT IN THE BOOTH`}
+        </button>
       </div>
-
-      {/* Submit */}
-      <button
-        onClick={handleSubmit}
-        disabled={!canSubmit || submitting}
-        style={{
-          width: "100%",
-          padding: "16px 24px",
-          border: "none",
-          borderRadius: 12,
-          fontSize: 15,
-          fontWeight: 700,
-          fontFamily: "'Syne', sans-serif",
-          letterSpacing: "0.02em",
-          cursor: !canSubmit ? "not-allowed" : "pointer",
-          background: !canSubmit ? palette.border : palette.accent,
-          color: !canSubmit ? palette.textDim : "#000",
-          transition: "all 0.25s",
-          transform: submitting ? "scale(0.98)" : "scale(1)",
-        }}
-      >
-        {submitting ? "Sending..." : `Send to ${ownerName} 🎧`}
-      </button>
-
-      <style>{`
-        @keyframes fadeIn {
-          from { opacity: 0; transform: translateY(-4px); }
-          to { opacity: 1; transform: translateY(0); }
-        }
-      `}</style>
     </div>
   );
 }
