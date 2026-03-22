@@ -182,7 +182,7 @@ export default function RoomPage() {
   if (loading || loadingRoom) {
     return (
       <div
-        style={{ textAlign: "center", padding: 80, color: palette.textMuted }}
+        style={{ textAlign: "center", padding: 80, color: "#555" }}
       >
         Loading...
       </div>
@@ -198,7 +198,7 @@ export default function RoomPage() {
         </h2>
         <p
           style={{
-            color: palette.textMuted,
+            color: "#555",
             fontFamily: "'Space Mono', monospace",
             fontSize: 14,
             marginBottom: 24,
@@ -240,7 +240,7 @@ export default function RoomPage() {
             padding: "6px 0",
             border: "none",
             background: "transparent",
-            color: palette.textMuted,
+            color: "#555",
             fontSize: 12,
             fontWeight: 600,
             fontFamily: "'Space Mono', monospace",
@@ -275,9 +275,9 @@ export default function RoomPage() {
               style={{
                 padding: "6px 14px",
                 borderRadius: 8,
-                border: `1px solid ${palette.border}`,
+                border: "1px solid #1e1e1e",
                 background: "transparent",
-                color: palette.textMuted,
+                color: "#555",
                 fontSize: 11,
                 fontWeight: 600,
                 fontFamily: "'Space Mono', monospace",
@@ -293,9 +293,9 @@ export default function RoomPage() {
                 style={{
                   padding: "6px 14px",
                   borderRadius: 8,
-                  border: `1px solid ${palette.border}`,
+                  border: "1px solid #1e1e1e",
                   background: "transparent",
-                  color: palette.coral,
+                  color: "#ef4444",
                   fontSize: 11,
                   fontWeight: 600,
                   fontFamily: "'Space Mono', monospace",
@@ -324,15 +324,15 @@ export default function RoomPage() {
               style={{
                 padding: "4px 10px",
                 borderRadius: 12,
-                background: palette.surface,
-                border: `1px solid ${palette.border}`,
+                background: "#111",
+                border: "1px solid #1e1e1e",
                 fontSize: 11,
                 fontWeight: 600,
                 fontFamily: "'Space Mono', monospace",
                 color:
                   m.user_id === room.created_by
                     ? palette.accent
-                    : palette.text,
+                    : "#e8e6e3",
               }}
             >
               {m.profiles?.display_name || "Member"}
@@ -343,8 +343,8 @@ export default function RoomPage() {
         {/* Search + add tracks */}
         <div
           style={{
-            background: palette.cardBg,
-            border: `1px solid ${palette.border}`,
+            background: "#111",
+            border: "1px solid #1e1e1e",
             borderRadius: 14,
             padding: 20,
             marginBottom: 20,
@@ -355,7 +355,7 @@ export default function RoomPage() {
               fontSize: 12,
               fontWeight: 600,
               fontFamily: "'Space Mono', monospace",
-              color: palette.textMuted,
+              color: "#555",
               letterSpacing: 1,
               textTransform: "uppercase",
               marginBottom: 12,
@@ -372,7 +372,7 @@ export default function RoomPage() {
             fontSize: 12,
             fontWeight: 600,
             fontFamily: "'Space Mono', monospace",
-            color: palette.textMuted,
+            color: "#555",
             letterSpacing: 1,
             textTransform: "uppercase",
             marginBottom: 10,
@@ -386,7 +386,7 @@ export default function RoomPage() {
             style={{
               textAlign: "center",
               padding: 40,
-              color: palette.textMuted,
+              color: "#555",
               fontSize: 13,
               fontFamily: "'Space Mono', monospace",
             }}

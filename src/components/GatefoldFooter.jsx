@@ -1,6 +1,5 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
-import { palette } from "../lib/palette";
 import { formatMs } from "../hooks/useMixtapeData";
 import { useToast } from "./Toast";
 import TapeTradeButton from "./TapeTradeButton";
@@ -165,7 +164,7 @@ export default function GatefoldFooter({ mixtape, mixtapeId, tracks, totalMs, us
     <div
       style={{
         padding: "24px 20px 40px",
-        borderTop: `1px solid ${palette.border}`,
+        borderTop: "1px solid #1e1e1e",
         marginTop: 32,
       }}
     >
@@ -184,9 +183,9 @@ export default function GatefoldFooter({ mixtape, mixtapeId, tracks, totalMs, us
           style={{
             padding: "10px 18px",
             borderRadius: 8,
-            border: `1px solid ${palette.border}`,
+            border: "1px solid #1e1e1e",
             background: "transparent",
-            color: palette.textMuted,
+            color: "#555",
             fontSize: 12,
             fontWeight: 600,
             fontFamily: "'Space Mono', monospace",
@@ -203,9 +202,9 @@ export default function GatefoldFooter({ mixtape, mixtapeId, tracks, totalMs, us
             style={{
               padding: "10px 18px",
               borderRadius: 8,
-              border: `1px solid ${palette.border}`,
+              border: "1px solid #1e1e1e",
               background: "transparent",
-              color: palette.textMuted,
+              color: "#555",
               fontSize: 12,
               fontWeight: 600,
               fontFamily: "'Space Mono', monospace",
@@ -223,9 +222,9 @@ export default function GatefoldFooter({ mixtape, mixtapeId, tracks, totalMs, us
             style={{
               padding: "10px 18px",
               borderRadius: 8,
-              border: `1px solid ${palette.border}`,
+              border: "1px solid #1e1e1e",
               background: "transparent",
-              color: palette.textMuted,
+              color: "#555",
               fontSize: 12,
               fontWeight: 600,
               fontFamily: "'Space Mono', monospace",
@@ -244,9 +243,9 @@ export default function GatefoldFooter({ mixtape, mixtapeId, tracks, totalMs, us
             style={{
               padding: "10px 18px",
               borderRadius: 8,
-              border: `1px solid ${palette.border}`,
+              border: "1px solid #1e1e1e",
               background: "transparent",
-              color: palette.textMuted,
+              color: "#555",
               fontSize: 12,
               fontWeight: 600,
               fontFamily: "'Space Mono', monospace",
@@ -271,7 +270,7 @@ export default function GatefoldFooter({ mixtape, mixtapeId, tracks, totalMs, us
             textAlign: "center",
             fontSize: 11,
             fontFamily: "'Space Mono', monospace",
-            color: palette.textDim,
+            color: "#333",
             marginBottom: 16,
           }}
         >
@@ -287,7 +286,7 @@ export default function GatefoldFooter({ mixtape, mixtapeId, tracks, totalMs, us
           style={{
             fontSize: 10,
             fontFamily: "'Space Mono', monospace",
-            color: palette.textDim,
+            color: "#333",
             textDecoration: "none",
             letterSpacing: 1,
           }}

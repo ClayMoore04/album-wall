@@ -1,7 +1,6 @@
 import { useState, useEffect } from "react";
 import { supabase } from "../lib/supabase";
 import { useAuth } from "./AuthProvider";
-import { palette } from "../lib/palette";
 
 function timeAgo(dateStr) {
   const diff = Date.now() - new Date(dateStr).getTime();
@@ -76,7 +75,7 @@ export default function GatefoldComments({ mixtapeId, accent }) {
           marginBottom: 20,
         }}
       >
-        <div style={{ flex: 1, height: 1, background: palette.border }} />
+        <div style={{ flex: 1, height: 1, background: "#1e1e1e" }} />
         <span
           style={{
             fontSize: 11,
@@ -89,7 +88,7 @@ export default function GatefoldComments({ mixtapeId, accent }) {
         >
           GUESTBOOK
         </span>
-        <div style={{ flex: 1, height: 1, background: palette.border }} />
+        <div style={{ flex: 1, height: 1, background: "#1e1e1e" }} />
       </div>
 
       {/* Comments */}
@@ -107,7 +106,7 @@ export default function GatefoldComments({ mixtapeId, accent }) {
               key={c.id}
               style={{
                 padding: "14px 16px",
-                background: palette.cardBg,
+                background: "#111",
                 borderLeft: `3px solid ${accent}`,
                 borderRadius: "0 8px 8px 0",
                 transform: `rotate(${getRotation(c.id)}deg)`,
@@ -126,7 +125,7 @@ export default function GatefoldComments({ mixtapeId, accent }) {
                     fontSize: 13,
                     fontWeight: 700,
                     fontFamily: "'Syne', sans-serif",
-                    color: palette.text,
+                    color: "#e8e6e3",
                   }}
                 >
                   {c.author_name}
@@ -135,7 +134,7 @@ export default function GatefoldComments({ mixtapeId, accent }) {
                   style={{
                     fontSize: 10,
                     fontFamily: "'Space Mono', monospace",
-                    color: palette.textDim,
+                    color: "#333",
                   }}
                 >
                   {timeAgo(c.created_at)}
@@ -144,7 +143,7 @@ export default function GatefoldComments({ mixtapeId, accent }) {
               <div
                 style={{
                   fontSize: 13,
-                  color: palette.text,
+                  color: "#e8e6e3",
                   lineHeight: 1.5,
                 }}
               >
@@ -166,10 +165,10 @@ export default function GatefoldComments({ mixtapeId, accent }) {
             maxLength={40}
             style={{
               padding: "10px 14px",
-              background: palette.surface,
-              border: `1px solid ${palette.border}`,
+              background: "#0e0e0e",
+              border: "1px solid #1e1e1e",
               borderRadius: 8,
-              color: palette.text,
+              color: "#e8e6e3",
               fontSize: 13,
               fontFamily: "'Syne', sans-serif",
               outline: "none",
@@ -188,10 +187,10 @@ export default function GatefoldComments({ mixtapeId, accent }) {
             style={{
               flex: 1,
               padding: "10px 14px",
-              background: palette.surface,
-              border: `1px solid ${palette.border}`,
+              background: "#0e0e0e",
+              border: "1px solid #1e1e1e",
               borderRadius: 8,
-              color: palette.text,
+              color: "#e8e6e3",
               fontSize: 13,
               fontFamily: "'Syne', sans-serif",
               outline: "none",
@@ -221,7 +220,7 @@ export default function GatefoldComments({ mixtapeId, accent }) {
         <div
           style={{
             fontSize: 10,
-            color: palette.textDim,
+            color: "#333",
             fontFamily: "'Space Mono', monospace",
             textAlign: "right",
           }}

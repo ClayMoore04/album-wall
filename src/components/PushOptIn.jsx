@@ -8,17 +8,6 @@ import {
 
 const DISMISS_KEY = "push-optin-dismissed";
 
-const palette = {
-  bg: "#0a0a0a",
-  accent: "#1DB954",
-  text: "#e8e6e3",
-  textMuted: "#777",
-  border: "#222",
-  surface: "#141414",
-  cardBg: "rgba(255,255,255,0.03)",
-  coral: "#ff6b6b",
-};
-
 export default function PushOptIn() {
   const { user } = useAuth();
   const [supported, setSupported] = useState(false);
@@ -80,8 +69,8 @@ export default function PushOptIn() {
     return (
       <div
         style={{
-          background: palette.cardBg,
-          border: `1px solid ${palette.border}`,
+          background: "#111",
+          border: "1px solid #1e1e1e",
           borderRadius: 12,
           padding: 20,
           marginBottom: 24,
@@ -100,7 +89,7 @@ export default function PushOptIn() {
                 fontSize: 12,
                 fontWeight: 600,
                 fontFamily: "'Space Mono', monospace",
-                color: palette.accent,
+                color: "#1DB954",
                 letterSpacing: "0.03em",
               }}
             >
@@ -112,10 +101,10 @@ export default function PushOptIn() {
             disabled={loading}
             style={{
               padding: "6px 14px",
-              border: `1px solid ${palette.border}`,
+              border: "1px solid #1e1e1e",
               borderRadius: 8,
               background: "transparent",
-              color: palette.textMuted,
+              color: "#555",
               fontSize: 11,
               fontWeight: 600,
               fontFamily: "'Space Mono', monospace",
@@ -136,8 +125,8 @@ export default function PushOptIn() {
   return (
     <div
       style={{
-        background: palette.cardBg,
-        border: `1px solid ${palette.border}`,
+        background: "#111",
+        border: "1px solid #1e1e1e",
         borderRadius: 12,
         padding: 20,
         marginBottom: 24,
@@ -152,7 +141,7 @@ export default function PushOptIn() {
           right: 12,
           background: "transparent",
           border: "none",
-          color: palette.textMuted,
+          color: "#555",
           fontSize: 16,
           cursor: "pointer",
           padding: "4px 8px",
@@ -168,7 +157,7 @@ export default function PushOptIn() {
           fontSize: 15,
           fontWeight: 700,
           fontFamily: "'Syne', sans-serif",
-          color: palette.text,
+          color: "#e8e6e3",
           margin: "0 0 8px",
         }}
       >
@@ -178,7 +167,7 @@ export default function PushOptIn() {
         style={{
           fontSize: 12,
           fontFamily: "'Space Mono', monospace",
-          color: palette.textMuted,
+          color: "#555",
           margin: "0 0 16px",
           lineHeight: 1.5,
         }}
@@ -197,7 +186,7 @@ export default function PushOptIn() {
           fontWeight: 700,
           fontFamily: "'Space Mono', monospace",
           cursor: loading ? "not-allowed" : "pointer",
-          background: palette.accent,
+          background: "#1DB954",
           color: "#000",
           opacity: loading ? 0.6 : 1,
           transition: "all 0.2s",

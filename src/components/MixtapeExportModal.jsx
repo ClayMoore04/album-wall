@@ -36,8 +36,8 @@ export default function MixtapeExportModal({
           bottom: 0,
           left: 0,
           right: 0,
-          background: palette.surface,
-          borderTop: `1px solid ${palette.border}`,
+          background: "#111",
+          borderTop: `1px solid #1e1e1e`,
           padding: "14px 20px",
           display: "flex",
           alignItems: "center",
@@ -50,7 +50,7 @@ export default function MixtapeExportModal({
           style={{
             fontSize: 13,
             fontFamily: "'Space Mono', monospace",
-            color: palette.textMuted,
+            color: "#555",
           }}
         >
           {tracks.length} track{tracks.length !== 1 ? "s" : ""} &middot;{" "}
@@ -75,14 +75,14 @@ export default function MixtapeExportModal({
           }}
           style={{
             padding: "10px 16px",
-            border: `1px solid ${palette.border}`,
+            border: `1px solid #1e1e1e`,
             borderRadius: 10,
             fontSize: 12,
             fontWeight: 600,
             fontFamily: "'Space Mono', monospace",
             cursor: "pointer",
             background: "transparent",
-            color: copiedTracks ? palette.accent : palette.textMuted,
+            color: copiedTracks ? palette.accent : "#555",
             transition: "all 0.2s",
           }}
         >
@@ -136,8 +136,8 @@ export default function MixtapeExportModal({
         >
           <div
             style={{
-              background: palette.surface,
-              border: `1px solid ${palette.border}`,
+              background: "#111",
+              border: `1px solid #1e1e1e`,
               borderRadius: 16,
               padding: 28,
               width: "100%",
@@ -154,7 +154,7 @@ export default function MixtapeExportModal({
                 </div>
                 <p
                   style={{
-                    color: palette.textMuted,
+                    color: "#555",
                     fontFamily: "'Space Mono', monospace",
                     fontSize: 13,
                     marginBottom: 4,
@@ -191,11 +191,11 @@ export default function MixtapeExportModal({
                     }}
                     style={{
                       padding: "8px 16px",
-                      border: `1px solid ${palette.border}`,
+                      border: `1px solid #1e1e1e`,
                       borderRadius: 8,
                       fontSize: 12,
                       fontFamily: "'Space Mono', monospace",
-                      color: palette.textMuted,
+                      color: "#555",
                       background: "transparent",
                       cursor: "pointer",
                     }}
@@ -214,7 +214,7 @@ export default function MixtapeExportModal({
                 <div
                   style={{
                     fontSize: 12,
-                    color: palette.textMuted,
+                    color: "#555",
                     fontFamily: "'Space Mono', monospace",
                     marginBottom: 20,
                   }}
@@ -230,7 +230,7 @@ export default function MixtapeExportModal({
                       fontSize: 11,
                       fontWeight: 600,
                       fontFamily: "'Space Mono', monospace",
-                      color: palette.textMuted,
+                      color: "#555",
                       textTransform: "uppercase",
                       letterSpacing: 1,
                       marginBottom: 6,
@@ -245,10 +245,10 @@ export default function MixtapeExportModal({
                     style={{
                       width: "100%",
                       padding: "12px 14px",
-                      background: palette.bg,
-                      border: `1px solid ${palette.border}`,
+                      background: "#0a0a0a",
+                      border: `1px solid #1e1e1e`,
                       borderRadius: 10,
-                      color: palette.text,
+                      color: "#e8e6e3",
                       fontSize: 14,
                       fontFamily: "'Syne', sans-serif",
                       outline: "none",
@@ -272,7 +272,7 @@ export default function MixtapeExportModal({
                       height: 22,
                       borderRadius: 11,
                       border: "none",
-                      background: isPublic ? palette.accent : palette.border,
+                      background: isPublic ? palette.accent : "#1e1e1e",
                       cursor: "pointer",
                       position: "relative",
                       transition: "background 0.2s",
@@ -295,7 +295,7 @@ export default function MixtapeExportModal({
                     style={{
                       fontSize: 12,
                       fontFamily: "'Space Mono', monospace",
-                      color: palette.textMuted,
+                      color: "#555",
                     }}
                   >
                     {isPublic ? "Public playlist" : "Private playlist"}
@@ -325,7 +325,7 @@ export default function MixtapeExportModal({
                     >
                       <span
                         style={{
-                          color: palette.textDim,
+                          color: "#333",
                           fontFamily: "'Space Mono', monospace",
                           fontSize: 10,
                           width: 18,
@@ -349,7 +349,7 @@ export default function MixtapeExportModal({
                         <span style={{ fontWeight: 600 }}>
                           {track.track_name}
                         </span>
-                        <span style={{ color: palette.textDim }}>
+                        <span style={{ color: "#333" }}>
                           {" — "}
                           {track.artist_name}
                         </span>
@@ -362,7 +362,7 @@ export default function MixtapeExportModal({
                   <div
                     style={{
                       fontSize: 12,
-                      color: palette.coral,
+                      color: "#ef4444",
                       fontFamily: "'Space Mono', monospace",
                       marginBottom: 12,
                     }}
@@ -389,11 +389,11 @@ export default function MixtapeExportModal({
                           : "pointer",
                       background:
                         exporting || !playlistName.trim()
-                          ? palette.border
+                          ? "#1e1e1e"
                           : palette.accent,
                       color:
                         exporting || !playlistName.trim()
-                          ? palette.textDim
+                          ? "#333"
                           : "#000",
                       transition: "all 0.2s",
                       marginBottom: 8,
@@ -431,14 +431,14 @@ export default function MixtapeExportModal({
                   style={{
                     width: "100%",
                     padding: "12px",
-                    border: `1px solid ${palette.border}`,
+                    border: `1px solid #1e1e1e`,
                     borderRadius: 10,
                     fontSize: 13,
                     fontWeight: 600,
                     fontFamily: "'Space Mono', monospace",
                     cursor: "pointer",
                     background: "transparent",
-                    color: palette.textMuted,
+                    color: "#555",
                   }}
                 >
                   Cancel

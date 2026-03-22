@@ -1,7 +1,19 @@
 import { Link } from "react-router-dom";
 import { useAuth } from "./AuthProvider";
 import { palette } from "../lib/palette";
-import { secondaryBtnStyle } from "../lib/styles";
+
+const secondaryBtnStyle = {
+  padding: "10px 24px",
+  border: "1px solid #1e1e1e",
+  borderRadius: 10,
+  fontSize: 13,
+  fontWeight: 600,
+  fontFamily: "'Space Mono', monospace",
+  cursor: "pointer",
+  background: "transparent",
+  color: "#555",
+  transition: "all 0.2s",
+};
 
 export default function ThankYou({ onAnother, onViewWall, ownerName = "They", submitterName = "" }) {
   const { user } = useAuth();
@@ -20,7 +32,7 @@ export default function ThankYou({ onAnother, onViewWall, ownerName = "They", su
       </h2>
       <p
         style={{
-          color: palette.textMuted,
+          color: "#555",
           fontFamily: "'Space Mono', monospace",
           fontSize: 14,
           lineHeight: 1.6,
@@ -54,7 +66,7 @@ export default function ThankYou({ onAnother, onViewWall, ownerName = "They", su
             marginTop: 40,
             padding: 24,
             background: `linear-gradient(135deg, rgba(29,185,84,0.08), rgba(255,107,107,0.06))`,
-            border: `1px solid ${palette.border}`,
+            border: "1px solid #1e1e1e",
             borderRadius: 14,
             textAlign: "center",
           }}
@@ -71,7 +83,7 @@ export default function ThankYou({ onAnother, onViewWall, ownerName = "They", su
           <p
             style={{
               fontSize: 12,
-              color: palette.textMuted,
+              color: "#555",
               fontFamily: "'Space Mono', monospace",
               lineHeight: 1.5,
               marginBottom: 16,

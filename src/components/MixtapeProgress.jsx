@@ -25,8 +25,8 @@ export default function MixtapeProgress({
       {/* Time Bar */}
       <div
         style={{
-          background: palette.surface,
-          border: `1px solid ${palette.border}`,
+          background: "#111",
+          border: `1px solid #1e1e1e`,
           borderRadius: 10,
           padding: "14px 16px",
           marginBottom: 20,
@@ -41,12 +41,12 @@ export default function MixtapeProgress({
             marginBottom: 8,
           }}
         >
-          <span style={{ color: palette.text, fontWeight: 700 }}>
+          <span style={{ color: "#e8e6e3", fontWeight: 700 }}>
             {formatMs(totalMs)} / 90:00
           </span>
           <span
             style={{
-              color: isOverTime ? palette.coral : palette.textMuted,
+              color: isOverTime ? "#ef4444" : "#555",
             }}
           >
             {isOverTime
@@ -58,7 +58,7 @@ export default function MixtapeProgress({
           style={{
             height: 6,
             borderRadius: 3,
-            background: palette.border,
+            background: "#1e1e1e",
             overflow: "hidden",
             position: "relative",
           }}
@@ -68,7 +68,7 @@ export default function MixtapeProgress({
               height: "100%",
               width: `${progressPercent}%`,
               borderRadius: 3,
-              background: isNearFull ? palette.coral : palette.accent,
+              background: isNearFull ? "#ef4444" : palette.accent,
               transition: "width 0.3s, background 0.3s",
             }}
           />
@@ -79,7 +79,7 @@ export default function MixtapeProgress({
               top: -1,
               bottom: -1,
               width: 2,
-              background: palette.textDim,
+              background: "#333",
               borderRadius: 1,
             }}
           />
@@ -96,7 +96,7 @@ export default function MixtapeProgress({
           <span style={{ color: palette.accent }}>
             SIDE A ({formatMs(sideAMs)})
           </span>
-          <span style={{ color: palette.coral }}>
+          <span style={{ color: "#ef4444" }}>
             SIDE B ({formatMs(sideBMs)})
           </span>
         </div>
@@ -106,8 +106,8 @@ export default function MixtapeProgress({
       {topPlayerIndex !== null && tracks[topPlayerIndex] && (
         <div
           style={{
-            background: palette.surface,
-            border: `1px solid ${palette.border}`,
+            background: "#111",
+            border: `1px solid #1e1e1e`,
             borderRadius: 10,
             padding: "12px 14px",
             marginBottom: 12,
@@ -126,7 +126,7 @@ export default function MixtapeProgress({
                 fontSize: 11,
                 fontWeight: 600,
                 fontFamily: "'Space Mono', monospace",
-                color: palette.textMuted,
+                color: "#555",
                 letterSpacing: 1,
                 textTransform: "uppercase",
               }}
@@ -139,10 +139,10 @@ export default function MixtapeProgress({
                 disabled={topPlayerIndex === 0}
                 style={{
                   padding: "4px 10px",
-                  border: `1px solid ${palette.border}`,
+                  border: `1px solid #1e1e1e`,
                   borderRadius: 6,
                   background: "transparent",
-                  color: topPlayerIndex === 0 ? palette.textDim : palette.textMuted,
+                  color: topPlayerIndex === 0 ? "#333" : "#555",
                   fontSize: 11,
                   fontFamily: "'Space Mono', monospace",
                   cursor: topPlayerIndex === 0 ? "default" : "pointer",
@@ -157,13 +157,13 @@ export default function MixtapeProgress({
                 disabled={topPlayerIndex === tracks.length - 1}
                 style={{
                   padding: "4px 10px",
-                  border: `1px solid ${palette.border}`,
+                  border: `1px solid #1e1e1e`,
                   borderRadius: 6,
                   background: "transparent",
                   color:
                     topPlayerIndex === tracks.length - 1
-                      ? palette.textDim
-                      : palette.textMuted,
+                      ? "#333"
+                      : "#555",
                   fontSize: 11,
                   fontFamily: "'Space Mono', monospace",
                   cursor:
@@ -176,10 +176,10 @@ export default function MixtapeProgress({
                 onClick={() => setTopPlayerIndex(null)}
                 style={{
                   padding: "4px 10px",
-                  border: `1px solid ${palette.border}`,
+                  border: `1px solid #1e1e1e`,
                   borderRadius: 6,
                   background: "transparent",
-                  color: palette.coral,
+                  color: "#ef4444",
                   fontSize: 11,
                   fontFamily: "'Space Mono', monospace",
                   cursor: "pointer",
@@ -197,7 +197,7 @@ export default function MixtapeProgress({
             }}
           >
             {tracks[topPlayerIndex].track_name}
-            <span style={{ color: palette.textMuted, fontWeight: 400 }}>
+            <span style={{ color: "#555", fontWeight: 400 }}>
               {" "}
               — {tracks[topPlayerIndex].artist_name}
             </span>
@@ -222,7 +222,7 @@ export default function MixtapeProgress({
             onClick={() => setTopPlayerIndex(0)}
             style={{
               padding: "8px 20px",
-              border: `1px solid ${palette.border}`,
+              border: `1px solid #1e1e1e`,
               borderRadius: 8,
               background: "transparent",
               color: palette.accent,
@@ -251,8 +251,8 @@ export default function MixtapeProgress({
             background: isMyTurn
               ? "rgba(29,185,84,0.08)"
               : "rgba(255,255,255,0.03)",
-            border: `1px solid ${isMyTurn ? "rgba(29,185,84,0.2)" : palette.border}`,
-            color: isMyTurn ? palette.accent : palette.textMuted,
+            border: `1px solid ${isMyTurn ? "rgba(29,185,84,0.2)" : "#1e1e1e"}`,
+            color: isMyTurn ? palette.accent : "#555",
           }}
         >
           {isMyTurn
@@ -270,7 +270,7 @@ export default function MixtapeProgress({
             marginBottom: 12,
             fontSize: 12,
             fontFamily: "'Space Mono', monospace",
-            color: palette.coral,
+            color: "#ef4444",
             background: "rgba(255,107,107,0.08)",
             border: `1px solid rgba(255,107,107,0.2)`,
             borderRadius: 8,

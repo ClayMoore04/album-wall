@@ -1,4 +1,3 @@
-import { palette } from "../lib/palette";
 import { getColor } from "../lib/palette";
 
 export default function AlbumPreview({ album, onClear }) {
@@ -8,8 +7,8 @@ export default function AlbumPreview({ album, onClear }) {
         display: "flex",
         alignItems: "center",
         gap: 14,
-        background: palette.cardBg,
-        border: `1px solid ${palette.border}`,
+        background: "#111",
+        border: "1px solid #1e1e1e",
         borderRadius: 14,
         padding: 14,
         marginBottom: 20,
@@ -84,7 +83,7 @@ export default function AlbumPreview({ album, onClear }) {
                     ? "rgba(255,107,107,0.15)"
                     : "rgba(29,185,84,0.15)",
                 color:
-                  album.type === "track" ? palette.coral : palette.accent,
+                  album.type === "track" ? "#ff6b6b" : "#1DB954",
               }}
             >
               {album.type === "track" ? "Song" : "Album"}
@@ -94,7 +93,7 @@ export default function AlbumPreview({ album, onClear }) {
         <div
           style={{
             fontSize: 12,
-            color: palette.textMuted,
+            color: "#555",
             fontFamily: "'Space Mono', monospace",
           }}
         >
@@ -111,7 +110,7 @@ export default function AlbumPreview({ album, onClear }) {
             alignItems: "center",
             gap: 5,
             padding: "6px 12px",
-            background: palette.accent,
+            background: "#1DB954",
             color: "#000",
             borderRadius: 20,
             fontSize: 11,
@@ -130,10 +129,10 @@ export default function AlbumPreview({ album, onClear }) {
             justifyContent: "center",
             width: 28,
             height: 28,
-            border: `1px solid ${palette.border}`,
+            border: "1px solid #1e1e1e",
             borderRadius: 20,
             background: "transparent",
-            color: palette.textMuted,
+            color: "#555",
             cursor: "pointer",
             fontSize: 14,
           }}

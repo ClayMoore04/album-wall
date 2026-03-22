@@ -1,6 +1,5 @@
 import { useState, useEffect } from "react";
 import { supabase } from "../lib/supabase";
-import { palette } from "../lib/palette";
 import { injectAnimations } from "../lib/animations";
 
 const REACTIONS = [
@@ -72,20 +71,20 @@ export default function ReactionBar({ submissionId, reactions = {} }) {
               padding: "4px 10px",
               borderRadius: 16,
               border: hasReacted
-                ? `1px solid ${palette.accent}`
-                : `1px solid ${palette.border}`,
+                ? "1px solid #1DB954"
+                : "1px solid #1e1e1e",
               background: hasReacted ? "rgba(29,185,84,0.1)" : "transparent",
               cursor: hasReacted ? "default" : "pointer",
               fontSize: 13,
-              color: palette.text,
+              color: "#e8e6e3",
               fontFamily: "'Space Mono', monospace",
               transition: "all 0.15s",
               opacity: hasReacted ? 0.8 : 1,
             }}
           >
-            <span style={poppingKey === key ? { display: "inline-block", animation: "booth-emojiPop 0.35s ease" } : undefined}>{emoji}</span>
+            <span style={poppingKey === key ? { display: "inline-block", animation: "itb-emojiPop 0.35s ease" } : undefined}>{emoji}</span>
             {count > 0 && (
-              <span style={{ fontSize: 11, color: palette.textMuted }}>
+              <span style={{ fontSize: 11, color: "#555" }}>
                 {count}
               </span>
             )}

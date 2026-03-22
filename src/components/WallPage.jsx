@@ -297,7 +297,7 @@ export default function WallPage() {
         </h2>
         <p
           style={{
-            color: palette.textMuted,
+            color: "#555",
             fontFamily: "'Space Mono', monospace",
             fontSize: 14,
             marginBottom: 24,
@@ -328,7 +328,7 @@ export default function WallPage() {
   if (!profile) {
     return (
       <div
-        style={{ textAlign: "center", padding: 80, color: palette.textMuted }}
+        style={{ textAlign: "center", padding: 80, color: "#555" }}
       >
         Loading...
       </div>

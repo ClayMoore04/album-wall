@@ -73,9 +73,9 @@ export default function TapeTradeButton({ mixtape }) {
         style={{
           padding: "4px 12px",
           borderRadius: 6,
-          border: `1px solid ${palette.border}`,
+          border: "1px solid #1e1e1e",
           background: "transparent",
-          color: palette.coral,
+          color: "#ef4444",
           fontSize: 10,
           fontFamily: "'Space Mono', monospace",
           cursor: "pointer",
@@ -104,8 +104,8 @@ export default function TapeTradeButton({ mixtape }) {
         >
           <div
             style={{
-              background: palette.surface,
-              border: `1px solid ${palette.border}`,
+              background: "#111",
+              border: "1px solid #1e1e1e",
               borderRadius: 16,
               padding: 28,
               width: "100%",
@@ -120,7 +120,7 @@ export default function TapeTradeButton({ mixtape }) {
                 </div>
                 <p
                   style={{
-                    color: palette.textMuted,
+                    color: "#555",
                     fontFamily: "'Space Mono', monospace",
                     fontSize: 12,
                     marginBottom: 20,
@@ -156,7 +156,7 @@ export default function TapeTradeButton({ mixtape }) {
                 <div
                   style={{
                     fontSize: 12,
-                    color: palette.textMuted,
+                    color: "#555",
                     fontFamily: "'Space Mono', monospace",
                     marginBottom: 20,
                     lineHeight: 1.5,
@@ -172,7 +172,7 @@ export default function TapeTradeButton({ mixtape }) {
                     style={{
                       padding: 20,
                       textAlign: "center",
-                      color: palette.textMuted,
+                      color: "#555",
                       fontSize: 12,
                       fontFamily: "'Space Mono', monospace",
                     }}
@@ -184,7 +184,7 @@ export default function TapeTradeButton({ mixtape }) {
                     style={{
                       padding: 20,
                       textAlign: "center",
-                      color: palette.textMuted,
+                      color: "#555",
                       fontSize: 12,
                       fontFamily: "'Space Mono', monospace",
                     }}
@@ -211,14 +211,14 @@ export default function TapeTradeButton({ mixtape }) {
                           width: "100%",
                           padding: "10px 14px",
                           border: `1px solid ${
-                            selectedId === m.id ? palette.coral : palette.border
+                            selectedId === m.id ? "#ef4444" : "#1e1e1e"
                           }`,
                           borderRadius: 8,
                           background:
                             selectedId === m.id
                               ? "rgba(255,107,107,0.1)"
                               : "transparent",
-                          color: palette.text,
+                          color: "#e8e6e3",
                           fontSize: 13,
                           fontWeight: 600,
                           cursor: "pointer",
@@ -235,7 +235,7 @@ export default function TapeTradeButton({ mixtape }) {
                   <div
                     style={{
                       fontSize: 12,
-                      color: palette.coral,
+                      color: "#ef4444",
                       fontFamily: "'Space Mono', monospace",
                       marginBottom: 12,
                     }}
@@ -259,8 +259,8 @@ export default function TapeTradeButton({ mixtape }) {
                       cursor:
                         !selectedId || sending ? "not-allowed" : "pointer",
                       background:
-                        !selectedId || sending ? palette.border : palette.coral,
-                      color: !selectedId || sending ? palette.textDim : "#000",
+                        !selectedId || sending ? "#1e1e1e" : "#ef4444",
+                      color: !selectedId || sending ? "#333" : "#000",
                       transition: "all 0.2s",
                     }}
                   >
@@ -270,14 +270,14 @@ export default function TapeTradeButton({ mixtape }) {
                     onClick={() => setShowModal(false)}
                     style={{
                       padding: "12px 20px",
-                      border: `1px solid ${palette.border}`,
+                      border: "1px solid #1e1e1e",
                       borderRadius: 10,
                       fontSize: 13,
                       fontWeight: 600,
                       fontFamily: "'Space Mono', monospace",
                       cursor: "pointer",
                       background: "transparent",
-                      color: palette.textMuted,
+                      color: "#555",
                     }}
                   >
                     Cancel

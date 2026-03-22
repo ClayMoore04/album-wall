@@ -125,7 +125,7 @@ export default function Header({ profile, followerCount, statusText, themeAccent
         {/* Bio */}
         <p style={{
           fontFamily: "'Space Mono', monospace",
-          color: palette.textMuted,
+          color: "#555",
           fontSize: 15,
           lineHeight: 1.5,
           maxWidth: 440,

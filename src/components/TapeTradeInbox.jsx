@@ -30,7 +30,7 @@ function TapeUnboxing({ trade, onOpen }) {
       style={{
         padding: 20,
         background: `linear-gradient(135deg, rgba(255,107,107,0.1), rgba(29,185,84,0.06))`,
-        border: `1px solid ${palette.coral}`,
+        border: "1px solid #ef4444",
         borderRadius: 14,
         textAlign: "center",
         cursor: phase === "sealed" ? "pointer" : "default",
@@ -58,7 +58,7 @@ function TapeUnboxing({ trade, onOpen }) {
       >
         {phase === "sealed" && (
           <>
-            <span style={{ color: palette.coral }}>
+            <span style={{ color: "#ef4444" }}>
               {trade.sender?.display_name}
             </span>{" "}
             made you a mixtape
@@ -68,7 +68,7 @@ function TapeUnboxing({ trade, onOpen }) {
         {phase === "revealed" && (
           <Link
             to={`/mixtape/${trade.sender_mixtape?.id}`}
-            style={{ color: palette.coral, textDecoration: "none", fontSize: 16 }}
+            style={{ color: "#ef4444", textDecoration: "none", fontSize: 16 }}
           >
             {trade.sender_mixtape?.title}
           </Link>
@@ -78,7 +78,7 @@ function TapeUnboxing({ trade, onOpen }) {
         <div
           style={{
             fontSize: 11,
-            color: palette.textMuted,
+            color: "#555",
             fontFamily: "'Space Mono', monospace",
             marginTop: 4,
           }}
@@ -186,7 +186,7 @@ export default function TapeTradeInbox() {
         style={{
           padding: 16,
           textAlign: "center",
-          color: palette.textMuted,
+          color: "#555",
           fontSize: 12,
           fontFamily: "'Space Mono', monospace",
         }}
@@ -201,7 +201,7 @@ export default function TapeTradeInbox() {
       <p
         style={{
           fontSize: 12,
-          color: palette.textMuted,
+          color: "#555",
           fontFamily: "'Space Mono', monospace",
           margin: 0,
         }}
@@ -236,8 +236,8 @@ export default function TapeTradeInbox() {
             key={trade.id}
             style={{
               padding: "12px 14px",
-              background: palette.surface,
-              border: `1px solid ${palette.border}`,
+              background: "#111",
+              border: "1px solid #1e1e1e",
               borderRadius: 10,
             }}
           >
@@ -260,8 +260,8 @@ export default function TapeTradeInbox() {
                   color: isCompleted
                     ? palette.accent
                     : isDeclined
-                    ? palette.textDim
-                    : palette.coral,
+                    ? "#333"
+                    : "#ef4444",
                 }}
               >
                 {isCompleted
@@ -275,7 +275,7 @@ export default function TapeTradeInbox() {
               <span
                 style={{
                   fontSize: 10,
-                  color: palette.textDim,
+                  color: "#333",
                   fontFamily: "'Space Mono', monospace",
                 }}
               >
@@ -291,7 +291,7 @@ export default function TapeTradeInbox() {
                   <Link
                     to={`/mixtape/${trade.sender_mixtape?.id}`}
                     style={{
-                      color: palette.coral,
+                      color: "#ef4444",
                       textDecoration: "none",
                       fontWeight: 700,
                     }}
@@ -318,7 +318,7 @@ export default function TapeTradeInbox() {
                   <Link
                     to={`/mixtape/${trade.sender_mixtape?.id}`}
                     style={{
-                      color: palette.coral,
+                      color: "#ef4444",
                       textDecoration: "none",
                       fontWeight: 700,
                     }}
@@ -334,7 +334,7 @@ export default function TapeTradeInbox() {
               <div
                 style={{
                   fontSize: 12,
-                  color: palette.textMuted,
+                  color: "#555",
                   fontFamily: "'Space Mono', monospace",
                 }}
               >
@@ -342,7 +342,7 @@ export default function TapeTradeInbox() {
                 <Link
                   to={`/mixtape/${trade.receiver_mixtape.id}`}
                   style={{
-                    color: palette.coral,
+                    color: "#ef4444",
                     textDecoration: "none",
                     fontWeight: 600,
                   }}
@@ -358,7 +358,7 @@ export default function TapeTradeInbox() {
                 <span
                   style={{
                     fontSize: 11,
-                    color: palette.textDim,
+                    color: "#333",
                     fontFamily: "'Space Mono', monospace",
                     flex: 1,
                     alignSelf: "center",
@@ -370,10 +370,10 @@ export default function TapeTradeInbox() {
                   onClick={() => handleCancel(trade.id)}
                   style={{
                     padding: "4px 10px",
-                    border: `1px solid ${palette.border}`,
+                    border: "1px solid #1e1e1e",
                     borderRadius: 6,
                     background: "transparent",
-                    color: palette.textMuted,
+                    color: "#555",
                     fontSize: 10,
                     fontWeight: 600,
                     fontFamily: "'Space Mono', monospace",
@@ -393,7 +393,7 @@ export default function TapeTradeInbox() {
                     padding: "6px 14px",
                     border: "none",
                     borderRadius: 8,
-                    background: palette.coral,
+                    background: "#ef4444",
                     color: "#000",
                     fontSize: 11,
                     fontWeight: 700,
@@ -408,10 +408,10 @@ export default function TapeTradeInbox() {
                   disabled={processing}
                   style={{
                     padding: "6px 14px",
-                    border: `1px solid ${palette.border}`,
+                    border: "1px solid #1e1e1e",
                     borderRadius: 8,
                     background: "transparent",
-                    color: palette.textMuted,
+                    color: "#555",
                     fontSize: 11,
                     fontWeight: 600,
                     fontFamily: "'Space Mono', monospace",
@@ -431,7 +431,7 @@ export default function TapeTradeInbox() {
                     fontSize: 11,
                     fontWeight: 600,
                     fontFamily: "'Space Mono', monospace",
-                    color: palette.textMuted,
+                    color: "#555",
                     marginBottom: 8,
                   }}
                 >
@@ -441,7 +441,7 @@ export default function TapeTradeInbox() {
                   <div
                     style={{
                       fontSize: 11,
-                      color: palette.textDim,
+                      color: "#333",
                       fontFamily: "'Space Mono', monospace",
                     }}
                   >
@@ -469,15 +469,15 @@ export default function TapeTradeInbox() {
                             padding: "8px 12px",
                             border: `1px solid ${
                               selectedMixtapeId === m.id
-                                ? palette.coral
-                                : palette.border
+                                ? "#ef4444"
+                                : "#1e1e1e"
                             }`,
                             borderRadius: 6,
                             background:
                               selectedMixtapeId === m.id
                                 ? "rgba(255,107,107,0.1)"
                                 : "transparent",
-                            color: palette.text,
+                            color: "#e8e6e3",
                             fontSize: 12,
                             cursor: "pointer",
                             textAlign: "left",
@@ -497,11 +497,11 @@ export default function TapeTradeInbox() {
                           borderRadius: 8,
                           background:
                             !selectedMixtapeId || processing
-                              ? palette.border
+                              ? "#1e1e1e"
                               : palette.accent,
                           color:
                             !selectedMixtapeId || processing
-                              ? palette.textDim
+                              ? "#333"
                               : "#000",
                           fontSize: 11,
                           fontWeight: 700,
@@ -518,10 +518,10 @@ export default function TapeTradeInbox() {
                         onClick={() => setRespondingId(null)}
                         style={{
                           padding: "6px 14px",
-                          border: `1px solid ${palette.border}`,
+                          border: "1px solid #1e1e1e",
                           borderRadius: 8,
                           background: "transparent",
-                          color: palette.textMuted,
+                          color: "#555",
                           fontSize: 11,
                           fontFamily: "'Space Mono', monospace",
                           cursor: "pointer",

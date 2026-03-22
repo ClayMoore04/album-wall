@@ -89,10 +89,10 @@ export default function SpotifyPlaylistImportModal({
   const inputStyle = {
     flex: 1,
     padding: "10px 14px",
-    background: palette.bg,
-    border: `1px solid ${palette.border}`,
+    background: "#0e0e0e",
+    border: "1px solid #1e1e1e",
     borderRadius: 10,
-    color: palette.text,
+    color: "#e8e6e3",
     fontSize: 14,
     fontFamily: "'Syne', sans-serif",
     outline: "none",
@@ -118,8 +118,8 @@ export default function SpotifyPlaylistImportModal({
     >
       <div
         style={{
-          background: palette.surface,
-          border: `1px solid ${palette.border}`,
+          background: "#111",
+          border: "1px solid #1e1e1e",
           borderRadius: 16,
           padding: 24,
           maxWidth: 480,
@@ -144,7 +144,7 @@ export default function SpotifyPlaylistImportModal({
             style={{
               border: "none",
               background: "transparent",
-              color: palette.textMuted,
+              color: "#555",
               fontSize: 18,
               cursor: "pointer",
             }}
@@ -188,7 +188,7 @@ export default function SpotifyPlaylistImportModal({
               <div
                 style={{
                   fontSize: 11,
-                  color: palette.coral,
+                  color: "#ef4444",
                   fontFamily: "'Space Mono', monospace",
                   marginBottom: 8,
                 }}
@@ -206,7 +206,7 @@ export default function SpotifyPlaylistImportModal({
               <div
                 style={{
                   fontSize: 11,
-                  color: palette.textMuted,
+                  color: "#555",
                   fontFamily: "'Space Mono', monospace",
                   marginTop: 4,
                   display: "flex",
@@ -220,7 +220,7 @@ export default function SpotifyPlaylistImportModal({
                 <div
                   style={{
                     fontSize: 11,
-                    color: palette.coral,
+                    color: "#ef4444",
                     fontFamily: "'Space Mono', monospace",
                     marginTop: 6,
                   }}
@@ -240,7 +240,7 @@ export default function SpotifyPlaylistImportModal({
                 overflowY: "auto",
                 marginBottom: 16,
                 borderRadius: 8,
-                border: `1px solid ${palette.border}`,
+                border: "1px solid #1e1e1e",
               }}
             >
               {(isOverLimit ? trimmedTracks : tracks).map((t, i) => (
@@ -253,7 +253,7 @@ export default function SpotifyPlaylistImportModal({
                     padding: "8px 12px",
                     borderBottom:
                       i < (isOverLimit ? trimmedTracks : tracks).length - 1
-                        ? `1px solid ${palette.border}`
+                        ? "1px solid #1e1e1e"
                         : "none",
                   }}
                 >
@@ -284,7 +284,7 @@ export default function SpotifyPlaylistImportModal({
                     <div
                       style={{
                         fontSize: 10,
-                        color: palette.textMuted,
+                        color: "#555",
                         fontFamily: "'Space Mono', monospace",
                       }}
                     >
@@ -294,7 +294,7 @@ export default function SpotifyPlaylistImportModal({
                   <span
                     style={{
                       fontSize: 10,
-                      color: palette.textDim,
+                      color: "#333",
                       fontFamily: "'Space Mono', monospace",
                       flexShrink: 0,
                     }}
@@ -331,14 +331,14 @@ export default function SpotifyPlaylistImportModal({
                 }}
                 style={{
                   padding: "12px 18px",
-                  border: `1px solid ${palette.border}`,
+                  border: "1px solid #1e1e1e",
                   borderRadius: 10,
                   fontSize: 13,
                   fontWeight: 600,
                   fontFamily: "'Space Mono', monospace",
                   cursor: "pointer",
                   background: "transparent",
-                  color: palette.textMuted,
+                  color: "#555",
                 }}
               >
                 Back
@@ -351,7 +351,7 @@ export default function SpotifyPlaylistImportModal({
           <div
             style={{
               fontSize: 12,
-              color: palette.coral,
+              color: "#ef4444",
               fontFamily: "'Space Mono', monospace",
               marginTop: 12,
               textAlign: "center",

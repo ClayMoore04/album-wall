@@ -1,12 +1,11 @@
 import { useMemo } from "react";
-import { palette } from "../lib/palette";
 
 function StatCard({ label, value, sub }) {
   return (
     <div
       style={{
-        background: palette.cardBg,
-        border: `1px solid ${palette.border}`,
+        background: "#111",
+        border: "1px solid #1e1e1e",
         borderRadius: 12,
         padding: 20,
         textAlign: "center",
@@ -27,7 +26,7 @@ function StatCard({ label, value, sub }) {
           fontSize: 11,
           fontWeight: 600,
           fontFamily: "'Space Mono', monospace",
-          color: palette.textMuted,
+          color: "#555",
           textTransform: "uppercase",
           letterSpacing: 1,
         }}
@@ -38,7 +37,7 @@ function StatCard({ label, value, sub }) {
         <div
           style={{
             fontSize: 11,
-            color: palette.textDim,
+            color: "#333",
             fontFamily: "'Space Mono', monospace",
             marginTop: 4,
           }}
@@ -63,7 +62,7 @@ function BarChart({ items, maxValue }) {
               width: 80,
               fontSize: 12,
               fontFamily: "'Space Mono', monospace",
-              color: palette.textMuted,
+              color: "#555",
               textAlign: "right",
               flexShrink: 0,
               whiteSpace: "nowrap",
@@ -77,7 +76,7 @@ function BarChart({ items, maxValue }) {
             style={{
               flex: 1,
               height: 20,
-              background: palette.surface,
+              background: "#111",
               borderRadius: 4,
               overflow: "hidden",
             }}
@@ -86,7 +85,7 @@ function BarChart({ items, maxValue }) {
               style={{
                 width: `${max > 0 ? (item.value / max) * 100 : 0}%`,
                 height: "100%",
-                background: item.color || palette.accent,
+                background: item.color || "#1DB954",
                 borderRadius: 4,
                 minWidth: item.value > 0 ? 4 : 0,
                 transition: "width 0.3s ease",
@@ -98,7 +97,7 @@ function BarChart({ items, maxValue }) {
               width: 24,
               fontSize: 12,
               fontFamily: "'Space Mono', monospace",
-              color: palette.text,
+              color: "#e8e6e3",
               fontWeight: 600,
             }}
           >
@@ -139,7 +138,7 @@ export default function Stats({ submissions }) {
       });
     });
     const tagBreakdown = Object.entries(tagMap)
-      .map(([label, value]) => ({ label, value, color: palette.accent }))
+      .map(([label, value]) => ({ label, value, color: "#1DB954" }))
       .sort((a, b) => b.value - a.value);
 
     // Rating distribution
@@ -167,7 +166,7 @@ export default function Stats({ submissions }) {
         <div style={{ fontSize: 42, marginBottom: 12 }}>📊</div>
         <p
           style={{
-            color: palette.textMuted,
+            color: "#555",
             fontFamily: "'Space Mono', monospace",
             fontSize: 14,
           }}
@@ -204,8 +203,8 @@ export default function Stats({ submissions }) {
       {/* Listening progress bar */}
       <div
         style={{
-          background: palette.cardBg,
-          border: `1px solid ${palette.border}`,
+          background: "#111",
+          border: "1px solid #1e1e1e",
           borderRadius: 12,
           padding: 16,
           marginBottom: 24,
@@ -216,7 +215,7 @@ export default function Stats({ submissions }) {
             fontSize: 11,
             fontWeight: 700,
             fontFamily: "'Space Mono', monospace",
-            color: palette.textDim,
+            color: "#333",
             textTransform: "uppercase",
             letterSpacing: 1,
             marginBottom: 10,
@@ -227,7 +226,7 @@ export default function Stats({ submissions }) {
         <div
           style={{
             height: 12,
-            background: palette.surface,
+            background: "#111",
             borderRadius: 6,
             overflow: "hidden",
           }}
@@ -236,7 +235,7 @@ export default function Stats({ submissions }) {
             style={{
               width: `${stats.listenedPct}%`,
               height: "100%",
-              background: `linear-gradient(90deg, ${palette.accent}, #1ed760)`,
+              background: "linear-gradient(90deg, #1DB954, #1ed760)",
               borderRadius: 6,
               transition: "width 0.5s ease",
             }}
@@ -248,8 +247,8 @@ export default function Stats({ submissions }) {
       {stats.topRecommenders.length > 0 && (
         <div
           style={{
-            background: palette.cardBg,
-            border: `1px solid ${palette.border}`,
+            background: "#111",
+            border: "1px solid #1e1e1e",
             borderRadius: 12,
             padding: 16,
             marginBottom: 24,
@@ -260,7 +259,7 @@ export default function Stats({ submissions }) {
               fontSize: 11,
               fontWeight: 700,
               fontFamily: "'Space Mono', monospace",
-              color: palette.textDim,
+              color: "#333",
               textTransform: "uppercase",
               letterSpacing: 1,
               marginBottom: 12,
@@ -276,8 +275,8 @@ export default function Stats({ submissions }) {
       {stats.tagBreakdown.length > 0 && (
         <div
           style={{
-            background: palette.cardBg,
-            border: `1px solid ${palette.border}`,
+            background: "#111",
+            border: "1px solid #1e1e1e",
             borderRadius: 12,
             padding: 16,
             marginBottom: 24,
@@ -288,7 +287,7 @@ export default function Stats({ submissions }) {
               fontSize: 11,
               fontWeight: 700,
               fontFamily: "'Space Mono', monospace",
-              color: palette.textDim,
+              color: "#333",
               textTransform: "uppercase",
               letterSpacing: 1,
               marginBottom: 12,
@@ -304,8 +303,8 @@ export default function Stats({ submissions }) {
       {stats.ratingDist.some((r) => r.value > 0) && (
         <div
           style={{
-            background: palette.cardBg,
-            border: `1px solid ${palette.border}`,
+            background: "#111",
+            border: "1px solid #1e1e1e",
             borderRadius: 12,
             padding: 16,
           }}
@@ -315,7 +314,7 @@ export default function Stats({ submissions }) {
               fontSize: 11,
               fontWeight: 700,
               fontFamily: "'Space Mono', monospace",
-              color: palette.textDim,
+              color: "#333",
               textTransform: "uppercase",
               letterSpacing: 1,
               marginBottom: 12,

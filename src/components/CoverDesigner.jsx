@@ -85,7 +85,7 @@ function drawCDTemplate(canvas, bgColor) {
     top: cy,
     originX: "center",
     originY: "center",
-    fill: palette.bg,
+    fill: "#0a0a0a",
     stroke: "#999",
     strokeWidth: 1.5,
     selectable: false,
@@ -645,9 +645,9 @@ export default function CoverDesigner({
   const toolBtnStyle = (isActive) => ({
     padding: "6px 10px",
     borderRadius: 6,
-    border: `1px solid ${isActive ? palette.accent : palette.border}`,
-    background: isActive ? palette.accent + "20" : palette.surface,
-    color: isActive ? palette.accent : palette.text,
+    border: `1px solid ${isActive ? palette.accent : "#1e1e1e"}`,
+    background: isActive ? palette.accent + "20" : "#111",
+    color: isActive ? palette.accent : "#e8e6e3",
     fontSize: 11,
     fontWeight: 600,
     fontFamily: "'Space Mono', monospace",
@@ -679,7 +679,7 @@ export default function CoverDesigner({
           display: "flex",
           justifyContent: "space-between",
           alignItems: "center",
-          borderBottom: `1px solid ${palette.border}`,
+          borderBottom: "1px solid #1e1e1e",
           flexShrink: 0,
         }}
       >
@@ -688,7 +688,7 @@ export default function CoverDesigner({
           style={{
             background: "none",
             border: "none",
-            color: palette.textMuted,
+            color: "#555",
             fontSize: 13,
             fontFamily: "'Space Mono', monospace",
             cursor: "pointer",
@@ -701,7 +701,7 @@ export default function CoverDesigner({
             fontSize: 13,
             fontWeight: 700,
             fontFamily: "'Space Mono', monospace",
-            color: palette.text,
+            color: "#e8e6e3",
             letterSpacing: 1,
           }}
         >
@@ -714,8 +714,8 @@ export default function CoverDesigner({
             padding: "6px 16px",
             border: "none",
             borderRadius: 8,
-            background: saving ? palette.border : palette.accent,
-            color: saving ? palette.textDim : "#000",
+            background: saving ? "#1e1e1e" : palette.accent,
+            color: saving ? "#333" : "#000",
             fontSize: 12,
             fontWeight: 700,
             fontFamily: "'Space Mono', monospace",
@@ -782,8 +782,8 @@ export default function CoverDesigner({
       <div
         style={{
           width: "100%",
-          background: palette.surface,
-          borderTop: `1px solid ${palette.border}`,
+          background: "#111",
+          borderTop: "1px solid #1e1e1e",
           padding: "10px 12px",
           flexShrink: 0,
         }}
@@ -853,7 +853,7 @@ export default function CoverDesigner({
             Select
           </button>
 
-          <div style={{ width: 1, height: 20, background: palette.border, margin: "0 4px" }} />
+          <div style={{ width: 1, height: 20, background: "#1e1e1e", margin: "0 4px" }} />
 
           {/* Pen sizes */}
           {[2, 5, 10].map((s) => (
@@ -873,14 +873,14 @@ export default function CoverDesigner({
                   width: s + 4,
                   height: s + 4,
                   borderRadius: "50%",
-                  background: penSize === s ? palette.accent : palette.text,
+                  background: penSize === s ? palette.accent : "#e8e6e3",
                   display: "block",
                 }}
               />
             </button>
           ))}
 
-          <div style={{ width: 1, height: 20, background: palette.border, margin: "0 4px" }} />
+          <div style={{ width: 1, height: 20, background: "#1e1e1e", margin: "0 4px" }} />
 
           <button
             onClick={handleUndo}
@@ -913,8 +913,8 @@ export default function CoverDesigner({
             onClick={handleClear}
             style={{
               ...toolBtnStyle(false),
-              color: palette.coral,
-              borderColor: palette.coral + "40",
+              color: "#ef4444",
+              borderColor: "#ef4444" + "40",
             }}
           >
             Clear
@@ -930,7 +930,7 @@ export default function CoverDesigner({
               flexWrap: "wrap",
               justifyContent: "center",
               padding: "8px 0",
-              borderTop: `1px solid ${palette.border}`,
+              borderTop: "1px solid #1e1e1e",
             }}
           >
             {STICKERS.map((s) => (
@@ -942,8 +942,8 @@ export default function CoverDesigner({
                   width: 40,
                   height: 40,
                   borderRadius: 8,
-                  border: `1px solid ${palette.border}`,
-                  background: palette.bg,
+                  border: "1px solid #1e1e1e",
+                  background: "#0a0a0a",
                   fontSize: 22,
                   cursor: "pointer",
                   display: "flex",
@@ -966,7 +966,7 @@ export default function CoverDesigner({
               flexWrap: "wrap",
               justifyContent: "center",
               padding: "8px 0",
-              borderTop: `1px solid ${palette.border}`,
+              borderTop: "1px solid #1e1e1e",
             }}
           >
             {BACKGROUND_COLORS.map((c) => (
@@ -977,7 +977,7 @@ export default function CoverDesigner({
                   width: 28,
                   height: 28,
                   borderRadius: 6,
-                  border: `2px solid ${bgColor === c ? palette.accent : palette.border}`,
+                  border: `2px solid ${bgColor === c ? palette.accent : "#1e1e1e"}`,
                   background: c,
                   cursor: "pointer",
                 }}
@@ -993,7 +993,7 @@ export default function CoverDesigner({
             gap: 4,
             justifyContent: "center",
             paddingTop: 8,
-            borderTop: `1px solid ${palette.border}`,
+            borderTop: "1px solid #1e1e1e",
             flexWrap: "wrap",
           }}
         >

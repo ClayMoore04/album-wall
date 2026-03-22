@@ -8,8 +8,8 @@ export default function RoomTrackCard({ track, addedByName, canRemove, onRemove 
         alignItems: "center",
         gap: 12,
         padding: "10px 14px",
-        background: palette.cardBg,
-        border: `1px solid ${palette.border}`,
+        background: "#111",
+        border: "1px solid #1e1e1e",
         borderRadius: 10,
       }}
     >
@@ -66,7 +66,7 @@ export default function RoomTrackCard({ track, addedByName, canRemove, onRemove 
                 padding: "1px 5px",
                 borderRadius: 3,
                 background: "rgba(255,107,107,0.15)",
-                color: palette.coral,
+                color: "#ef4444",
               }}
             >
               Song
@@ -76,7 +76,7 @@ export default function RoomTrackCard({ track, addedByName, canRemove, onRemove 
         <div
           style={{
             fontSize: 11,
-            color: palette.textMuted,
+            color: "#555",
             fontFamily: "'Space Mono', monospace",
             whiteSpace: "nowrap",
             overflow: "hidden",
@@ -85,7 +85,7 @@ export default function RoomTrackCard({ track, addedByName, canRemove, onRemove 
         >
           {track.artist_name}
           {addedByName && (
-            <span style={{ color: palette.textDim }}>
+            <span style={{ color: "#333" }}>
               {" "}
               &middot; added by {addedByName}
             </span>
@@ -115,10 +115,10 @@ export default function RoomTrackCard({ track, addedByName, canRemove, onRemove 
             style={{
               width: 24,
               height: 24,
-              border: `1px solid ${palette.border}`,
+              border: "1px solid #1e1e1e",
               borderRadius: 12,
               background: "transparent",
-              color: palette.textMuted,
+              color: "#555",
               cursor: "pointer",
               fontSize: 12,
               display: "flex",

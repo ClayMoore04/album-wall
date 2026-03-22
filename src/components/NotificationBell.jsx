@@ -75,14 +75,14 @@ export default function NotificationBell() {
         onClick={() => setOpen(!open)}
         style={{
           padding: "8px 10px",
-          border: `1px solid ${palette.border}`,
+          border: "1px solid #1e1e1e",
           borderRadius: 8,
           fontSize: 14,
-          background: open ? palette.surfaceHover : palette.surface,
+          background: open ? "#1a1a1a" : "#111",
           cursor: "pointer",
           position: "relative",
           lineHeight: 1,
-          color: palette.text,
+          color: "#e8e6e3",
         }}
       >
         {"\u{1F514}"}
@@ -95,7 +95,7 @@ export default function NotificationBell() {
               minWidth: 16,
               height: 16,
               borderRadius: 8,
-              background: palette.coral,
+              background: "#ef4444",
               color: "#fff",
               fontSize: 9,
               fontWeight: 700,
@@ -120,8 +120,8 @@ export default function NotificationBell() {
             width: 300,
             maxHeight: 400,
             overflowY: "auto",
-            background: palette.surface,
-            border: `1px solid ${palette.border}`,
+            background: "#111",
+            border: "1px solid #1e1e1e",
             borderRadius: 12,
             boxShadow: "0 8px 32px rgba(0,0,0,0.4)",
             zIndex: 200,
@@ -133,7 +133,7 @@ export default function NotificationBell() {
               justifyContent: "space-between",
               alignItems: "center",
               padding: "12px 14px",
-              borderBottom: `1px solid ${palette.border}`,
+              borderBottom: "1px solid #1e1e1e",
             }}
           >
             <span
@@ -141,7 +141,7 @@ export default function NotificationBell() {
                 fontSize: 12,
                 fontWeight: 700,
                 fontFamily: "'Space Mono', monospace",
-                color: palette.text,
+                color: "#e8e6e3",
               }}
             >
               Notifications
@@ -170,7 +170,7 @@ export default function NotificationBell() {
               style={{
                 padding: "32px 14px",
                 textAlign: "center",
-                color: palette.textMuted,
+                color: "#555",
                 fontSize: 12,
                 fontFamily: "'Space Mono', monospace",
               }}
@@ -190,7 +190,7 @@ export default function NotificationBell() {
                   borderLeft: !n.read
                     ? `3px solid ${palette.accent}`
                     : "3px solid transparent",
-                  borderBottom: `1px solid ${palette.border}`,
+                  borderBottom: "1px solid #1e1e1e",
                   background: !n.read
                     ? "rgba(29,185,84,0.05)"
                     : "transparent",
@@ -201,7 +201,7 @@ export default function NotificationBell() {
                 <div
                   style={{
                     fontSize: 12,
-                    color: palette.text,
+                    color: "#e8e6e3",
                     lineHeight: 1.4,
                   }}
                 >
@@ -210,7 +210,7 @@ export default function NotificationBell() {
                 <div
                   style={{
                     fontSize: 10,
-                    color: palette.textDim,
+                    color: "#333",
                     fontFamily: "'Space Mono', monospace",
                     marginTop: 4,
                   }}

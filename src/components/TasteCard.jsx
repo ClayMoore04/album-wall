@@ -5,7 +5,7 @@ const W = 1080;
 const H = 1350;
 const PAD = 60;
 const ACCENT = "#1DB954";
-const CORAL = "#ff6b6b";
+const CORAL = "#ef4444";
 const BG = "#0a0a0a";
 const SURFACE = "#181818";
 const BORDER = "#282828";
@@ -86,7 +86,7 @@ function drawCard(canvas, profile, submissions) {
   ctx.fillRect(0, 0, W, H);
 
   const grad2 = ctx.createRadialGradient(W - 200, H, 0, W - 200, H, W);
-  grad2.addColorStop(0, "rgba(255,107,107,0.05)");
+  grad2.addColorStop(0, "rgba(239,68,68,0.05)");
   grad2.addColorStop(1, "transparent");
   ctx.fillStyle = grad2;
   ctx.fillRect(0, 0, W, H);
@@ -327,8 +327,8 @@ export default function TasteCard({ profile, submissions }) {
   return (
     <div
       style={{
-        background: palette.cardBg,
-        border: `1px solid ${palette.border}`,
+        background: "#111",
+        border: "1px solid #1e1e1e",
         borderRadius: 12,
         padding: 20,
         marginTop: 24,
@@ -355,7 +355,7 @@ export default function TasteCard({ profile, submissions }) {
           <div
             style={{
               fontSize: 11,
-              color: palette.textMuted,
+              color: "#555",
               fontFamily: "'Space Mono', monospace",
             }}
           >
@@ -387,14 +387,14 @@ export default function TasteCard({ profile, submissions }) {
               onClick={handleCopy}
               style={{
                 padding: "10px 16px",
-                border: `1px solid ${palette.border}`,
+                border: "1px solid #1e1e1e",
                 borderRadius: 10,
                 fontSize: 12,
                 fontWeight: 600,
                 fontFamily: "'Space Mono', monospace",
                 cursor: "pointer",
-                background: palette.surface,
-                color: palette.text,
+                background: "#111",
+                color: "#e8e6e3",
               }}
             >
               Copy
@@ -419,14 +419,14 @@ export default function TasteCard({ profile, submissions }) {
               onClick={handleGenerate}
               style={{
                 padding: "10px 16px",
-                border: `1px solid ${palette.border}`,
+                border: "1px solid #1e1e1e",
                 borderRadius: 10,
                 fontSize: 12,
                 fontWeight: 600,
                 fontFamily: "'Space Mono', monospace",
                 cursor: "pointer",
                 background: "transparent",
-                color: palette.textMuted,
+                color: "#555",
               }}
             >
               Refresh
@@ -447,7 +447,7 @@ export default function TasteCard({ profile, submissions }) {
           style={{
             width: "100%",
             borderRadius: 10,
-            border: `1px solid ${palette.border}`,
+            border: "1px solid #1e1e1e",
           }}
         />
       )}

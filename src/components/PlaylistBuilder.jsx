@@ -94,7 +94,7 @@ export default function PlaylistBuilder({ submissions, loading }) {
 
   if (loading) {
     return (
-      <div style={{ textAlign: "center", padding: 60, color: palette.textMuted }}>
+      <div style={{ textAlign: "center", padding: 60, color: "#555" }}>
         Loading...
       </div>
     );
@@ -106,7 +106,7 @@ export default function PlaylistBuilder({ submissions, loading }) {
         <div style={{ fontSize: 42, marginBottom: 12 }}>🎶</div>
         <p
           style={{
-            color: palette.textMuted,
+            color: "#555",
             fontFamily: "'Space Mono', monospace",
             fontSize: 14,
           }}
@@ -136,7 +136,7 @@ export default function PlaylistBuilder({ submissions, loading }) {
               fontSize: 11,
               fontWeight: 700,
               fontFamily: "'Space Mono', monospace",
-              color: palette.textDim,
+              color: "#333",
               textTransform: "uppercase",
               letterSpacing: 1,
               marginBottom: 4,
@@ -148,11 +148,11 @@ export default function PlaylistBuilder({ submissions, loading }) {
             onClick={selectAll}
             style={{
               padding: "4px 10px",
-              border: `1px solid ${palette.border}`,
+              border: "1px solid #1e1e1e",
               borderRadius: 6,
               fontSize: 11,
               fontFamily: "'Space Mono', monospace",
-              color: palette.textMuted,
+              color: "#555",
               background: "transparent",
               cursor: "pointer",
             }}
@@ -165,11 +165,11 @@ export default function PlaylistBuilder({ submissions, loading }) {
             onClick={handleDisconnect}
             style={{
               padding: "4px 10px",
-              border: `1px solid ${palette.border}`,
+              border: "1px solid #1e1e1e",
               borderRadius: 6,
               fontSize: 11,
               fontFamily: "'Space Mono', monospace",
-              color: palette.textDim,
+              color: "#333",
               background: "transparent",
               cursor: "pointer",
             }}
@@ -194,14 +194,14 @@ export default function PlaylistBuilder({ submissions, loading }) {
                 padding: 12,
                 background: isSelected
                   ? "rgba(29,185,84,0.08)"
-                  : palette.cardBg,
+                  : "#111",
                 border: isSelected
                   ? `1px solid rgba(29,185,84,0.3)`
-                  : `1px solid ${palette.border}`,
+                  : "1px solid #1e1e1e",
                 borderRadius: 12,
                 cursor: "pointer",
                 textAlign: "left",
-                color: palette.text,
+                color: "#e8e6e3",
                 transition: "all 0.15s",
                 width: "100%",
               }}
@@ -214,7 +214,7 @@ export default function PlaylistBuilder({ submissions, loading }) {
                   borderRadius: 6,
                   border: isSelected
                     ? `2px solid ${palette.accent}`
-                    : `2px solid ${palette.border}`,
+                    : "2px solid #1e1e1e",
                   background: isSelected ? palette.accent : "transparent",
                   display: "flex",
                   alignItems: "center",
@@ -279,7 +279,7 @@ export default function PlaylistBuilder({ submissions, loading }) {
                 <div
                   style={{
                     fontSize: 11,
-                    color: palette.textMuted,
+                    color: "#555",
                     fontFamily: "'Space Mono', monospace",
                     whiteSpace: "nowrap",
                     overflow: "hidden",
@@ -302,8 +302,8 @@ export default function PlaylistBuilder({ submissions, loading }) {
             bottom: 0,
             left: 0,
             right: 0,
-            background: palette.surface,
-            borderTop: `1px solid ${palette.border}`,
+            background: "#111",
+            borderTop: "1px solid #1e1e1e",
             padding: "14px 20px",
             display: "flex",
             alignItems: "center",
@@ -316,7 +316,7 @@ export default function PlaylistBuilder({ submissions, loading }) {
             style={{
               fontSize: 13,
               fontFamily: "'Space Mono', monospace",
-              color: palette.textMuted,
+              color: "#555",
             }}
           >
             {selected.size} album{selected.size !== 1 ? "s" : ""} selected
@@ -368,8 +368,8 @@ export default function PlaylistBuilder({ submissions, loading }) {
         >
           <div
             style={{
-              background: palette.surface,
-              border: `1px solid ${palette.border}`,
+              background: "#111",
+              border: "1px solid #1e1e1e",
               borderRadius: 16,
               padding: 28,
               width: "100%",
@@ -390,7 +390,7 @@ export default function PlaylistBuilder({ submissions, loading }) {
                 </div>
                 <p
                   style={{
-                    color: palette.textMuted,
+                    color: "#555",
                     fontFamily: "'Space Mono', monospace",
                     fontSize: 13,
                     marginBottom: 4,
@@ -428,11 +428,11 @@ export default function PlaylistBuilder({ submissions, loading }) {
                     }}
                     style={{
                       padding: "8px 16px",
-                      border: `1px solid ${palette.border}`,
+                      border: "1px solid #1e1e1e",
                       borderRadius: 8,
                       fontSize: 12,
                       fontFamily: "'Space Mono', monospace",
-                      color: palette.textMuted,
+                      color: "#555",
                       background: "transparent",
                       cursor: "pointer",
                     }}
@@ -452,7 +452,7 @@ export default function PlaylistBuilder({ submissions, loading }) {
                 <div
                   style={{
                     fontSize: 12,
-                    color: palette.textMuted,
+                    color: "#555",
                     fontFamily: "'Space Mono', monospace",
                     marginBottom: 20,
                   }}
@@ -469,7 +469,7 @@ export default function PlaylistBuilder({ submissions, loading }) {
                       fontSize: 11,
                       fontWeight: 600,
                       fontFamily: "'Space Mono', monospace",
-                      color: palette.textMuted,
+                      color: "#555",
                       textTransform: "uppercase",
                       letterSpacing: 1,
                       marginBottom: 6,
@@ -484,10 +484,10 @@ export default function PlaylistBuilder({ submissions, loading }) {
                     style={{
                       width: "100%",
                       padding: "12px 14px",
-                      background: palette.bg,
-                      border: `1px solid ${palette.border}`,
+                      background: "#0a0a0a",
+                      border: "1px solid #1e1e1e",
                       borderRadius: 10,
-                      color: palette.text,
+                      color: "#e8e6e3",
                       fontSize: 14,
                       fontFamily: "'Syne', sans-serif",
                       outline: "none",
@@ -514,7 +514,7 @@ export default function PlaylistBuilder({ submissions, loading }) {
                       border: "none",
                       background: isPublic
                         ? palette.accent
-                        : palette.border,
+                        : "#1e1e1e",
                       cursor: "pointer",
                       position: "relative",
                       transition: "background 0.2s",
@@ -537,7 +537,7 @@ export default function PlaylistBuilder({ submissions, loading }) {
                     style={{
                       fontSize: 12,
                       fontFamily: "'Space Mono', monospace",
-                      color: palette.textMuted,
+                      color: "#555",
                     }}
                   >
                     {isPublic ? "Public playlist" : "Private playlist"}
@@ -582,7 +582,7 @@ export default function PlaylistBuilder({ submissions, loading }) {
                         <span style={{ fontWeight: 600 }}>
                           {sub.album_name}
                         </span>
-                        <span style={{ color: palette.textDim }}>
+                        <span style={{ color: "#333" }}>
                           {" — "}
                           {sub.artist_name}
                         </span>
@@ -592,7 +592,7 @@ export default function PlaylistBuilder({ submissions, loading }) {
                         style={{
                           border: "none",
                           background: "transparent",
-                          color: palette.textDim,
+                          color: "#333",
                           cursor: "pointer",
                           fontSize: 16,
                           padding: "0 4px",
@@ -609,7 +609,7 @@ export default function PlaylistBuilder({ submissions, loading }) {
                   <div
                     style={{
                       fontSize: 12,
-                      color: palette.coral,
+                      color: "#ef4444",
                       fontFamily: "'Space Mono', monospace",
                       marginBottom: 12,
                     }}
@@ -637,11 +637,11 @@ export default function PlaylistBuilder({ submissions, loading }) {
                           : "pointer",
                       background:
                         exporting || !playlistName.trim()
-                          ? palette.border
+                          ? "#1e1e1e"
                           : palette.accent,
                       color:
                         exporting || !playlistName.trim()
-                          ? palette.textDim
+                          ? "#333"
                           : "#000",
                       transition: "all 0.2s",
                       marginBottom: 8,
@@ -678,14 +678,14 @@ export default function PlaylistBuilder({ submissions, loading }) {
                   style={{
                     width: "100%",
                     padding: "12px",
-                    border: `1px solid ${palette.border}`,
+                    border: "1px solid #1e1e1e",
                     borderRadius: 10,
                     fontSize: 13,
                     fontWeight: 600,
                     fontFamily: "'Space Mono', monospace",
                     cursor: "pointer",
                     background: "transparent",
-                    color: palette.textMuted,
+                    color: "#555",
                   }}
                 >
                   Cancel

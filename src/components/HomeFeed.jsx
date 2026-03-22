@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "./AuthProvider";
 import { supabase } from "../lib/supabase";
-import { palette, getColor } from "../lib/palette";
+import { getColor } from "../lib/palette";
 import { timeAgo } from "../lib/timeAgo";
 import { injectAnimations } from "../lib/animations";
 import MixtapeCoverArt from "./MixtapeCoverArt";
@@ -13,14 +13,14 @@ function FeedCardSkeleton({ delay = 0 }) {
   return (
     <div
       style={{
-        background: palette.cardBg,
-        border: `1px solid ${palette.border}`,
+        background: "#111",
+        border: "1px solid #1e1e1e",
         borderRadius: 12,
         padding: 20,
         display: "flex",
         gap: 14,
         ...(delay > 0
-          ? { animation: `booth-fadeInUp 0.35s ease ${delay}s both` }
+          ? { animation: `itb-fadeInUp 0.35s ease ${delay}s both` }
           : {}),
       }}
     >
@@ -195,14 +195,14 @@ export default function HomeFeed() {
 
   const quickLinkStyle = {
     padding: "8px 16px",
-    border: `1px solid ${palette.border}`,
+    border: "1px solid #1e1e1e",
     borderRadius: 20,
     fontSize: 12,
     fontWeight: 700,
     fontFamily: "'Space Mono', monospace",
     textDecoration: "none",
-    color: palette.text,
-    background: palette.surface,
+    color: "#e8e6e3",
+    background: "#111",
     transition: "all 0.2s",
     whiteSpace: "nowrap",
   };
@@ -233,7 +233,7 @@ export default function HomeFeed() {
           style={{
             fontSize: 11,
             fontFamily: "'Space Mono', monospace",
-            color: palette.textMuted,
+            color: "#555",
             textDecoration: "none",
           }}
         >
@@ -279,8 +279,8 @@ export default function HomeFeed() {
             style={{
               textAlign: "center",
               padding: "60px 20px",
-              background: palette.cardBg,
-              border: `1px solid ${palette.border}`,
+              background: "#111",
+              border: "1px solid #1e1e1e",
               borderRadius: 12,
             }}
           >
@@ -297,7 +297,7 @@ export default function HomeFeed() {
             <div
               style={{
                 fontSize: 13,
-                color: palette.textMuted,
+                color: "#555",
                 marginBottom: 20,
                 lineHeight: 1.5,
               }}
@@ -309,7 +309,7 @@ export default function HomeFeed() {
               style={{
                 display: "inline-block",
                 padding: "10px 24px",
-                background: palette.accent,
+                background: "#1DB954",
                 color: "#000",
                 borderRadius: 20,
                 fontSize: 13,
@@ -340,18 +340,18 @@ function FeedCard({ item, entranceIndex }) {
   const delay = Math.min(entranceIndex, 10) * 0.05;
 
   const cardStyle = {
-    background: palette.cardBg,
-    border: `1px solid ${hovered ? "rgba(29,185,84,0.3)" : palette.border}`,
+    background: "#111",
+    border: `1px solid ${hovered ? "rgba(29,185,84,0.3)" : "#1e1e1e"}`,
     borderRadius: 12,
     padding: 16,
     display: "flex",
     gap: 14,
     textDecoration: "none",
-    color: palette.text,
+    color: "#e8e6e3",
     transition: "transform 0.2s, box-shadow 0.2s, border-color 0.2s",
     transform: hovered ? "translateY(-1px)" : "translateY(0)",
     boxShadow: hovered ? "0 4px 16px rgba(29,185,84,0.08)" : "none",
-    animation: `booth-fadeInUp 0.35s ease ${delay}s both`,
+    animation: `itb-fadeInUp 0.35s ease ${delay}s both`,
     cursor: "pointer",
   };
 
@@ -411,13 +411,13 @@ function FeedCard({ item, entranceIndex }) {
             }}
           >
             <span style={{ fontWeight: 700 }}>{sub.artist_name}</span>
-            <span style={{ color: palette.textMuted }}> - </span>
+            <span style={{ color: "#555" }}> - </span>
             <span>{sub.album_name}</span>
           </div>
           <div
             style={{
               fontSize: 12,
-              color: palette.textMuted,
+              color: "#555",
               marginTop: 4,
               fontFamily: "'Space Mono', monospace",
             }}
@@ -427,7 +427,7 @@ function FeedCard({ item, entranceIndex }) {
           <div
             style={{
               fontSize: 11,
-              color: palette.textDim,
+              color: "#333",
               marginTop: 4,
               fontFamily: "'Space Mono', monospace",
             }}
@@ -468,7 +468,7 @@ function FeedCard({ item, entranceIndex }) {
             }}
           >
             <span style={{ fontWeight: 700 }}>{ownerName}</span>
-            <span style={{ color: palette.textMuted }}>
+            <span style={{ color: "#555" }}>
               {" "}
               published a new mixtape
             </span>
@@ -476,7 +476,7 @@ function FeedCard({ item, entranceIndex }) {
           <div
             style={{
               fontSize: 13,
-              color: palette.accent,
+              color: "#1DB954",
               marginTop: 4,
               fontWeight: 700,
               overflow: "hidden",
@@ -498,7 +498,7 @@ function FeedCard({ item, entranceIndex }) {
               style={{
                 fontSize: 10,
                 fontFamily: "'Space Mono', monospace",
-                color: palette.textMuted,
+                color: "#555",
                 padding: "2px 6px",
                 borderRadius: 4,
                 background: "rgba(29,185,84,0.1)",
@@ -509,7 +509,7 @@ function FeedCard({ item, entranceIndex }) {
             <span
               style={{
                 fontSize: 11,
-                color: palette.textDim,
+                color: "#333",
                 fontFamily: "'Space Mono', monospace",
               }}
             >
@@ -559,13 +559,13 @@ function FeedCard({ item, entranceIndex }) {
             }}
           >
             <span style={{ fontWeight: 700 }}>{senderName}</span>
-            <span style={{ color: palette.textMuted }}> and </span>
+            <span style={{ color: "#555" }}> and </span>
             <span style={{ fontWeight: 700 }}>{receiverName}</span>
           </div>
           <div
             style={{
               fontSize: 12,
-              color: palette.coral,
+              color: "#ff6b6b",
               marginTop: 4,
               fontFamily: "'Space Mono', monospace",
               fontWeight: 600,
@@ -576,7 +576,7 @@ function FeedCard({ item, entranceIndex }) {
           <div
             style={{
               fontSize: 11,
-              color: palette.textDim,
+              color: "#333",
               marginTop: 4,
               fontFamily: "'Space Mono', monospace",
             }}

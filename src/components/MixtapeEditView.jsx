@@ -104,7 +104,7 @@ export default function MixtapeEditView(props) {
             padding: "6px 0",
             border: "none",
             background: "transparent",
-            color: palette.textMuted,
+            color: "#555",
             fontSize: 12,
             fontWeight: 600,
             fontFamily: "'Space Mono', monospace",

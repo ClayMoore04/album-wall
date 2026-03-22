@@ -206,7 +206,7 @@ export default function MixtapeListPage() {
   if (loading || !user) {
     return (
       <div
-        style={{ textAlign: "center", padding: 80, color: palette.textMuted }}
+        style={{ textAlign: "center", padding: 80, color: "#555" }}
       >
         Loading...
       </div>
@@ -216,10 +216,10 @@ export default function MixtapeListPage() {
   const inputStyle = {
     flex: 1,
     padding: "10px 14px",
-    background: palette.surface,
-    border: `1px solid ${palette.border}`,
+    background: "#0e0e0e",
+    border: `1px solid #1e1e1e`,
     borderRadius: 10,
-    color: palette.text,
+    color: "#e8e6e3",
     fontSize: 14,
     fontFamily: "'Syne', sans-serif",
     outline: "none",
@@ -243,7 +243,7 @@ export default function MixtapeListPage() {
     fontSize: 11,
     fontWeight: 600,
     fontFamily: "'Space Mono', monospace",
-    color: palette.textMuted,
+    color: "#555",
     letterSpacing: 0.5,
   };
 
@@ -258,12 +258,12 @@ export default function MixtapeListPage() {
             textAlign: "center",
           }}
         >
-          Mixtapes<span style={{ color: palette.coral }}>.</span>
+          Mixtapes<span style={{ color: "#ef4444" }}>.</span>
         </h1>
         <p
           style={{
             textAlign: "center",
-            color: palette.textMuted,
+            color: "#555",
             fontSize: 14,
             fontFamily: "'Space Mono', monospace",
             marginBottom: 28,
@@ -275,8 +275,8 @@ export default function MixtapeListPage() {
         {/* Create mixtape */}
         <div
           style={{
-            background: palette.cardBg,
-            border: `1px solid ${palette.border}`,
+            background: "#111",
+            border: `1px solid #1e1e1e`,
             borderRadius: 12,
             padding: 16,
             marginBottom: 24,
@@ -307,10 +307,10 @@ export default function MixtapeListPage() {
             style={{
               marginTop: 10,
               padding: "8px 14px",
-              border: `1px solid ${palette.border}`,
+              border: `1px solid #1e1e1e`,
               borderRadius: 8,
               background: "transparent",
-              color: palette.textMuted,
+              color: "#555",
               fontSize: 11,
               fontWeight: 600,
               fontFamily: "'Space Mono', monospace",
@@ -336,7 +336,7 @@ export default function MixtapeListPage() {
                 height: 20,
                 borderRadius: 10,
                 border: "none",
-                background: isCollab ? palette.accent : palette.border,
+                background: isCollab ? palette.accent : "#1e1e1e",
                 cursor: "pointer",
                 position: "relative",
                 transition: "background 0.2s",
@@ -365,9 +365,9 @@ export default function MixtapeListPage() {
               style={{
                 marginTop: 12,
                 padding: "12px 14px",
-                background: palette.surface,
+                background: "#111",
                 borderRadius: 8,
-                border: `1px solid ${palette.border}`,
+                border: `1px solid #1e1e1e`,
                 display: "flex",
                 flexDirection: "column",
                 gap: 10,
@@ -384,13 +384,13 @@ export default function MixtapeListPage() {
                       style={{
                         padding: "6px 14px",
                         borderRadius: 8,
-                        border: `1px solid ${collabMode === mode ? palette.accent : palette.border}`,
+                        border: `1px solid ${collabMode === mode ? palette.accent : "#1e1e1e"}`,
                         background:
                           collabMode === mode
                             ? "rgba(29,185,84,0.1)"
                             : "transparent",
                         color:
-                          collabMode === mode ? palette.accent : palette.text,
+                          collabMode === mode ? palette.accent : "#e8e6e3",
                         fontSize: 12,
                         fontWeight: 600,
                         fontFamily: "'Space Mono', monospace",
@@ -405,7 +405,7 @@ export default function MixtapeListPage() {
                 <div
                   style={{
                     fontSize: 10,
-                    color: palette.textDim,
+                    color: "#333",
                     fontFamily: "'Space Mono', monospace",
                     marginTop: 4,
                   }}
@@ -429,7 +429,7 @@ export default function MixtapeListPage() {
                       style={{
                         padding: "6px 12px",
                         borderRadius: 8,
-                        border: `1px solid ${maxCollaborators === n ? palette.accent : palette.border}`,
+                        border: `1px solid ${maxCollaborators === n ? palette.accent : "#1e1e1e"}`,
                         background:
                           maxCollaborators === n
                             ? "rgba(29,185,84,0.1)"
@@ -437,7 +437,7 @@ export default function MixtapeListPage() {
                         color:
                           maxCollaborators === n
                             ? palette.accent
-                            : palette.text,
+                            : "#e8e6e3",
                         fontSize: 12,
                         fontWeight: 600,
                         fontFamily: "'Space Mono', monospace",
@@ -457,7 +457,7 @@ export default function MixtapeListPage() {
         {error && (
           <div
             style={{
-              color: palette.coral,
+              color: "#ef4444",
               fontSize: 12,
               fontFamily: "'Space Mono', monospace",
               marginBottom: 16,
@@ -480,7 +480,7 @@ export default function MixtapeListPage() {
             style={{
               textAlign: "center",
               padding: 40,
-              color: palette.textMuted,
+              color: "#555",
               fontSize: 13,
               fontFamily: "'Space Mono', monospace",
             }}
@@ -498,11 +498,11 @@ export default function MixtapeListPage() {
                   alignItems: "center",
                   gap: 14,
                   padding: "16px 20px",
-                  background: palette.cardBg,
-                  border: `1px solid ${palette.border}`,
+                  background: "#111",
+                  border: `1px solid #1e1e1e`,
                   borderRadius: 12,
                   textDecoration: "none",
-                  color: palette.text,
+                  color: "#e8e6e3",
                   transition: "border-color 0.2s",
                 }}
               >
@@ -529,7 +529,7 @@ export default function MixtapeListPage() {
                           fontSize: 9,
                           fontWeight: 700,
                           fontFamily: "'Space Mono', monospace",
-                          color: palette.coral,
+                          color: "#ef4444",
                           background: "rgba(255,107,107,0.1)",
                           padding: "2px 6px",
                           borderRadius: 4,
@@ -546,7 +546,7 @@ export default function MixtapeListPage() {
                     <div
                       style={{
                         fontSize: 11,
-                        color: palette.coral,
+                        color: "#ef4444",
                         fontFamily: "'Space Mono', monospace",
                         fontStyle: "italic",
                         marginTop: 2,
@@ -559,7 +559,7 @@ export default function MixtapeListPage() {
                     <div
                       style={{
                         fontSize: 10,
-                        color: palette.textDim,
+                        color: "#333",
                         fontFamily: "'Space Mono', monospace",
                         marginTop: 2,
                       }}
@@ -570,7 +570,7 @@ export default function MixtapeListPage() {
                   <div
                     style={{
                       fontSize: 11,
-                      color: palette.textMuted,
+                      color: "#555",
                       fontFamily: "'Space Mono', monospace",
                       marginTop: 4,
                       display: "flex",
@@ -586,7 +586,7 @@ export default function MixtapeListPage() {
                 </div>
                 <span
                   style={{
-                    color: palette.coral,
+                    color: "#ef4444",
                     fontSize: 18,
                     fontWeight: 300,
                   }}

@@ -8,7 +8,7 @@ const levelColors = {
   "soul mates": palette.accent,
   "kindred spirits": "#6bc5ff",
   "good vibes": "#ffb347",
-  "different wavelengths": palette.textMuted,
+  "different wavelengths": "#555",
 };
 
 export default function CompatibilityBadge({ userId, compact }) {
@@ -42,14 +42,14 @@ export default function CompatibilityBadge({ userId, compact }) {
           width: compact ? 56 : 120,
           height: 18,
           borderRadius: 9,
-          background: palette.surface,
+          background: "#111",
         }}
       />
     );
   }
   if (!result) return null;
 
-  const color = levelColors[result.level] || palette.textMuted;
+  const color = levelColors[result.level] || "#555";
 
   if (compact) {
     return (
@@ -83,7 +83,7 @@ export default function CompatibilityBadge({ userId, compact }) {
         gap: 4,
         padding: "6px 12px",
         borderRadius: 10,
-        background: palette.surface,
+        background: "#111",
         border: `1px solid ${color}33`,
       }}
     >
@@ -108,7 +108,7 @@ export default function CompatibilityBadge({ userId, compact }) {
           style={{
             fontSize: 10,
             fontFamily: "'Space Mono', monospace",
-            color: palette.textMuted,
+            color: "#555",
             textTransform: "uppercase",
             letterSpacing: 1,
           }}
@@ -121,7 +121,7 @@ export default function CompatibilityBadge({ userId, compact }) {
           style={{
             fontSize: 10,
             fontFamily: "'Space Mono', monospace",
-            color: palette.textDim,
+            color: "#333",
             maxWidth: 200,
             overflow: "hidden",
             textOverflow: "ellipsis",

@@ -1,5 +1,4 @@
 import { useEffect } from "react";
-import { palette } from "../lib/palette";
 import { getThemeAccent } from "../lib/themes";
 import GatefoldHero from "./GatefoldHero";
 import GatefoldTrackList from "./GatefoldTrackList";
@@ -38,7 +37,7 @@ export default function MixtapePublicView({
         maxWidth: 640,
         margin: "0 auto",
         minHeight: "100vh",
-        background: palette.bg,
+        background: "#0a0a0a",
       }}
     >
       <GatefoldHero

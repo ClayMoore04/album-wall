@@ -52,8 +52,8 @@ export default function OnboardingChecklist({ profile, stats, onDismiss }) {
   return (
     <div
       style={{
-        background: palette.cardBg,
-        border: `1px solid ${palette.border}`,
+        background: "#111",
+        border: "1px solid #1e1e1e",
         borderLeft: `3px solid ${palette.accent}`,
         borderRadius: 12,
         padding: 20,
@@ -75,7 +75,7 @@ export default function OnboardingChecklist({ profile, stats, onDismiss }) {
           <div
             style={{
               fontSize: 11,
-              color: palette.textMuted,
+              color: "#555",
               fontFamily: "'Space Mono', monospace",
               marginTop: 2,
             }}
@@ -87,10 +87,10 @@ export default function OnboardingChecklist({ profile, stats, onDismiss }) {
           onClick={handleDismiss}
           style={{
             padding: "4px 10px",
-            border: `1px solid ${palette.border}`,
+            border: "1px solid #1e1e1e",
             borderRadius: 6,
             background: "transparent",
-            color: palette.textMuted,
+            color: "#555",
             fontSize: 10,
             fontWeight: 600,
             fontFamily: "'Space Mono', monospace",
@@ -118,7 +118,7 @@ export default function OnboardingChecklist({ profile, stats, onDismiss }) {
                 borderRadius: 11,
                 border: step.complete
                   ? `2px solid ${palette.accent}`
-                  : `2px solid ${palette.border}`,
+                  : "2px solid #1e1e1e",
                 background: step.complete ? palette.accent : "transparent",
                 display: "flex",
                 alignItems: "center",
@@ -137,7 +137,7 @@ export default function OnboardingChecklist({ profile, stats, onDismiss }) {
                 style={{
                   fontSize: 13,
                   fontWeight: 600,
-                  color: step.complete ? palette.textMuted : palette.text,
+                  color: step.complete ? "#555" : "#e8e6e3",
                   textDecoration: step.complete ? "line-through" : "none",
                 }}
               >
@@ -146,7 +146,7 @@ export default function OnboardingChecklist({ profile, stats, onDismiss }) {
               <div
                 style={{
                   fontSize: 11,
-                  color: palette.textDim,
+                  color: "#333",
                   fontFamily: "'Space Mono', monospace",
                   marginTop: 2,
                 }}

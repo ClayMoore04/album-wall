@@ -1,7 +1,9 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import { searchSpotify } from "../lib/spotify";
 import { palette } from "../lib/palette";
-import { inputStyle, labelStyle } from "../lib/styles";
+
+const inputStyle = { background: "#0e0e0e", border: "1px solid #1e1e1e", borderRadius: 8, color: "#e8e6e3", fontFamily: "'Syne', sans-serif", fontSize: 13, padding: "10px 12px", boxSizing: "border-box", outline: "none", width: "100%" };
+const labelStyle = { fontFamily: "'Space Mono', monospace", fontSize: 8, letterSpacing: "0.1em", textTransform: "uppercase", color: "#555", display: "block", marginBottom: 6 };
 
 export default function SpotifySearch({ onSelect, forceType }) {
   const [query, setQuery] = useState("");
@@ -89,14 +91,14 @@ export default function SpotifySearch({ onSelect, forceType }) {
     fontFamily: "'Space Mono', monospace",
     cursor: "pointer",
     background: active ? palette.accent : "transparent",
-    color: active ? "#000" : palette.textMuted,
+    color: active ? "#000" : "#555",
     transition: "all 0.15s",
   });
 
   return (
     <div ref={containerRef} style={{ position: "relative", marginBottom: 16 }}>
       <label style={labelStyle}>
-        Search Spotify <span style={{ color: palette.coral }}>*</span>
+        Search Spotify <span style={{ color: "#ef4444" }}>*</span>
       </label>
 
       {/* Album / Song toggle */}
@@ -105,11 +107,11 @@ export default function SpotifySearch({ onSelect, forceType }) {
           style={{
             display: "inline-flex",
             gap: 2,
-            background: palette.surface,
+            background: "#111",
             borderRadius: 10,
             padding: 3,
             marginBottom: 8,
-            border: `1px solid ${palette.border}`,
+            border: `1px solid #1e1e1e`,
           }}
         >
           <button
@@ -166,7 +168,7 @@ export default function SpotifySearch({ onSelect, forceType }) {
           style={{
             marginTop: 6,
             fontSize: 12,
-            color: palette.textMuted,
+            color: "#555",
             fontFamily: "'Space Mono', monospace",
           }}
         >
@@ -183,8 +185,8 @@ export default function SpotifySearch({ onSelect, forceType }) {
             left: 0,
             right: 0,
             marginTop: 4,
-            background: palette.surface,
-            border: `1px solid ${palette.border}`,
+            background: "#111",
+            border: `1px solid #1e1e1e`,
             borderRadius: 12,
             overflow: "hidden",
             zIndex: 100,
@@ -204,15 +206,15 @@ export default function SpotifySearch({ onSelect, forceType }) {
                 width: "100%",
                 padding: "10px 14px",
                 border: "none",
-                borderBottom: `1px solid ${palette.border}`,
+                borderBottom: `1px solid #1e1e1e`,
                 background: "transparent",
-                color: palette.text,
+                color: "#e8e6e3",
                 cursor: "pointer",
                 textAlign: "left",
                 transition: "background 0.15s",
               }}
               onMouseEnter={(e) =>
-                (e.currentTarget.style.background = palette.surfaceHover)
+                (e.currentTarget.style.background = "#1a1a1a")
               }
               onMouseLeave={(e) =>
                 (e.currentTarget.style.background = "transparent")
@@ -236,7 +238,7 @@ export default function SpotifySearch({ onSelect, forceType }) {
                     width: 48,
                     height: 48,
                     borderRadius: item.type === "track" ? 4 : 6,
-                    background: palette.border,
+                    background: "#1e1e1e",
                     flexShrink: 0,
                   }}
                 />
@@ -275,7 +277,7 @@ export default function SpotifySearch({ onSelect, forceType }) {
                           ? "rgba(255,107,107,0.15)"
                           : "rgba(29,185,84,0.15)",
                       color:
-                        item.type === "track" ? palette.coral : palette.accent,
+                        item.type === "track" ? "#ef4444" : palette.accent,
                     }}
                   >
                     {item.type === "track" ? "Song" : "Album"}
@@ -284,7 +286,7 @@ export default function SpotifySearch({ onSelect, forceType }) {
                 <div
                   style={{
                     fontSize: 12,
-                    color: palette.textMuted,
+                    color: "#555",
                     fontFamily: "'Space Mono', monospace",
                     whiteSpace: "nowrap",
                     overflow: "hidden",

@@ -106,7 +106,7 @@ export default function RoomListPage() {
   if (loading || !user) {
     return (
       <div
-        style={{ textAlign: "center", padding: 80, color: palette.textMuted }}
+        style={{ textAlign: "center", padding: 80, color: "#555" }}
       >
         Loading...
       </div>
@@ -116,10 +116,10 @@ export default function RoomListPage() {
   const inputStyle = {
     flex: 1,
     padding: "10px 14px",
-    background: palette.surface,
-    border: `1px solid ${palette.border}`,
+    background: "#0e0e0e",
+    border: "1px solid #1e1e1e",
     borderRadius: 10,
-    color: palette.text,
+    color: "#e8e6e3",
     fontSize: 14,
     fontFamily: "'Syne', sans-serif",
     outline: "none",
@@ -155,7 +155,7 @@ export default function RoomListPage() {
         <p
           style={{
             textAlign: "center",
-            color: palette.textMuted,
+            color: "#555",
             fontSize: 14,
             fontFamily: "'Space Mono', monospace",
             marginBottom: 28,
@@ -167,8 +167,8 @@ export default function RoomListPage() {
         {/* Create room */}
         <div
           style={{
-            background: palette.cardBg,
-            border: `1px solid ${palette.border}`,
+            background: "#111",
+            border: "1px solid #1e1e1e",
             borderRadius: 12,
             padding: 16,
             marginBottom: 12,
@@ -199,8 +199,8 @@ export default function RoomListPage() {
         {/* Join room */}
         <div
           style={{
-            background: palette.cardBg,
-            border: `1px solid ${palette.border}`,
+            background: "#111",
+            border: "1px solid #1e1e1e",
             borderRadius: 12,
             padding: 16,
             marginBottom: 24,
@@ -221,8 +221,8 @@ export default function RoomListPage() {
               style={{
                 ...btnStyle,
                 background: "transparent",
-                border: `1px solid ${palette.border}`,
-                color: palette.text,
+                border: "1px solid #1e1e1e",
+                color: "#e8e6e3",
                 opacity: !joinCode.trim() ? 0.5 : 1,
               }}
             >
@@ -234,7 +234,7 @@ export default function RoomListPage() {
         {error && (
           <div
             style={{
-              color: palette.coral,
+              color: "#ef4444",
               fontSize: 12,
               fontFamily: "'Space Mono', monospace",
               marginBottom: 16,
@@ -251,7 +251,7 @@ export default function RoomListPage() {
             style={{
               textAlign: "center",
               padding: 40,
-              color: palette.textMuted,
+              color: "#555",
               fontSize: 13,
               fontFamily: "'Space Mono', monospace",
             }}
@@ -263,7 +263,7 @@ export default function RoomListPage() {
             style={{
               textAlign: "center",
               padding: 40,
-              color: palette.textMuted,
+              color: "#555",
               fontSize: 13,
               fontFamily: "'Space Mono', monospace",
             }}
@@ -281,11 +281,11 @@ export default function RoomListPage() {
                   alignItems: "center",
                   justifyContent: "space-between",
                   padding: "16px 20px",
-                  background: palette.cardBg,
-                  border: `1px solid ${palette.border}`,
+                  background: "#111",
+                  border: "1px solid #1e1e1e",
                   borderRadius: 12,
                   textDecoration: "none",
-                  color: palette.text,
+                  color: "#e8e6e3",
                   transition: "border-color 0.2s",
                 }}
               >
@@ -296,7 +296,7 @@ export default function RoomListPage() {
                   <div
                     style={{
                       fontSize: 11,
-                      color: palette.textMuted,
+                      color: "#555",
                       fontFamily: "'Space Mono', monospace",
                       marginTop: 4,
                       display: "flex",
@@ -311,7 +311,7 @@ export default function RoomListPage() {
                       {room.trackCount} track{room.trackCount !== 1 ? "s" : ""}
                     </span>
                     {room.profiles && (
-                      <span style={{ color: palette.textDim }}>
+                      <span style={{ color: "#333" }}>
                         by {room.profiles.display_name}
                       </span>
                     )}

@@ -75,9 +75,9 @@ export default function FollowButton({ wallId, onCountChange }) {
         borderRadius: 20,
         border: following
           ? `1px solid ${palette.accent}`
-          : `1px solid ${palette.border}`,
+          : "1px solid #1e1e1e",
         background: following ? palette.accent : "transparent",
-        color: following ? "#000" : palette.textMuted,
+        color: following ? "#000" : "#555",
         fontSize: 12,
         fontWeight: 700,
         fontFamily: "'Space Mono', monospace",

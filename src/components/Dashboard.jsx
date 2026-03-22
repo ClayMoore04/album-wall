@@ -522,14 +522,14 @@ export default function Dashboard() {
                   })}
                 </div>
                 <div style={{ marginTop: 8 }}>
-                  <label style={{ ...labelStyle, fontSize: 10, color: palette.textDim }}>Or paste an image URL</label>
+                  <label style={{ ...labelStyle, fontSize: 10, color: "#333" }}>Or paste an image URL</label>
                   <DashInput value={bannerUrl} onChange={(v) => { setBannerUrl(v); if (v) setBannerStyle("none"); }} placeholder="https://..." accent={accent} />
                 </div>
               </div>
               {(bannerStyle !== "none" || bannerUrl) && (
                 <div>
                   <label style={{ ...labelStyle, fontSize: 10, color: accent }}>Preview</label>
-                  <div style={{ height: 60, borderRadius: 8, background: getBannerCss(bannerStyle, bannerUrl), border: `1px solid ${palette.border}` }} />
+                  <div style={{ height: 60, borderRadius: 8, background: getBannerCss(bannerStyle, bannerUrl), border: `1px solid ${"#1e1e1e"}` }} />
                 </div>
               )}
             </div>
@@ -565,7 +565,7 @@ export default function Dashboard() {
             FOLLOWING {following.length > 0 && `(${following.length})`}
           </div>
           {following.length === 0 ? (
-            <p style={{ fontSize: 12, color: palette.textMuted, fontFamily: "'Space Mono', monospace", margin: "0 0 16px" }}>
+            <p style={{ fontSize: 12, color: "#555", fontFamily: "'Space Mono', monospace", margin: "0 0 16px" }}>
               You're not following any walls yet.{" "}
               <Link to="/discover" style={{ color: accent, textDecoration: "none" }}>Discover booths</Link>
             </p>

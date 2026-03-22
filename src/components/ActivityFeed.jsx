@@ -45,7 +45,7 @@ export default function ActivityFeed({ followedWallIds }) {
         style={{
           textAlign: "center",
           padding: 24,
-          color: palette.textMuted,
+          color: "#555",
           fontSize: 13,
           fontFamily: "'Space Mono', monospace",
         }}
@@ -61,7 +61,7 @@ export default function ActivityFeed({ followedWallIds }) {
         style={{
           textAlign: "center",
           padding: 24,
-          color: palette.textMuted,
+          color: "#555",
           fontSize: 13,
           fontFamily: "'Space Mono', monospace",
         }}
@@ -81,9 +81,9 @@ export default function ActivityFeed({ followedWallIds }) {
             alignItems: "center",
             gap: 10,
             padding: "10px 14px",
-            background: palette.cardBg,
+            background: "#111",
             borderRadius: 10,
-            border: `1px solid ${palette.border}`,
+            border: "1px solid #1e1e1e",
           }}
         >
           {item.album_art_url ? (
@@ -124,7 +124,7 @@ export default function ActivityFeed({ followedWallIds }) {
             <div
               style={{
                 fontSize: 11,
-                color: palette.textMuted,
+                color: "#555",
                 fontFamily: "'Space Mono', monospace",
                 whiteSpace: "nowrap",
                 overflow: "hidden",
@@ -135,7 +135,7 @@ export default function ActivityFeed({ followedWallIds }) {
               {item.profiles && (
                 <>
                   {" "}
-                  <span style={{ color: palette.textDim }}>on</span>{" "}
+                  <span style={{ color: "#333" }}>on</span>{" "}
                   <Link
                     to={`/${item.profiles.slug}`}
                     style={{ color: palette.accent, textDecoration: "none" }}
@@ -149,7 +149,7 @@ export default function ActivityFeed({ followedWallIds }) {
           <div
             style={{
               fontSize: 10,
-              color: palette.textDim,
+              color: "#333",
               fontFamily: "'Space Mono', monospace",
               flexShrink: 0,
               whiteSpace: "nowrap",

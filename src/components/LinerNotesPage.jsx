@@ -44,7 +44,7 @@ export default function LinerNotesPage() {
   if (loading) {
     return (
       <div
-        style={{ textAlign: "center", padding: 80, color: palette.textMuted }}
+        style={{ textAlign: "center", padding: 80, color: "#555" }}
       >
         Loading...
       </div>
@@ -59,7 +59,7 @@ export default function LinerNotesPage() {
         </h2>
         <p
           style={{
-            color: palette.textMuted,
+            color: "#555",
             fontFamily: "'Space Mono', monospace",
             fontSize: 14,
           }}
@@ -100,7 +100,7 @@ export default function LinerNotesPage() {
             <div
               style={{
                 fontSize: 12,
-                color: palette.coral,
+                color: "#ef4444",
                 fontFamily: "'Space Mono', monospace",
                 fontStyle: "italic",
                 marginBottom: 2,
@@ -112,7 +112,7 @@ export default function LinerNotesPage() {
           <div
             style={{
               fontSize: 12,
-              color: palette.textMuted,
+              color: "#555",
               fontFamily: "'Space Mono', monospace",
               marginBottom: 6,
             }}
@@ -130,7 +130,7 @@ export default function LinerNotesPage() {
               fontSize: 11,
               fontWeight: 600,
               fontFamily: "'Space Mono', monospace",
-              color: palette.textDim,
+              color: "#333",
               letterSpacing: 2,
               textTransform: "uppercase",
               marginTop: 10,
@@ -146,7 +146,7 @@ export default function LinerNotesPage() {
             style={{
               textAlign: "center",
               padding: 40,
-              color: palette.textMuted,
+              color: "#555",
               fontSize: 13,
               fontFamily: "'Space Mono', monospace",
             }}
@@ -181,7 +181,7 @@ export default function LinerNotesPage() {
                       width: 48,
                       height: 48,
                       borderRadius: 4,
-                      background: palette.border,
+                      background: "#1e1e1e",
                       flexShrink: 0,
                     }}
                   />
@@ -193,7 +193,7 @@ export default function LinerNotesPage() {
                   <div
                     style={{
                       fontSize: 11,
-                      color: palette.textMuted,
+                      color: "#555",
                       fontFamily: "'Space Mono', monospace",
                       marginBottom: 8,
                     }}
@@ -203,7 +203,7 @@ export default function LinerNotesPage() {
                   <div
                     style={{
                       fontSize: 13,
-                      color: palette.text,
+                      color: "#e8e6e3",
                       lineHeight: 1.6,
                       fontStyle: "italic",
                     }}

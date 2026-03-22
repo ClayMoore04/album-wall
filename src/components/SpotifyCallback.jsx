@@ -66,7 +66,7 @@ export default function SpotifyCallback() {
           </h2>
           <p
             style={{
-              color: palette.textMuted,
+              color: "#555",
               fontFamily: "'Space Mono', monospace",
               fontSize: 13,
             }}
@@ -84,7 +84,7 @@ export default function SpotifyCallback() {
           </h2>
           <p
             style={{
-              color: palette.textMuted,
+              color: "#555",
               fontFamily: "'Space Mono', monospace",
               fontSize: 13,
             }}
@@ -102,7 +102,7 @@ export default function SpotifyCallback() {
           </h2>
           <p
             style={{
-              color: palette.textMuted,
+              color: "#555",
               fontFamily: "'Space Mono', monospace",
               fontSize: 13,
               marginBottom: 20,
@@ -114,14 +114,14 @@ export default function SpotifyCallback() {
             onClick={() => navigate("/")}
             style={{
               padding: "10px 20px",
-              border: `1px solid ${palette.border}`,
+              border: "1px solid #1e1e1e",
               borderRadius: 8,
               fontSize: 13,
               fontWeight: 600,
               fontFamily: "'Space Mono', monospace",
               cursor: "pointer",
               background: "transparent",
-              color: palette.textMuted,
+              color: "#555",
             }}
           >
             Back to The Booth

@@ -54,8 +54,8 @@ export default function EmbedCodeModal({ slug, type = "wall", id, onClose }) {
   };
 
   const modalStyle = {
-    background: palette.surface,
-    border: `1px solid ${palette.border}`,
+    background: "#111",
+    border: "1px solid #1e1e1e",
     borderRadius: 16,
     padding: 24,
     maxWidth: 480,
@@ -69,20 +69,20 @@ export default function EmbedCodeModal({ slug, type = "wall", id, onClose }) {
     display: "block",
     fontSize: 12,
     fontWeight: 600,
-    color: palette.textMuted,
+    color: "#555",
     fontFamily: "'Space Mono', monospace",
     marginBottom: 8,
     letterSpacing: "0.03em",
   };
 
   const codeBlockStyle = {
-    background: palette.bg,
-    border: `1px solid ${palette.border}`,
+    background: "#0a0a0a",
+    border: "1px solid #1e1e1e",
     borderRadius: 8,
     padding: 12,
     fontSize: 11,
     fontFamily: "'Space Mono', monospace",
-    color: palette.text,
+    color: "#e8e6e3",
     whiteSpace: "pre-wrap",
     wordBreak: "break-all",
     lineHeight: 1.5,
@@ -91,10 +91,10 @@ export default function EmbedCodeModal({ slug, type = "wall", id, onClose }) {
 
   const copyBtnStyle = (label) => ({
     padding: "6px 14px",
-    border: `1px solid ${palette.border}`,
+    border: "1px solid #1e1e1e",
     borderRadius: 8,
     background: copied === label ? palette.accent : "transparent",
-    color: copied === label ? "#000" : palette.textMuted,
+    color: copied === label ? "#000" : "#555",
     fontSize: 11,
     fontWeight: 600,
     fontFamily: "'Space Mono', monospace",
@@ -105,10 +105,10 @@ export default function EmbedCodeModal({ slug, type = "wall", id, onClose }) {
 
   const themeBtnStyle = (t) => ({
     padding: "4px 12px",
-    border: `1px solid ${previewTheme === t ? palette.accent : palette.border}`,
+    border: `1px solid ${previewTheme === t ? palette.accent : "#1e1e1e"}`,
     borderRadius: 6,
     background: previewTheme === t ? palette.accent + "22" : "transparent",
-    color: previewTheme === t ? palette.accent : palette.textMuted,
+    color: previewTheme === t ? palette.accent : "#555",
     fontSize: 11,
     fontWeight: 600,
     fontFamily: "'Space Mono', monospace",
@@ -127,7 +127,7 @@ export default function EmbedCodeModal({ slug, type = "wall", id, onClose }) {
             right: 16,
             background: "transparent",
             border: "none",
-            color: palette.textMuted,
+            color: "#555",
             fontSize: 20,
             cursor: "pointer",
             lineHeight: 1,
@@ -141,7 +141,7 @@ export default function EmbedCodeModal({ slug, type = "wall", id, onClose }) {
             fontSize: 18,
             fontWeight: 700,
             margin: "0 0 4px",
-            color: palette.text,
+            color: "#e8e6e3",
           }}
         >
           Embed Your {type === "mixtape" ? "Mixtape" : "Booth"}
@@ -149,7 +149,7 @@ export default function EmbedCodeModal({ slug, type = "wall", id, onClose }) {
         <p
           style={{
             fontSize: 12,
-            color: palette.textMuted,
+            color: "#555",
             fontFamily: "'Space Mono', monospace",
             margin: "0 0 20px",
           }}
@@ -187,7 +187,7 @@ export default function EmbedCodeModal({ slug, type = "wall", id, onClose }) {
               padding: 16,
               display: "flex",
               justifyContent: "center",
-              border: `1px solid ${palette.border}`,
+              border: "1px solid #1e1e1e",
             }}
           >
             <iframe

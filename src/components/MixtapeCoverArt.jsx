@@ -1,5 +1,3 @@
-import { palette } from "../lib/palette";
-
 export default function MixtapeCoverArt({ tracks, coverArtIndex, customCoverUrl, size = 120 }) {
   // Custom cover takes priority
   if (customCoverUrl) {
@@ -50,13 +48,13 @@ export default function MixtapeCoverArt({ tracks, coverArtIndex, customCoverUrl,
           width: size,
           height: size,
           borderRadius: 8,
-          background: palette.surface,
-          border: `1px solid ${palette.border}`,
+          background: "#111",
+          border: `1px solid #1e1e1e`,
           display: "flex",
           alignItems: "center",
           justifyContent: "center",
           fontSize: size * 0.3,
-          color: palette.textDim,
+          color: "#333",
           fontFamily: "'Space Mono', monospace",
           fontWeight: 700,
         }}
@@ -82,7 +80,7 @@ export default function MixtapeCoverArt({ tracks, coverArtIndex, customCoverUrl,
         borderRadius: 8,
         overflow: "hidden",
         gap: 1,
-        background: palette.border,
+        background: "#1e1e1e",
       }}
     >
       {arts.map((url, i) =>
@@ -104,7 +102,7 @@ export default function MixtapeCoverArt({ tracks, coverArtIndex, customCoverUrl,
             style={{
               width: half,
               height: half,
-              background: palette.surface,
+              background: "#111",
             }}
           />
         )

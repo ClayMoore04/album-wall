@@ -229,7 +229,7 @@ export default function DiscoverPage() {
                 borderRadius: 16,
                 border: "none",
                 background: "transparent",
-                color: palette.textDim,
+                color: "#333",
                 fontSize: 11,
                 fontWeight: 600,
                 fontFamily: "'Space Mono', monospace",

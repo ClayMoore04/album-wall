@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { palette } from "../lib/palette";
+
 import { formatMs } from "../hooks/useMixtapeData";
 
 function GatefoldTrack({ track, position, accent, onPlay, isPlaying }) {
@@ -10,7 +10,7 @@ function GatefoldTrack({ track, position, accent, onPlay, isPlaying }) {
         alignItems: "flex-start",
         gap: 12,
         padding: "12px 0",
-        borderBottom: `1px solid ${palette.border}08`,
+        borderBottom: "1px solid #1e1e1e08",
         cursor: track.spotify_id ? "pointer" : "default",
         transition: "background 0.15s",
       }}
@@ -23,7 +23,7 @@ function GatefoldTrack({ track, position, accent, onPlay, isPlaying }) {
           flexShrink: 0,
           fontSize: 12,
           fontFamily: "'Space Mono', monospace",
-          color: isPlaying ? accent : palette.textDim,
+          color: isPlaying ? accent : "#333",
           paddingTop: 2,
           textAlign: "right",
         }}
@@ -50,7 +50,7 @@ function GatefoldTrack({ track, position, accent, onPlay, isPlaying }) {
             width: 36,
             height: 36,
             borderRadius: 4,
-            background: palette.surface,
+            background: "#111",
             flexShrink: 0,
           }}
         />
@@ -71,7 +71,7 @@ function GatefoldTrack({ track, position, accent, onPlay, isPlaying }) {
               fontSize: 14,
               fontWeight: 700,
               fontFamily: "'Syne', sans-serif",
-              color: isPlaying ? accent : palette.text,
+              color: isPlaying ? accent : "#e8e6e3",
               overflow: "hidden",
               textOverflow: "ellipsis",
               whiteSpace: "nowrap",
@@ -83,7 +83,7 @@ function GatefoldTrack({ track, position, accent, onPlay, isPlaying }) {
             style={{
               fontSize: 11,
               fontFamily: "'Space Mono', monospace",
-              color: palette.textDim,
+              color: "#333",
               flexShrink: 0,
             }}
           >
@@ -95,7 +95,7 @@ function GatefoldTrack({ track, position, accent, onPlay, isPlaying }) {
           style={{
             fontSize: 11,
             fontFamily: "'Space Mono', monospace",
-            color: palette.textMuted,
+            color: "#555",
             marginTop: 2,
             overflow: "hidden",
             textOverflow: "ellipsis",
@@ -115,7 +115,7 @@ function GatefoldTrack({ track, position, accent, onPlay, isPlaying }) {
               borderLeft: `2px solid ${accent}`,
               fontSize: 12,
               fontStyle: "italic",
-              color: palette.textMuted,
+              color: "#555",
               lineHeight: 1.5,
             }}
           >
@@ -129,7 +129,7 @@ function GatefoldTrack({ track, position, accent, onPlay, isPlaying }) {
             style={{
               fontSize: 10,
               fontFamily: "'Space Mono', monospace",
-              color: palette.textDim,
+              color: "#333",
               marginTop: 4,
             }}
           >
@@ -165,8 +165,8 @@ export default function GatefoldTrackList({
           alignItems: "center",
           justifyContent: "space-between",
           padding: "12px 16px",
-          background: palette.surface,
-          border: `1px solid ${palette.border}`,
+          background: "#111",
+          border: "1px solid #1e1e1e",
           borderRadius: 8,
           marginBottom: 8,
         }}
@@ -187,7 +187,7 @@ export default function GatefoldTrackList({
           style={{
             fontSize: 11,
             fontFamily: "'Space Mono', monospace",
-            color: palette.textDim,
+            color: "#333",
           }}
         >
           {formatMs(sideAMs)}
@@ -238,8 +238,8 @@ export default function GatefoldTrackList({
               textAlign: "center",
               padding: "28px 0",
               margin: "16px 0",
-              borderTop: `1px solid ${palette.border}`,
-              borderBottom: `1px solid ${palette.border}`,
+              borderTop: "1px solid #1e1e1e",
+              borderBottom: "1px solid #1e1e1e",
             }}
           >
             <div
@@ -258,7 +258,7 @@ export default function GatefoldTrackList({
               style={{
                 fontSize: 10,
                 fontFamily: "'Space Mono', monospace",
-                color: palette.textDim,
+                color: "#333",
                 marginTop: 4,
               }}
             >
@@ -273,8 +273,8 @@ export default function GatefoldTrackList({
               alignItems: "center",
               justifyContent: "space-between",
               padding: "12px 16px",
-              background: palette.surface,
-              border: `1px solid ${palette.border}`,
+              background: "#111",
+              border: "1px solid #1e1e1e",
               borderRadius: 8,
               marginBottom: 8,
             }}
@@ -295,7 +295,7 @@ export default function GatefoldTrackList({
               style={{
                 fontSize: 11,
                 fontFamily: "'Space Mono', monospace",
-                color: palette.textDim,
+                color: "#333",
               }}
             >
               {formatMs(sideBMs)}
@@ -345,7 +345,7 @@ export default function GatefoldTrackList({
           style={{
             textAlign: "center",
             padding: 40,
-            color: palette.textMuted,
+            color: "#555",
             fontSize: 13,
             fontFamily: "'Space Mono', monospace",
           }}

@@ -72,7 +72,7 @@ export default function MixtapeComments({ mixtapeId, isOwner }) {
           fontSize: 12,
           fontWeight: 600,
           fontFamily: "'Space Mono', monospace",
-          color: palette.textMuted,
+          color: "#555",
           letterSpacing: 1,
           textTransform: "uppercase",
           marginBottom: 12,
@@ -96,8 +96,8 @@ export default function MixtapeComments({ mixtapeId, isOwner }) {
               key={c.id}
               style={{
                 padding: "10px 14px",
-                background: palette.cardBg,
-                border: `1px solid ${palette.border}`,
+                background: "#111",
+                border: `1px solid #1e1e1e`,
                 borderRadius: 8,
                 display: "flex",
                 justifyContent: "space-between",
@@ -112,7 +112,7 @@ export default function MixtapeComments({ mixtapeId, isOwner }) {
                 <span
                   style={{
                     fontSize: 10,
-                    color: palette.textDim,
+                    color: "#333",
                     fontFamily: "'Space Mono', monospace",
                     marginLeft: 8,
                   }}
@@ -122,7 +122,7 @@ export default function MixtapeComments({ mixtapeId, isOwner }) {
                 <div
                   style={{
                     fontSize: 13,
-                    color: palette.text,
+                    color: "#e8e6e3",
                     marginTop: 4,
                     lineHeight: 1.4,
                   }}
@@ -136,7 +136,7 @@ export default function MixtapeComments({ mixtapeId, isOwner }) {
                   style={{
                     background: "none",
                     border: "none",
-                    color: palette.textDim,
+                    color: "#333",
                     cursor: "pointer",
                     fontSize: 12,
                     flexShrink: 0,
@@ -162,10 +162,10 @@ export default function MixtapeComments({ mixtapeId, isOwner }) {
             maxLength={40}
             style={{
               padding: "8px 12px",
-              background: palette.surface,
-              border: `1px solid ${palette.border}`,
+              background: "#0e0e0e",
+              border: `1px solid #1e1e1e`,
               borderRadius: 8,
-              color: palette.text,
+              color: "#e8e6e3",
               fontSize: 13,
               fontFamily: "'Syne', sans-serif",
               outline: "none",
@@ -184,10 +184,10 @@ export default function MixtapeComments({ mixtapeId, isOwner }) {
             style={{
               flex: 1,
               padding: "8px 12px",
-              background: palette.surface,
-              border: `1px solid ${palette.border}`,
+              background: "#0e0e0e",
+              border: `1px solid #1e1e1e`,
               borderRadius: 8,
-              color: palette.text,
+              color: "#e8e6e3",
               fontSize: 13,
               fontFamily: "'Syne', sans-serif",
               outline: "none",
@@ -217,7 +217,7 @@ export default function MixtapeComments({ mixtapeId, isOwner }) {
         <div
           style={{
             fontSize: 10,
-            color: palette.textDim,
+            color: "#333",
             fontFamily: "'Space Mono', monospace",
             textAlign: "right",
           }}

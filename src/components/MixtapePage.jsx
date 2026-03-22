@@ -9,7 +9,7 @@ export default function MixtapePage() {
   if (data.loading || data.loadingMixtape) {
     return (
       <div
-        style={{ textAlign: "center", padding: 80, color: palette.textMuted }}
+        style={{ textAlign: "center", padding: 80, color: "#555" }}
       >
         Loading...
       </div>
@@ -24,7 +24,7 @@ export default function MixtapePage() {
         </h2>
         <p
           style={{
-            color: palette.textMuted,
+            color: "#555",
             fontFamily: "'Space Mono', monospace",
             fontSize: 14,
             marginBottom: 24,

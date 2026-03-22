@@ -1,5 +1,5 @@
 import { Link } from "react-router-dom";
-import { palette } from "../lib/palette";
+
 import { formatMs } from "../hooks/useMixtapeData";
 import MixtapeCoverArt from "./MixtapeCoverArt";
 
@@ -12,7 +12,7 @@ export default function GatefoldHero({ mixtape, tracks, collaborators, totalMs, 
         padding: "60px 20px 40px",
         textAlign: "center",
         background: `linear-gradient(180deg, ${accentFaint} 0%, transparent 60%)`,
-        borderBottom: `1px solid ${palette.border}`,
+        borderBottom: "1px solid #1e1e1e",
         marginBottom: 32,
       }}
     >
@@ -102,7 +102,7 @@ export default function GatefoldHero({ mixtape, tracks, collaborators, totalMs, 
           fontFamily: "'Syne', sans-serif",
           margin: "0 0 8px",
           lineHeight: 1.1,
-          color: palette.text,
+          color: "#e8e6e3",
         }}
       >
         {mixtape.title}
@@ -127,7 +127,7 @@ export default function GatefoldHero({ mixtape, tracks, collaborators, totalMs, 
       <div
         style={{
           fontSize: 13,
-          color: palette.textMuted,
+          color: "#555",
           fontFamily: "'Space Mono', monospace",
           marginBottom: 16,
         }}
@@ -135,7 +135,7 @@ export default function GatefoldHero({ mixtape, tracks, collaborators, totalMs, 
         by{" "}
         <Link
           to={`/${mixtape.profiles?.slug}`}
-          style={{ color: palette.text, textDecoration: "none", fontWeight: 600 }}
+          style={{ color: "#e8e6e3", textDecoration: "none", fontWeight: 600 }}
         >
           {mixtape.profiles?.display_name || "Unknown"}
         </Link>
@@ -146,7 +146,7 @@ export default function GatefoldHero({ mixtape, tracks, collaborators, totalMs, 
               {i === collaborators.length - 1 ? " & " : ", "}
               <Link
                 to={`/${c.profiles?.slug}`}
-                style={{ color: palette.text, textDecoration: "none", fontWeight: 600 }}
+                style={{ color: "#e8e6e3", textDecoration: "none", fontWeight: 600 }}
               >
                 {c.profiles?.display_name}
               </Link>
@@ -159,7 +159,7 @@ export default function GatefoldHero({ mixtape, tracks, collaborators, totalMs, 
         style={{
           fontSize: 11,
           fontFamily: "'Space Mono', monospace",
-          color: palette.textDim,
+          color: "#333",
           letterSpacing: 1,
         }}
       >

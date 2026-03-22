@@ -38,8 +38,8 @@ export default function MixtapeOfTheWeek() {
     <div
       style={{
         background:
-          "linear-gradient(135deg, rgba(255,107,107,0.08), rgba(29,185,84,0.08))",
-        border: `1px solid ${palette.border}`,
+          "linear-gradient(135deg, rgba(239,68,68,0.08), rgba(29,185,84,0.08))",
+        border: "1px solid #1e1e1e",
         borderRadius: 16,
         padding: 24,
         marginBottom: 28,
@@ -51,7 +51,7 @@ export default function MixtapeOfTheWeek() {
           fontSize: 10,
           fontWeight: 700,
           fontFamily: "'Space Mono', monospace",
-          color: palette.coral,
+          color: "#ef4444",
           letterSpacing: 2,
           textTransform: "uppercase",
           marginBottom: 14,
@@ -83,7 +83,7 @@ export default function MixtapeOfTheWeek() {
         <div
           style={{
             fontSize: 12,
-            color: palette.coral,
+            color: "#ef4444",
             fontFamily: "'Space Mono', monospace",
             fontStyle: "italic",
             marginBottom: 4,
@@ -96,7 +96,7 @@ export default function MixtapeOfTheWeek() {
       <div
         style={{
           fontSize: 12,
-          color: palette.textMuted,
+          color: "#555",
           fontFamily: "'Space Mono', monospace",
           marginBottom: 14,
         }}
@@ -121,7 +121,7 @@ export default function MixtapeOfTheWeek() {
           display: "inline-block",
           padding: "10px 24px",
           borderRadius: 10,
-          background: palette.coral,
+          background: "#ef4444",
           color: "#000",
           fontSize: 13,
           fontWeight: 700,

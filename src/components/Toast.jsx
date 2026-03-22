@@ -1,5 +1,4 @@
 import { createContext, useContext, useState, useCallback, useEffect } from "react";
-import { palette } from "../lib/palette";
 
 const ToastContext = createContext(null);
 
@@ -38,9 +37,9 @@ export function ToastProvider({ children }) {
             transform: "translateX(-50%)",
             padding: "10px 24px",
             borderRadius: 10,
-            background: palette.surface,
-            border: `1px solid ${palette.border}`,
-            color: palette.text,
+            background: "#111",
+            border: "1px solid #1e1e1e",
+            color: "#e8e6e3",
             fontSize: 13,
             fontWeight: 600,
             fontFamily: "'Space Mono', monospace",

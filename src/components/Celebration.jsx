@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { palette } from "../lib/palette";
 
-const COLORS = [palette.accent, palette.coral, "#f5c518", "#9b59b6", "#3498db", "#e67e22"];
+const COLORS = [palette.accent, "#ef4444", "#f5c518", "#9b59b6", "#3498db", "#e67e22"];
 
 function randomBetween(a, b) {
   return Math.random() * (b - a) + a;

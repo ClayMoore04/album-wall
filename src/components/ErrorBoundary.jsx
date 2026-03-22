@@ -24,7 +24,7 @@ export default class ErrorBoundary extends Component {
           </h2>
           <p
             style={{
-              color: palette.textMuted,
+              color: "#555",
               fontFamily: "'Space Mono', monospace",
               fontSize: 14,
               marginBottom: 24,

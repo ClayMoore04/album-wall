@@ -340,7 +340,7 @@ export default function MixtapeHeader({
                 padding: "6px 10px",
                 border: "none",
                 background: mixtape.cover_art_index === null ? `rgba(${accentRgb},0.15)` : "transparent",
-                color: palette.text,
+                color: "#e8e6e3",
                 fontSize: 11, fontFamily: "'Space Mono', monospace",
                 cursor: "pointer", textAlign: "left", borderRadius: 4,
               }}
@@ -354,7 +354,7 @@ export default function MixtapeHeader({
                   width: "100%", padding: "5px 10px",
                   border: "none",
                   background: mixtape.cover_art_index === i ? `rgba(${accentRgb},0.15)` : "transparent",
-                  color: palette.text,
+                  color: "#e8e6e3",
                   fontSize: 11, fontFamily: "'Space Mono', monospace",
                   cursor: "pointer", textAlign: "left", borderRadius: 4,
                 }}
@@ -367,7 +367,7 @@ export default function MixtapeHeader({
                 </span>
               </button>
             ))}
-            <div style={{ borderTop: `1px solid ${palette.border}`, margin: "6px 0" }} />
+            <div style={{ borderTop: `1px solid ${"#1e1e1e"}`, margin: "6px 0" }} />
             <button
               onClick={() => {
                 setShowCoverPicker(false);
@@ -394,7 +394,7 @@ export default function MixtapeHeader({
                   display: "block", width: "100%",
                   padding: "6px 10px", border: "none",
                   background: mixtape.custom_cover_url && !mixtape.cover_art_index ? `rgba(${accentRgb},0.15)` : "transparent",
-                  color: palette.text,
+                  color: "#e8e6e3",
                   fontSize: 11, fontFamily: "'Space Mono', monospace",
                   cursor: "pointer", textAlign: "left", borderRadius: 4,
                 }}

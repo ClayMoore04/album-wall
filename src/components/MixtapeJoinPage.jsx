@@ -52,7 +52,7 @@ export default function MixtapeJoinPage() {
         </h2>
         <p
           style={{
-            color: palette.textMuted,
+            color: "#555",
             fontFamily: "'Space Mono', monospace",
             fontSize: 14,
             marginBottom: 24,
@@ -85,7 +85,7 @@ export default function MixtapeJoinPage() {
       style={{
         textAlign: "center",
         padding: 80,
-        color: palette.textMuted,
+        color: "#555",
         fontSize: 14,
         fontFamily: "'Space Mono', monospace",
       }}

@@ -1,7 +1,5 @@
 import { useRef } from "react";
 import { QRCodeSVG } from "qrcode.react";
-import { palette } from "../lib/palette";
-
 export default function QRCode({ url, size = 160 }) {
   const svgRef = useRef(null);
 
@@ -18,7 +16,7 @@ export default function QRCode({ url, size = 160 }) {
 
     const img = new Image();
     img.onload = () => {
-      ctx.fillStyle = palette.surface;
+      ctx.fillStyle = "#111";
       ctx.fillRect(0, 0, canvas.width, canvas.height);
       ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
       const link = document.createElement("a");
@@ -34,7 +32,7 @@ export default function QRCode({ url, size = 160 }) {
       <div
         ref={svgRef}
         style={{
-          background: palette.text,
+          background: "#e8e6e3",
           padding: 12,
           borderRadius: 10,
           display: "inline-block",
@@ -43,8 +41,8 @@ export default function QRCode({ url, size = 160 }) {
         <QRCodeSVG
           value={url}
           size={size}
-          bgColor={palette.text}
-          fgColor={palette.bg}
+          bgColor={"#e8e6e3"}
+          fgColor={"#0a0a0a"}
           level="M"
         />
       </div>
@@ -52,10 +50,10 @@ export default function QRCode({ url, size = 160 }) {
         onClick={handleDownload}
         style={{
           padding: "6px 14px",
-          border: `1px solid ${palette.border}`,
+          border: "1px solid #1e1e1e",
           borderRadius: 8,
           background: "transparent",
-          color: palette.textMuted,
+          color: "#555",
           fontSize: 11,
           fontWeight: 600,
           fontFamily: "'Space Mono', monospace",

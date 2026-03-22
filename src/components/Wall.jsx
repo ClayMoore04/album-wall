@@ -87,7 +87,7 @@ export default function Wall({
           <div style={{ fontSize: 42, marginBottom: 12 }}>🧱</div>
           <p
             style={{
-              color: palette.textMuted,
+              color: "#555",
               fontFamily: "'Space Mono', monospace",
               fontSize: 14,
               marginBottom: 16,
@@ -119,15 +119,15 @@ export default function Wall({
         style={{
           textAlign: "center",
           padding: "40px 20px",
-          background: palette.cardBg,
-          border: `1px solid ${palette.border}`,
+          background: "#111",
+          border: "1px solid #1e1e1e",
           borderRadius: 12,
         }}
       >
         <div style={{ fontSize: 42, marginBottom: 12 }}>🧱</div>
         <p
           style={{
-            color: palette.textMuted,
+            color: "#555",
             fontFamily: "'Space Mono', monospace",
             fontSize: 14,
             marginBottom: 4,
@@ -157,9 +157,9 @@ export default function Wall({
         borderRadius: 16,
         border: active
           ? `1px solid ${palette.accent}`
-          : `1px solid ${palette.border}`,
+          : "1px solid #1e1e1e",
         background: active ? "rgba(29,185,84,0.15)" : "transparent",
-        color: active ? palette.accent : palette.textMuted,
+        color: active ? palette.accent : "#555",
         fontSize: 11,
         fontWeight: 600,
         fontFamily: "'Space Mono', monospace",
@@ -228,7 +228,7 @@ export default function Wall({
               fontSize: 10,
               fontWeight: 700,
               fontFamily: "'Space Mono', monospace",
-              color: palette.textDim,
+              color: "#333",
               textTransform: "uppercase",
               letterSpacing: 1,
               marginBottom: 8,
@@ -263,9 +263,9 @@ export default function Wall({
             style={{
               padding: "6px 12px",
               borderRadius: 8,
-              border: `1px solid ${palette.border}`,
-              background: showFilter ? palette.surfaceHover : "transparent",
-              color: palette.textMuted,
+              border: "1px solid #1e1e1e",
+              background: showFilter ? "#1a1a1a" : "transparent",
+              color: "#555",
               fontSize: 11,
               fontWeight: 600,
               fontFamily: "'Space Mono', monospace",
@@ -285,7 +285,7 @@ export default function Wall({
                 padding: "4px 8px",
                 border: "none",
                 background: "transparent",
-                color: palette.coral,
+                color: "#ef4444",
                 fontSize: 11,
                 fontFamily: "'Space Mono', monospace",
                 cursor: "pointer",
@@ -298,7 +298,7 @@ export default function Wall({
         <div
           style={{
             fontSize: 11,
-            color: palette.textDim,
+            color: "#333",
             fontFamily: "'Space Mono', monospace",
           }}
         >
@@ -310,8 +310,8 @@ export default function Wall({
       {showFilter && (
         <div
           style={{
-            background: palette.surface,
-            border: `1px solid ${palette.border}`,
+            background: "#111",
+            border: "1px solid #1e1e1e",
             borderRadius: 12,
             padding: 14,
             marginBottom: 16,
@@ -324,7 +324,7 @@ export default function Wall({
                 fontSize: 10,
                 fontWeight: 700,
                 fontFamily: "'Space Mono', monospace",
-                color: palette.textDim,
+                color: "#333",
                 textTransform: "uppercase",
                 letterSpacing: 1,
                 marginBottom: 6,
@@ -352,7 +352,7 @@ export default function Wall({
                 fontSize: 10,
                 fontWeight: 700,
                 fontFamily: "'Space Mono', monospace",
-                color: palette.textDim,
+                color: "#333",
                 textTransform: "uppercase",
                 letterSpacing: 1,
                 marginBottom: 6,
@@ -377,7 +377,7 @@ export default function Wall({
                 fontSize: 10,
                 fontWeight: 700,
                 fontFamily: "'Space Mono', monospace",
-                color: palette.textDim,
+                color: "#333",
                 textTransform: "uppercase",
                 letterSpacing: 1,
                 marginBottom: 6,
@@ -404,7 +404,7 @@ export default function Wall({
             style={{
               textAlign: "center",
               padding: "40px 20px",
-              color: palette.textMuted,
+              color: "#555",
               fontFamily: "'Space Mono', monospace",
               fontSize: 13,
             }}

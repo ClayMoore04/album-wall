@@ -1,7 +1,9 @@
 import { useState, useEffect } from "react";
 import { supabase } from "../lib/supabase";
 import { palette } from "../lib/palette";
-import { inputStyle, labelStyle } from "../lib/styles";
+
+const inputStyle = { background: "#0e0e0e", border: "1px solid #1e1e1e", borderRadius: 8, color: "#e8e6e3", fontFamily: "'Syne', sans-serif", fontSize: 13, padding: "10px 12px", boxSizing: "border-box", outline: "none", width: "100%" };
+const labelStyle = { fontFamily: "'Space Mono', monospace", fontSize: 8, letterSpacing: "0.1em", textTransform: "uppercase", color: "#555", display: "block", marginBottom: 6 };
 
 function timeAgo(dateStr) {
   const diff = Date.now() - new Date(dateStr).getTime();
@@ -95,8 +97,8 @@ export default function GuestBook({ wallId, isOwner }) {
       {/* Sign form */}
       <div
         style={{
-          background: palette.cardBg,
-          border: `1px solid ${palette.border}`,
+          background: "#111",
+          border: `1px solid #1e1e1e`,
           borderRadius: 12,
           padding: 20,
           marginBottom: 24,
@@ -152,7 +154,7 @@ export default function GuestBook({ wallId, isOwner }) {
             style={{
               textAlign: "right",
               fontSize: 10,
-              color: palette.textDim,
+              color: "#333",
               fontFamily: "'Space Mono', monospace",
               marginTop: 4,
             }}
@@ -172,8 +174,8 @@ export default function GuestBook({ wallId, isOwner }) {
             fontWeight: 700,
             fontFamily: "'Space Mono', monospace",
             cursor: !name.trim() || !message.trim() ? "not-allowed" : "pointer",
-            background: !name.trim() || !message.trim() ? palette.border : palette.accent,
-            color: !name.trim() || !message.trim() ? palette.textDim : "#000",
+            background: !name.trim() || !message.trim() ? "#1e1e1e" : palette.accent,
+            color: !name.trim() || !message.trim() ? "#333" : "#000",
             transition: "all 0.2s",
           }}
         >
@@ -187,7 +189,7 @@ export default function GuestBook({ wallId, isOwner }) {
           style={{
             textAlign: "center",
             padding: 40,
-            color: palette.textMuted,
+            color: "#555",
             fontSize: 13,
             fontFamily: "'Space Mono', monospace",
           }}
@@ -199,7 +201,7 @@ export default function GuestBook({ wallId, isOwner }) {
           style={{
             textAlign: "center",
             padding: 40,
-            color: palette.textMuted,
+            color: "#555",
             fontSize: 13,
             fontFamily: "'Space Mono', monospace",
           }}
@@ -212,8 +214,8 @@ export default function GuestBook({ wallId, isOwner }) {
             <div
               key={entry.id}
               style={{
-                background: palette.cardBg,
-                border: `1px solid ${palette.border}`,
+                background: "#111",
+                border: "1px solid #1e1e1e",
                 borderRadius: 10,
                 padding: 16,
               }}
@@ -238,7 +240,7 @@ export default function GuestBook({ wallId, isOwner }) {
                   <span
                     style={{
                       fontSize: 10,
-                      color: palette.textDim,
+                      color: "#333",
                       fontFamily: "'Space Mono', monospace",
                     }}
                   >
@@ -251,7 +253,7 @@ export default function GuestBook({ wallId, isOwner }) {
                         padding: "2px 6px",
                         border: "none",
                         background: "transparent",
-                        color: palette.textDim,
+                        color: "#333",
                         fontSize: 10,
                         cursor: "pointer",
                         fontFamily: "'Space Mono', monospace",
@@ -265,7 +267,7 @@ export default function GuestBook({ wallId, isOwner }) {
               <div
                 style={{
                   fontSize: 13,
-                  color: palette.textMuted,
+                  color: "#555",
                   lineHeight: 1.5,
                   whiteSpace: "pre-wrap",
                   wordBreak: "break-word",
