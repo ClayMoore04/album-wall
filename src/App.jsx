@@ -33,21 +33,6 @@ export default function App() {
         overflow: "hidden",
       }}
     >
-      {/* Background gradient */}
-      <div
-        style={{
-          position: "fixed",
-          top: 0,
-          left: 0,
-          right: 0,
-          bottom: 0,
-          background:
-            "radial-gradient(ellipse at 20% 0%, rgba(29,185,84,0.06) 0%, transparent 60%), radial-gradient(ellipse at 80% 100%, rgba(255,107,107,0.04) 0%, transparent 50%)",
-          pointerEvents: "none",
-          zIndex: 0,
-        }}
-      />
-
       <Sidebar />
       <NavBar />
       <div
