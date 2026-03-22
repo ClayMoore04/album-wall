@@ -4,7 +4,7 @@ import { palette } from "../lib/palette";
 const W = 1080;
 const H = 1350;
 const PAD = 60;
-const ACCENT = "#1DB954";
+const ACCENT = "#ec4899";
 const CORAL = "#ef4444";
 const BG = "#0a0a0a";
 const SURFACE = "#181818";
@@ -80,7 +80,7 @@ function drawCard(canvas, profile, submissions) {
 
   // Subtle gradient overlay
   const grad = ctx.createRadialGradient(200, 0, 0, 200, 0, W);
-  grad.addColorStop(0, "rgba(29,185,84,0.08)");
+  grad.addColorStop(0, "rgba(236,72,153,0.08)");
   grad.addColorStop(1, "transparent");
   ctx.fillStyle = grad;
   ctx.fillRect(0, 0, W, H);
@@ -213,9 +213,9 @@ function drawCard(canvas, profile, submissions) {
       }
 
       roundRect(ctx, tagX, y, tw, tagH, 22);
-      ctx.fillStyle = "rgba(29,185,84,0.15)";
+      ctx.fillStyle = "rgba(236,72,153,0.15)";
       ctx.fill();
-      ctx.strokeStyle = "rgba(29,185,84,0.4)";
+      ctx.strokeStyle = "rgba(236,72,153,0.4)";
       ctx.lineWidth = 1.5;
       ctx.stroke();
 

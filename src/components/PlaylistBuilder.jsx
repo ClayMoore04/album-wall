@@ -193,10 +193,10 @@ export default function PlaylistBuilder({ submissions, loading }) {
                 gap: 12,
                 padding: 12,
                 background: isSelected
-                  ? "rgba(29,185,84,0.08)"
+                  ? "rgba(236,72,153,0.08)"
                   : "#111",
                 border: isSelected
-                  ? `1px solid rgba(29,185,84,0.3)`
+                  ? `1px solid rgba(236,72,153,0.3)`
                   : "1px solid #1e1e1e",
                 borderRadius: 12,
                 cursor: "pointer",

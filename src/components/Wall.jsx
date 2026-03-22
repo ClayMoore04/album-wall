@@ -158,7 +158,7 @@ export default function Wall({
         border: active
           ? `1px solid ${palette.accent}`
           : "1px solid #1e1e1e",
-        background: active ? "rgba(29,185,84,0.15)" : "transparent",
+        background: active ? "rgba(236,72,153,0.15)" : "transparent",
         color: active ? palette.accent : "#555",
         fontSize: 11,
         fontWeight: 600,
@@ -166,7 +166,7 @@ export default function Wall({
         cursor: "pointer",
         transition: "all 0.15s",
         whiteSpace: "nowrap",
-        boxShadow: active ? "0 0 8px rgba(29,185,84,0.2)" : "none",
+        boxShadow: active ? "0 0 8px rgba(236,72,153,0.2)" : "none",
       }}
     >
       {label}

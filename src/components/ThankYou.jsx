@@ -65,7 +65,7 @@ export default function ThankYou({ onAnother, onViewWall, ownerName = "They", su
           style={{
             marginTop: 40,
             padding: 24,
-            background: `linear-gradient(135deg, rgba(29,185,84,0.08), rgba(255,107,107,0.06))`,
+            background: `linear-gradient(135deg, rgba(236,72,153,0.08), rgba(239,68,68,0.06))`,
             border: "1px solid #1e1e1e",
             borderRadius: 14,
             textAlign: "center",

@@ -65,7 +65,7 @@ export default function RoomTrackCard({ track, addedByName, canRemove, onRemove 
                 textTransform: "uppercase",
                 padding: "1px 5px",
                 borderRadius: 3,
-                background: "rgba(255,107,107,0.15)",
+                background: "rgba(239,68,68,0.15)",
                 color: "#ef4444",
               }}
             >

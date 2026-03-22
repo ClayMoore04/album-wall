@@ -29,7 +29,7 @@ function TapeUnboxing({ trade, onOpen }) {
     <div
       style={{
         padding: 20,
-        background: `linear-gradient(135deg, rgba(255,107,107,0.1), rgba(29,185,84,0.06))`,
+        background: `linear-gradient(135deg, rgba(239,68,68,0.1), rgba(236,72,153,0.06))`,
         border: "1px solid #ef4444",
         borderRadius: 14,
         textAlign: "center",
@@ -475,7 +475,7 @@ export default function TapeTradeInbox() {
                             borderRadius: 6,
                             background:
                               selectedMixtapeId === m.id
-                                ? "rgba(255,107,107,0.1)"
+                                ? "rgba(239,68,68,0.1)"
                                 : "transparent",
                             color: "#e8e6e3",
                             fontSize: 12,

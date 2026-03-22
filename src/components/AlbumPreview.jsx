@@ -80,10 +80,10 @@ export default function AlbumPreview({ album, onClear }) {
                 borderRadius: 3,
                 background:
                   album.type === "track"
-                    ? "rgba(255,107,107,0.15)"
+                    ? "rgba(239,68,68,0.15)"
                     : "rgba(29,185,84,0.15)",
                 color:
-                  album.type === "track" ? "#ff6b6b" : "#1DB954",
+                  album.type === "track" ? "#ef4444" : "#1DB954",
               }}
             >
               {album.type === "track" ? "Song" : "Album"}

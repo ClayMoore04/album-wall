@@ -38,7 +38,7 @@ export default function MixtapeOfTheWeek() {
     <div
       style={{
         background:
-          "linear-gradient(135deg, rgba(239,68,68,0.08), rgba(29,185,84,0.08))",
+          "linear-gradient(135deg, rgba(239,68,68,0.08), rgba(236,72,153,0.08))",
         border: "1px solid #1e1e1e",
         borderRadius: 16,
         padding: 24,

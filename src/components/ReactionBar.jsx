@@ -73,7 +73,7 @@ export default function ReactionBar({ submissionId, reactions = {} }) {
               border: hasReacted
                 ? "1px solid #1DB954"
                 : "1px solid #1e1e1e",
-              background: hasReacted ? "rgba(29,185,84,0.1)" : "transparent",
+              background: hasReacted ? "rgba(236,72,153,0.1)" : "transparent",
               cursor: hasReacted ? "default" : "pointer",
               fontSize: 13,
               color: "#e8e6e3",

@@ -89,7 +89,7 @@ export default function PushOptIn() {
                 fontSize: 12,
                 fontWeight: 600,
                 fontFamily: "'Space Mono', monospace",
-                color: "#1DB954",
+                color: "#ec4899",
                 letterSpacing: "0.03em",
               }}
             >
@@ -186,7 +186,7 @@ export default function PushOptIn() {
           fontWeight: 700,
           fontFamily: "'Space Mono', monospace",
           cursor: loading ? "not-allowed" : "pointer",
-          background: "#1DB954",
+          background: "#ec4899",
           color: "#000",
           opacity: loading ? 0.6 : 1,
           transition: "all 0.2s",

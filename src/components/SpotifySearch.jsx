@@ -274,7 +274,7 @@ export default function SpotifySearch({ onSelect, forceType }) {
                       borderRadius: 3,
                       background:
                         item.type === "track"
-                          ? "rgba(255,107,107,0.15)"
+                          ? "rgba(239,68,68,0.15)"
                           : "rgba(29,185,84,0.15)",
                       color:
                         item.type === "track" ? "#ef4444" : palette.accent,

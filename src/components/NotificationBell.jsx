@@ -192,7 +192,7 @@ export default function NotificationBell() {
                     : "3px solid transparent",
                   borderBottom: "1px solid #1e1e1e",
                   background: !n.read
-                    ? "rgba(29,185,84,0.05)"
+                    ? "rgba(236,72,153,0.05)"
                     : "transparent",
                   cursor: "pointer",
                   textAlign: "left",

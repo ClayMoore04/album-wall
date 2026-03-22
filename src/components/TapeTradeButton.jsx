@@ -216,7 +216,7 @@ export default function TapeTradeButton({ mixtape }) {
                           borderRadius: 8,
                           background:
                             selectedId === m.id
-                              ? "rgba(255,107,107,0.1)"
+                              ? "rgba(239,68,68,0.1)"
                               : "transparent",
                           color: "#e8e6e3",
                           fontSize: 13,

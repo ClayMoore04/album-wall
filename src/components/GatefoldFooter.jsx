@@ -44,7 +44,7 @@ export default function GatefoldFooter({ mixtape, mixtapeId, tracks, totalMs, us
 
       // Accent gradient
       const grad = ctx.createLinearGradient(0, 0, W, H);
-      grad.addColorStop(0, (accent || "#1DB954") + "18");
+      grad.addColorStop(0, (accent || "#ec4899") + "18");
       grad.addColorStop(1, "transparent");
       ctx.fillStyle = grad;
       ctx.fillRect(0, 0, W, H);
@@ -95,7 +95,7 @@ export default function GatefoldFooter({ mixtape, mixtapeId, tracks, totalMs, us
 
       // Theme
       if (mixtape.theme) {
-        ctx.fillStyle = accent || "#1DB954";
+        ctx.fillStyle = accent || "#ec4899";
         ctx.font = "italic 24px sans-serif";
         ctx.fillText(`for: ${mixtape.theme}`, W / 2, 750);
       }

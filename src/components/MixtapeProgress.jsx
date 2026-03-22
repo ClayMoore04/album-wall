@@ -249,9 +249,9 @@ export default function MixtapeProgress({
             fontFamily: "'Space Mono', monospace",
             borderRadius: 8,
             background: isMyTurn
-              ? "rgba(29,185,84,0.08)"
+              ? "rgba(236,72,153,0.08)"
               : "rgba(255,255,255,0.03)",
-            border: `1px solid ${isMyTurn ? "rgba(29,185,84,0.2)" : "#1e1e1e"}`,
+            border: `1px solid ${isMyTurn ? "rgba(236,72,153,0.2)" : "#1e1e1e"}`,
             color: isMyTurn ? palette.accent : "#555",
           }}
         >
@@ -271,8 +271,8 @@ export default function MixtapeProgress({
             fontSize: 12,
             fontFamily: "'Space Mono', monospace",
             color: "#ef4444",
-            background: "rgba(255,107,107,0.08)",
-            border: `1px solid rgba(255,107,107,0.2)`,
+            background: "rgba(239,68,68,0.08)",
+            border: `1px solid rgba(239,68,68,0.2)`,
             borderRadius: 8,
           }}
         >

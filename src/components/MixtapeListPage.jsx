@@ -387,7 +387,7 @@ export default function MixtapeListPage() {
                         border: `1px solid ${collabMode === mode ? palette.accent : "#1e1e1e"}`,
                         background:
                           collabMode === mode
-                            ? "rgba(29,185,84,0.1)"
+                            ? "rgba(236,72,153,0.1)"
                             : "transparent",
                         color:
                           collabMode === mode ? palette.accent : "#e8e6e3",
@@ -432,7 +432,7 @@ export default function MixtapeListPage() {
                         border: `1px solid ${maxCollaborators === n ? palette.accent : "#1e1e1e"}`,
                         background:
                           maxCollaborators === n
-                            ? "rgba(29,185,84,0.1)"
+                            ? "rgba(236,72,153,0.1)"
                             : "transparent",
                         color:
                           maxCollaborators === n
@@ -530,7 +530,7 @@ export default function MixtapeListPage() {
                           fontWeight: 700,
                           fontFamily: "'Space Mono', monospace",
                           color: "#ef4444",
-                          background: "rgba(255,107,107,0.1)",
+                          background: "rgba(239,68,68,0.1)",
                           padding: "2px 6px",
                           borderRadius: 4,
                           letterSpacing: 0.5,

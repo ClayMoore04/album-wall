@@ -1,5 +1,5 @@
 export const THEMES = {
-  default: { name: "Spotify Green", accent: "#1DB954", emoji: "🟢" },
+  default: { name: "Rose", accent: "#ec4899", emoji: "🩷" },
   coral: { name: "Coral", accent: "#ff6b6b", emoji: "🔴" },
   purple: { name: "Purple", accent: "#a855f7", emoji: "🟣" },
   ocean: { name: "Ocean", accent: "#3b82f6", emoji: "🔵" },

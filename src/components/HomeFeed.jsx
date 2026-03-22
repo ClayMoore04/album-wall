@@ -309,7 +309,7 @@ export default function HomeFeed() {
               style={{
                 display: "inline-block",
                 padding: "10px 24px",
-                background: "#1DB954",
+                background: "#ec4899",
                 color: "#000",
                 borderRadius: 20,
                 fontSize: 13,
@@ -341,7 +341,7 @@ function FeedCard({ item, entranceIndex }) {
 
   const cardStyle = {
     background: "#111",
-    border: `1px solid ${hovered ? "rgba(29,185,84,0.3)" : "#1e1e1e"}`,
+    border: `1px solid ${hovered ? "rgba(236,72,153,0.3)" : "#1e1e1e"}`,
     borderRadius: 12,
     padding: 16,
     display: "flex",
@@ -350,7 +350,7 @@ function FeedCard({ item, entranceIndex }) {
     color: "#e8e6e3",
     transition: "transform 0.2s, box-shadow 0.2s, border-color 0.2s",
     transform: hovered ? "translateY(-1px)" : "translateY(0)",
-    boxShadow: hovered ? "0 4px 16px rgba(29,185,84,0.08)" : "none",
+    boxShadow: hovered ? "0 4px 16px rgba(236,72,153,0.08)" : "none",
     animation: `itb-fadeInUp 0.35s ease ${delay}s both`,
     cursor: "pointer",
   };
@@ -476,7 +476,7 @@ function FeedCard({ item, entranceIndex }) {
           <div
             style={{
               fontSize: 13,
-              color: "#1DB954",
+              color: "#ec4899",
               marginTop: 4,
               fontWeight: 700,
               overflow: "hidden",
@@ -501,7 +501,7 @@ function FeedCard({ item, entranceIndex }) {
                 color: "#555",
                 padding: "2px 6px",
                 borderRadius: 4,
-                background: "rgba(29,185,84,0.1)",
+                background: "rgba(236,72,153,0.1)",
               }}
             >
               {tracks.length} tracks
@@ -539,8 +539,8 @@ function FeedCard({ item, entranceIndex }) {
             height: 48,
             borderRadius: 8,
             flexShrink: 0,
-            background: "rgba(255,107,107,0.1)",
-            border: `1px solid rgba(255,107,107,0.2)`,
+            background: "rgba(239,68,68,0.1)",
+            border: `1px solid rgba(239,68,68,0.2)`,
             display: "flex",
             alignItems: "center",
             justifyContent: "center",
@@ -565,7 +565,7 @@ function FeedCard({ item, entranceIndex }) {
           <div
             style={{
               fontSize: 12,
-              color: "#ff6b6b",
+              color: "#ef4444",
               marginTop: 4,
               fontFamily: "'Space Mono', monospace",
               fontWeight: 600,

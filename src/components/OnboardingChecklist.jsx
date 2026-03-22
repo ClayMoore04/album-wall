@@ -161,7 +161,7 @@ export default function OnboardingChecklist({ profile, stats, onDismiss }) {
                     padding: "4px 12px",
                     border: `1px solid ${palette.accent}`,
                     borderRadius: 6,
-                    background: "rgba(29,185,84,0.1)",
+                    background: "rgba(236,72,153,0.1)",
                     color: palette.accent,
                     fontSize: 11,
                     fontWeight: 600,
