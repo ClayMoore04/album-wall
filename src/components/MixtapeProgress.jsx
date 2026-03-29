@@ -249,9 +249,9 @@ export default function MixtapeProgress({
             fontFamily: "'Space Mono', monospace",
             borderRadius: 8,
             background: isMyTurn
-              ? "rgba(236,72,153,0.08)"
+              ? "rgba(244,114,182,0.08)"
               : "rgba(255,255,255,0.03)",
-            border: `1px solid ${isMyTurn ? "rgba(236,72,153,0.2)" : "#1e1e1e"}`,
+            border: `1px solid ${isMyTurn ? "rgba(244,114,182,0.2)" : "#1e1e1e"}`,
             color: isMyTurn ? palette.accent : "#555",
           }}
         >

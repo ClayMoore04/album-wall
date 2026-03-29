@@ -1,10 +1,10 @@
 export const THEMES = {
-  default: { name: "Rose", accent: "#ec4899", emoji: "🩷" },
+  default: { name: "Rose", accent: "#f472b6", emoji: "🩷" },
   coral: { name: "Coral", accent: "#ff6b6b", emoji: "🔴" },
   purple: { name: "Purple", accent: "#a855f7", emoji: "🟣" },
   ocean: { name: "Ocean", accent: "#3b82f6", emoji: "🔵" },
   gold: { name: "Gold", accent: "#f59e0b", emoji: "🟡" },
-  rose: { name: "Rose", accent: "#ec4899", emoji: "🩷" },
+  rose: { name: "Rose", accent: "#f472b6", emoji: "🩷" },
   mono: { name: "Mono", accent: "#999999", emoji: "⚪" },
   neon: { name: "Neon", accent: "#06b6d4", emoji: "🩵" },
 };
@@ -18,7 +18,7 @@ export const BANNER_PRESETS = [
   {
     key: "gradient-1",
     label: "Sunset",
-    css: "linear-gradient(135deg, #f97316 0%, #ec4899 50%, #8b5cf6 100%)",
+    css: "linear-gradient(135deg, #f97316 0%, #f472b6 50%, #8b5cf6 100%)",
   },
   {
     key: "gradient-2",
@@ -43,7 +43,7 @@ export const BANNER_PRESETS = [
   {
     key: "gradient-6",
     label: "Aurora",
-    css: "linear-gradient(135deg, #06b6d4 0%, #10b981 33%, #8b5cf6 66%, #ec4899 100%)",
+    css: "linear-gradient(135deg, #06b6d4 0%, #10b981 33%, #8b5cf6 66%, #f472b6 100%)",
   },
 ];
 

@@ -5,7 +5,7 @@ import { TAGS } from "../lib/tags";
 import SpotifySearch from "./SpotifySearch";
 import AlbumPreview from "./AlbumPreview";
 
-function hexToRgb(hex = "#ec4899") {
+function hexToRgb(hex = "#f472b6") {
   const h = hex.replace("#", "");
   const full = h.length === 3 ? h.split("").map((c) => c + c).join("") : h;
   const n = parseInt(full, 16);

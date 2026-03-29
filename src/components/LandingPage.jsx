@@ -5,7 +5,7 @@ import { elevation } from "../lib/styles";
 import MixtapeOfTheWeek from "./MixtapeOfTheWeek";
 
 const ACCENT = palette.accent;
-const ACCENT_RGB = "236,72,153";
+const ACCENT_RGB = "244,114,182";
 
 let landingCssInjected = false;
 function injectLandingCss() {

@@ -24,7 +24,7 @@ function injectWallCardCss() {
 }
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
-function hexToRgb(hex = "#ec4899") {
+function hexToRgb(hex = "#f472b6") {
   const h = hex.replace("#", "");
   const full = h.length === 3 ? h.split("").map((c) => c + c).join("") : h;
   const n = parseInt(full, 16);
@@ -33,11 +33,11 @@ function hexToRgb(hex = "#ec4899") {
 
 function generateArtGradient(artistName = "", albumName = "") {
   const GRADIENTS = [
-    "linear-gradient(135deg,#f97316,#ec4899)",
+    "linear-gradient(135deg,#f97316,#f472b6)",
     "linear-gradient(135deg,#f5d547,#f97316)",
     "linear-gradient(135deg,#1e3a5f,#4c1d95)",
     "linear-gradient(135deg,#059669,#1DB954)",
-    "linear-gradient(135deg,#a855f7,#ec4899)",
+    "linear-gradient(135deg,#a855f7,#f472b6)",
     "linear-gradient(135deg,#06b6d4,#3b82f6)",
     "linear-gradient(135deg,#dc2626,#f97316)",
     "linear-gradient(135deg,#1e1b4b,#7c3aed)",

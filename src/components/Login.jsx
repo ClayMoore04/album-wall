@@ -2,8 +2,8 @@ import { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { useAuth } from "./AuthProvider";
 
-const ACCENT = "#ec4899";
-const ACCENT_RGB = "236,72,153";
+const ACCENT = "#f472b6";
+const ACCENT_RGB = "244,114,182";
 
 let loginCssInjected = false;
 function injectLoginCss() {

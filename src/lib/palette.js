@@ -1,14 +1,14 @@
 export const palette = {
   bg: "#0a0a0a",
-  surface: "#141414",
-  surfaceHover: "#1a1a1a",
-  border: "#222",
-  accent: "#ec4899",
-  text: "#e8e6e3",
-  textMuted: "#777",
-  textDim: "#555",
-  coral: "#ff6b6b",
-  cardBg: "rgba(255,255,255,0.03)",
+  surface: "#161616",
+  surfaceHover: "#1e1e1e",
+  border: "#2a2a2a",
+  accent: "#f472b6",
+  text: "#f0eeeb",
+  textMuted: "#999",
+  textDim: "#6b6b6b",
+  coral: "#ff7b7b",
+  cardBg: "rgba(255,255,255,0.04)",
 };
 
 export const noiseOverlay = {

@@ -13,7 +13,7 @@ function injectChallengeCss() {
   style.textContent = `
     @keyframes challengeGradient {
       0% { border-color: #ef4444; }
-      33% { border-color: #ec4899; }
+      33% { border-color: #f472b6; }
       66% { border-color: #8b5cf6; }
       100% { border-color: #ef4444; }
     }

@@ -4,13 +4,13 @@ import { useAuth } from "./AuthProvider";
 import { palette } from "../lib/palette";
 
 const ACCENT = palette.accent;
-const ACCENT_RGB = "236,72,153";
+const ACCENT_RGB = "244,114,182";
 
 // Mock album cards for the booth preview
 const MOCK_ALBUMS = [
-  { gradient: "linear-gradient(135deg,#f97316,#ec4899)", initials: "OK" },
+  { gradient: "linear-gradient(135deg,#f97316,#f472b6)", initials: "OK" },
   { gradient: "linear-gradient(135deg,#06b6d4,#3b82f6)", initials: "KA" },
-  { gradient: "linear-gradient(135deg,#a855f7,#ec4899)", initials: "IF" },
+  { gradient: "linear-gradient(135deg,#a855f7,#f472b6)", initials: "IF" },
 ];
 
 function MockBoothPreview({ name }) {

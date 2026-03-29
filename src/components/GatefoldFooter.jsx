@@ -100,7 +100,7 @@ export default function GatefoldFooter({ mixtape, mixtapeId, tracks, totalMs, us
 
       // Extract dominant color
       const dominantColor = coverUrl ? await extractColor(coverUrl) : null;
-      const tintHex = dominantColor || accent || "#ec4899";
+      const tintHex = dominantColor || accent || "#f472b6";
       const tintRgb = hexToRgb(tintHex);
 
       // 1. Full-bleed blurred background

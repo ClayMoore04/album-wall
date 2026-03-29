@@ -19,7 +19,7 @@ function injectDiscoverCss() {
   discoverCssInjected = true;
 }
 
-function hexToRgb(hex = "#ec4899") {
+function hexToRgb(hex = "#f472b6") {
   const h = hex.replace("#", "");
   const full = h.length === 3 ? h.split("").map((c) => c + c).join("") : h;
   const n = parseInt(full, 16);
@@ -28,11 +28,11 @@ function hexToRgb(hex = "#ec4899") {
 
 function nameToGradient(name = "") {
   const GRADIENTS = [
-    ["#f97316", "#ec4899"],
+    ["#f97316", "#f472b6"],
     ["#a855f7", "#3b82f6"],
     ["#06b6d4", "#1DB954"],
     ["#f5d547", "#f97316"],
-    ["#ec4899", "#a855f7"],
+    ["#f472b6", "#a855f7"],
     ["#3b82f6", "#06b6d4"],
     ["#1DB954", "#059669"],
     ["#dc2626", "#f97316"],

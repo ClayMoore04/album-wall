@@ -71,7 +71,7 @@ export default async function handler(req) {
                 right: 0,
                 bottom: 0,
                 background:
-                  "radial-gradient(ellipse at 50% 80%, rgba(236,72,153,0.06) 0%, transparent 60%)",
+                  "radial-gradient(ellipse at 50% 80%, rgba(244,114,182,0.06) 0%, transparent 60%)",
               },
             },
           },
@@ -85,7 +85,7 @@ export default async function handler(req) {
                 left: 0,
                 right: 0,
                 height: 4,
-                background: "#ec4899",
+                background: "#f472b6",
               },
             },
           },
@@ -107,7 +107,7 @@ export default async function handler(req) {
                   props: {
                     style: {
                       fontSize: 11,
-                      color: "#ec4899",
+                      color: "#f472b6",
                       letterSpacing: 3,
                       marginBottom: 16,
                       textTransform: "uppercase",
@@ -157,7 +157,7 @@ export default async function handler(req) {
                       props: {
                         style: {
                           fontSize: 14,
-                          color: "#ec4899",
+                          color: "#f472b6",
                           fontStyle: "italic",
                           marginBottom: 16,
                         },

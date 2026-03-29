@@ -90,7 +90,7 @@ export const pillBtnStyle = (active) => ({
 export const elevation = {
   flat: { boxShadow: "none" },
   raised: { boxShadow: "0 2px 8px rgba(0,0,0,0.3)" },
-  floating: (accentRgb = "236,72,153") => ({
+  floating: (accentRgb = "244,114,182") => ({
     boxShadow: `0 8px 32px rgba(0,0,0,0.5), 0 0 0 1px rgba(${accentRgb},0.08)`,
   }),
 };

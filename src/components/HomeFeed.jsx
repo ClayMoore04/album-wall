@@ -332,7 +332,7 @@ export default function HomeFeed() {
               style={{
                 display: "inline-block",
                 padding: "10px 24px",
-                background: "#ec4899",
+                background: "#f472b6",
                 color: "#000",
                 borderRadius: 20,
                 fontSize: 13,
@@ -363,7 +363,7 @@ function FeedCard({ item, entranceIndex }) {
 
   const cardStyle = {
     background: "#111",
-    border: `1px solid ${hovered ? "rgba(236,72,153,0.3)" : "#1e1e1e"}`,
+    border: `1px solid ${hovered ? "rgba(244,114,182,0.3)" : "#1e1e1e"}`,
     borderRadius: 12,
     padding: 16,
     display: "flex",
@@ -371,7 +371,7 @@ function FeedCard({ item, entranceIndex }) {
     textDecoration: "none",
     color: "#e8e6e3",
     transition: "border-color 0.2s, box-shadow 0.2s",
-    boxShadow: hovered ? "0 4px 16px rgba(236,72,153,0.08)" : "none",
+    boxShadow: hovered ? "0 4px 16px rgba(244,114,182,0.08)" : "none",
     cursor: "pointer",
   };
 
@@ -525,7 +525,7 @@ function FeedCard({ item, entranceIndex }) {
           <div
             style={{
               fontSize: 13,
-              color: "#ec4899",
+              color: "#f472b6",
               marginTop: 4,
               fontWeight: 700,
               overflow: "hidden",
@@ -550,7 +550,7 @@ function FeedCard({ item, entranceIndex }) {
                 color: "#555",
                 padding: "2px 6px",
                 borderRadius: 4,
-                background: "rgba(236,72,153,0.1)",
+                background: "rgba(244,114,182,0.1)",
               }}
             >
               {tracks.length} tracks
