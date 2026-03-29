@@ -4,6 +4,7 @@ import { formatMs } from "../hooks/useMixtapeData";
 import { useToast } from "./Toast";
 import { extractColor, hexToRgb } from "../lib/colorExtract";
 import TapeTradeButton from "./TapeTradeButton";
+import BookmarkButton from "./BookmarkButton";
 
 // Load an image with crossOrigin support, returns null on failure
 function loadImage(url) {
@@ -289,6 +290,8 @@ export default function GatefoldFooter({ mixtape, mixtapeId, tracks, totalMs, us
           marginBottom: 20,
         }}
       >
+        <BookmarkButton mixtapeId={mixtapeId} />
+
         <button
           onClick={handleCopyLink}
           style={{

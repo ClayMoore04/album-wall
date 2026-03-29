@@ -26,6 +26,8 @@ export default function MixtapeListPage() {
   const [creating, setCreating] = useState(false);
   const [newTitle, setNewTitle] = useState("");
   const [error, setError] = useState(null);
+  const [activeTab, setActiveTab] = useState("mine"); // "mine" | "saved"
+  const [savedMixtapes, setSavedMixtapes] = useState([]);
 
   // Collab creation options
   const [isCollab, setIsCollab] = useState(false);
@@ -127,6 +129,36 @@ export default function MixtapeListPage() {
     );
 
     setMixtapes(allMixtapes);
+
+    // Load saved/bookmarked mixtapes
+    const { data: bookmarkRows } = await supabase
+      .from("bookmarks")
+      .select("mixtape_id")
+      .eq("user_id", user.id)
+      .order("created_at", { ascending: false });
+
+    if (bookmarkRows?.length) {
+      const savedIds = bookmarkRows.map((b) => b.mixtape_id);
+      const { data: savedData } = await supabase
+        .from("mixtapes")
+        .select("*, profiles!user_id(display_name, slug)")
+        .in("id", savedIds)
+        .eq("is_public", true);
+
+      const savedWithStats = await Promise.all(
+        (savedData || []).map(async (m) => {
+          const { data: tracks } = await supabase
+            .from("mixtape_tracks")
+            .select("duration_ms, album_art_url")
+            .eq("mixtape_id", m.id)
+            .order("position", { ascending: true });
+          const totalMs = (tracks || []).reduce((sum, t) => sum + t.duration_ms, 0);
+          return { ...m, trackCount: tracks?.length || 0, totalMs, tracks: tracks || [], isSaved: true };
+        })
+      );
+      setSavedMixtapes(savedWithStats);
+    }
+
     setLoadingMixtapes(false);
   };
 
@@ -468,6 +500,45 @@ export default function MixtapeListPage() {
           </div>
         )}
 
+        {/* Tabs: My Mixtapes / Saved */}
+        <div
+          style={{
+            display: "flex",
+            gap: 2,
+            background: "#111",
+            borderRadius: 10,
+            padding: 3,
+            marginBottom: 16,
+            border: "1px solid #1a1a1a",
+          }}
+        >
+          {[
+            { key: "mine", label: "MY MIXTAPES" },
+            { key: "saved", label: `SAVED${savedMixtapes.length > 0 ? ` (${savedMixtapes.length})` : ""}` },
+          ].map((tab) => (
+            <button
+              key={tab.key}
+              onClick={() => setActiveTab(tab.key)}
+              style={{
+                flex: 1,
+                padding: "9px 0",
+                border: "none",
+                borderRadius: 8,
+                cursor: "pointer",
+                fontFamily: "'Space Mono', monospace",
+                fontSize: 9,
+                fontWeight: 600,
+                letterSpacing: "0.04em",
+                transition: "all 0.2s",
+                background: activeTab === tab.key ? palette.accent : "transparent",
+                color: activeTab === tab.key ? "#000" : "#444",
+              }}
+            >
+              {tab.label}
+            </button>
+          ))}
+        </div>
+
         {/* Mixtape list */}
         {loadingMixtapes ? (
           <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
@@ -475,6 +546,79 @@ export default function MixtapeListPage() {
             <MixtapeRowSkeleton />
             <MixtapeRowSkeleton />
           </div>
+        ) : activeTab === "saved" ? (
+          savedMixtapes.length === 0 ? (
+            <div
+              style={{
+                textAlign: "center",
+                padding: 40,
+                color: "#555",
+                fontSize: 13,
+                fontFamily: "'Space Mono', monospace",
+              }}
+            >
+              No saved mixtapes yet. Tap the heart on any mixtape to save it.
+            </div>
+          ) : (
+            <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+              {savedMixtapes.map((mixtape) => (
+                <Link
+                  key={mixtape.id}
+                  to={`/mixtape/${mixtape.id}`}
+                  style={{
+                    display: "flex",
+                    alignItems: "center",
+                    gap: 14,
+                    padding: "16px 20px",
+                    background: "#111",
+                    border: "1px solid #1e1e1e",
+                    borderRadius: 12,
+                    textDecoration: "none",
+                    color: "#e8e6e3",
+                    transition: "border-color 0.2s",
+                  }}
+                >
+                  <MixtapeCoverArt
+                    tracks={mixtape.tracks}
+                    coverArtIndex={mixtape.cover_art_index}
+                    customCoverUrl={mixtape.custom_cover_url}
+                    size={56}
+                  />
+                  <div style={{ flex: 1, minWidth: 0 }}>
+                    <div style={{ fontSize: 15, fontWeight: 700 }}>
+                      {mixtape.title}
+                    </div>
+                    {mixtape.profiles && (
+                      <div
+                        style={{
+                          fontSize: 10,
+                          color: "#555",
+                          fontFamily: "'Space Mono', monospace",
+                          marginTop: 2,
+                        }}
+                      >
+                        by {mixtape.profiles.display_name}
+                      </div>
+                    )}
+                    <div
+                      style={{
+                        fontSize: 11,
+                        color: "#555",
+                        fontFamily: "'Space Mono', monospace",
+                        marginTop: 4,
+                        display: "flex",
+                        gap: 10,
+                      }}
+                    >
+                      <span>{mixtape.trackCount} track{mixtape.trackCount !== 1 ? "s" : ""}</span>
+                      <span>{formatMs(mixtape.totalMs)}</span>
+                    </div>
+                  </div>
+                  <span style={{ color: "#ec4899", fontSize: 14, lineHeight: 1 }}>♥</span>
+                </Link>
+              ))}
+            </div>
+          )
         ) : mixtapes.length === 0 ? (
           <div
             style={{
