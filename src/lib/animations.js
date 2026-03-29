@@ -24,6 +24,14 @@ export function injectAnimations() {
       0%, 100% { opacity: 0.4; }
       50%      { opacity: 0.8; }
     }
+    @keyframes booth-breathe {
+      0%, 100% { transform: scale(0.98); }
+      50%      { transform: scale(1.02); }
+    }
+    @keyframes booth-shimmer {
+      0%   { background-position: -200% 0; }
+      100% { background-position: 200% 0; }
+    }
     button:active {
       transform: scale(0.97) !important;
     }

@@ -7,6 +7,7 @@ import { VIBE_TAGS } from "../lib/tags";
 
 import DiscoverWallCard from "./DiscoverWallCard";
 import MixtapeOfTheWeek from "./MixtapeOfTheWeek";
+import WeeklyChallenge from "./WeeklyChallenge";
 import { DiscoverCardSkeleton } from "./Skeleton";
 
 const SORT_OPTIONS = [
@@ -102,6 +103,9 @@ export default function DiscoverPage() {
   return (
     <>
       <div style={{ maxWidth: 560, margin: "0 auto", padding: "40px 0" }}>
+
+        {/* Weekly Challenge */}
+        <WeeklyChallenge />
 
         {/* MixtapeOfTheWeek */}
         <div style={{ marginBottom: 28 }}>

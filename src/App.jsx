@@ -1,6 +1,8 @@
-import { Routes, Route } from "react-router-dom";
+import { Routes, Route, useLocation } from "react-router-dom";
+import { AnimatePresence } from "framer-motion";
 import { palette } from "./lib/palette";
 import ErrorBoundary from "./components/ErrorBoundary";
+import PageTransition from "./components/PageTransition";
 import LandingPage from "./components/LandingPage";
 import SignUp from "./components/SignUp";
 import Login from "./components/Login";
@@ -22,6 +24,7 @@ import Sidebar from "./components/Sidebar";
 import NavBar from "./components/NavBar";
 
 export default function App() {
+  const location = useLocation();
   return (
     <div
       style={{
@@ -45,23 +48,25 @@ export default function App() {
           padding: "32px 20px 80px",
         }}
       >
-        <Routes>
-          <Route path="/signup" element={<ErrorBoundary><SignUp /></ErrorBoundary>} />
-          <Route path="/login" element={<ErrorBoundary><Login /></ErrorBoundary>} />
-          <Route path="/callback" element={<ErrorBoundary><SpotifyCallback /></ErrorBoundary>} />
-          <Route path="/dashboard" element={<ErrorBoundary><Dashboard /></ErrorBoundary>} />
-          <Route path="/feed" element={<ErrorBoundary><HomeFeed /></ErrorBoundary>} />
-          <Route path="/discover" element={<ErrorBoundary><DiscoverPage /></ErrorBoundary>} />
-          <Route path="/rooms" element={<ErrorBoundary><RoomListPage /></ErrorBoundary>} />
-          <Route path="/room/join/:inviteCode" element={<ErrorBoundary><RoomJoinPage /></ErrorBoundary>} />
-          <Route path="/room/:roomId" element={<ErrorBoundary><RoomPage /></ErrorBoundary>} />
-          <Route path="/mixtapes" element={<ErrorBoundary><MixtapeListPage /></ErrorBoundary>} />
-          <Route path="/mixtape/join/:inviteCode" element={<ErrorBoundary><MixtapeJoinPage /></ErrorBoundary>} />
-          <Route path="/mixtape/:id/notes" element={<ErrorBoundary><LinerNotesPage /></ErrorBoundary>} />
-          <Route path="/mixtape/:id" element={<ErrorBoundary><MixtapePage /></ErrorBoundary>} />
-          <Route path="/:slug" element={<ErrorBoundary><WallPage /></ErrorBoundary>} />
-          <Route path="/" element={<ErrorBoundary><LandingPage /></ErrorBoundary>} />
-        </Routes>
+        <AnimatePresence mode="wait">
+          <Routes location={location} key={location.pathname}>
+            <Route path="/signup" element={<ErrorBoundary><PageTransition><SignUp /></PageTransition></ErrorBoundary>} />
+            <Route path="/login" element={<ErrorBoundary><PageTransition><Login /></PageTransition></ErrorBoundary>} />
+            <Route path="/callback" element={<ErrorBoundary><SpotifyCallback /></ErrorBoundary>} />
+            <Route path="/dashboard" element={<ErrorBoundary><PageTransition><Dashboard /></PageTransition></ErrorBoundary>} />
+            <Route path="/feed" element={<ErrorBoundary><PageTransition><HomeFeed /></PageTransition></ErrorBoundary>} />
+            <Route path="/discover" element={<ErrorBoundary><PageTransition><DiscoverPage /></PageTransition></ErrorBoundary>} />
+            <Route path="/rooms" element={<ErrorBoundary><PageTransition><RoomListPage /></PageTransition></ErrorBoundary>} />
+            <Route path="/room/join/:inviteCode" element={<ErrorBoundary><PageTransition><RoomJoinPage /></PageTransition></ErrorBoundary>} />
+            <Route path="/room/:roomId" element={<ErrorBoundary><PageTransition><RoomPage /></PageTransition></ErrorBoundary>} />
+            <Route path="/mixtapes" element={<ErrorBoundary><PageTransition><MixtapeListPage /></PageTransition></ErrorBoundary>} />
+            <Route path="/mixtape/join/:inviteCode" element={<ErrorBoundary><PageTransition><MixtapeJoinPage /></PageTransition></ErrorBoundary>} />
+            <Route path="/mixtape/:id/notes" element={<ErrorBoundary><PageTransition><LinerNotesPage /></PageTransition></ErrorBoundary>} />
+            <Route path="/mixtape/:id" element={<ErrorBoundary><PageTransition><MixtapePage /></PageTransition></ErrorBoundary>} />
+            <Route path="/:slug" element={<ErrorBoundary><PageTransition><WallPage /></PageTransition></ErrorBoundary>} />
+            <Route path="/" element={<ErrorBoundary><PageTransition><LandingPage /></PageTransition></ErrorBoundary>} />
+          </Routes>
+        </AnimatePresence>
       </div>
       <MobileTabBar />
       <InstallPrompt />
