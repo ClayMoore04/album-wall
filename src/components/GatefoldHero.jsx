@@ -1,5 +1,6 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Link } from "react-router-dom";
+import { motion, useScroll, useTransform } from "framer-motion";
 
 import { formatMs } from "../hooks/useMixtapeData";
 import { extractColor, hexToRgb } from "../lib/colorExtract";
@@ -7,6 +8,7 @@ import MixtapeCoverArt from "./MixtapeCoverArt";
 
 export default function GatefoldHero({ mixtape, tracks, collaborators, totalMs, accent }) {
   const [artColor, setArtColor] = useState(null);
+  const containerRef = useRef(null);
 
   // Determine the cover art URL to extract color from
   useEffect(() => {
@@ -26,8 +28,22 @@ export default function GatefoldHero({ mixtape, tracks, collaborators, totalMs, 
   const ambientColor = artColor || accent;
   const ambientRgb = hexToRgb(ambientColor);
 
+  // Scroll-driven vinyl animation
+  const { scrollYProgress } = useScroll({
+    target: containerRef,
+    offset: ["start start", "end start"],
+  });
+
+  // Vinyl rotates 120deg as hero scrolls out of view
+  const vinylRotate = useTransform(scrollYProgress, [0, 1], [0, 120]);
+  // Vinyl slides out from behind cover (-30% -> 10%)
+  const vinylTranslateX = useTransform(scrollYProgress, [0, 1], [-30, 10]);
+  // Cover art subtle parallax
+  const coverTranslateY = useTransform(scrollYProgress, [0, 1], [0, -15]);
+
   return (
     <div
+      ref={containerRef}
       style={{
         padding: "60px 20px 40px",
         textAlign: "center",
@@ -45,13 +61,15 @@ export default function GatefoldHero({ mixtape, tracks, collaborators, totalMs, 
           marginBottom: 24,
         }}
       >
-        {/* Vinyl record behind cover */}
-        <div
+        {/* Vinyl record behind cover — scroll-driven rotation + slide */}
+        <motion.div
           style={{
             position: "absolute",
             top: "50%",
             left: "50%",
-            transform: "translate(-30%, -50%)",
+            x: useTransform(vinylTranslateX, (v) => `${v}%`),
+            y: "-50%",
+            rotate: vinylRotate,
             width: 260,
             height: 260,
             borderRadius: "50%",
@@ -81,17 +99,17 @@ export default function GatefoldHero({ mixtape, tracks, collaborators, totalMs, 
               opacity: 0.8,
             }}
           />
-        </div>
+        </motion.div>
 
-        {/* Cover art */}
-        <div style={{ position: "relative", zIndex: 1 }}>
+        {/* Cover art with subtle parallax */}
+        <motion.div style={{ position: "relative", zIndex: 1, y: coverTranslateY }}>
           <MixtapeCoverArt
             tracks={tracks}
             coverArtIndex={mixtape.cover_art_index}
             customCoverUrl={mixtape.custom_cover_url}
             size={260}
           />
-        </div>
+        </motion.div>
       </div>
 
       {/* Collab badge */}
