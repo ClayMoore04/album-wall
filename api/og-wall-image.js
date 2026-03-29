@@ -26,25 +26,24 @@ export default async function handler(req) {
     return new Response("Not found", { status: 404 });
   }
 
-  const [{ data: submissions }, { count: followerCount }] = await Promise.all([
-    supabase
-      .from("submissions")
-      .select("album_art_url")
-      .eq("wall_id", profile.id)
-      .order("created_at", { ascending: false })
-      .limit(6),
-    supabase
-      .from("follows")
-      .select("*", { count: "exact", head: true })
-      .eq("following_id", profile.id),
-  ]);
+  const [{ data: submissions, count: subCount }, { count: followerCount }] =
+    await Promise.all([
+      supabase
+        .from("submissions")
+        .select("album_art_url", { count: "exact" })
+        .eq("wall_id", profile.id)
+        .order("created_at", { ascending: false })
+        .limit(6),
+      supabase
+        .from("follows")
+        .select("*", { count: "exact", head: true })
+        .eq("following_id", profile.id),
+    ]);
 
   const arts = (submissions || [])
     .filter((s) => s.album_art_url)
     .map((s) => s.album_art_url)
     .slice(0, 6);
-
-  const subCount = (submissions || []).length;
 
   return new ImageResponse(
     {
@@ -52,60 +51,45 @@ export default async function handler(req) {
       props: {
         style: {
           display: "flex",
+          flexDirection: "column",
           width: "100%",
           height: "100%",
           background: "#0a0a0a",
-          padding: 60,
           fontFamily: "sans-serif",
+          position: "relative",
+          overflow: "hidden",
         },
         children: [
-          // Left: album art grid
+          // Ambient gradient
           {
             type: "div",
             props: {
               style: {
-                display: "flex",
-                flexWrap: "wrap",
-                width: 300,
-                height: 300,
-                borderRadius: 12,
-                overflow: "hidden",
-                gap: 3,
-                flexShrink: 0,
-                alignSelf: "center",
+                position: "absolute",
+                top: 0,
+                left: 0,
+                right: 0,
+                bottom: 0,
+                background:
+                  "radial-gradient(ellipse at 50% 80%, rgba(236,72,153,0.06) 0%, transparent 60%)",
               },
-              children: arts.length > 0
-                ? arts.map((url, i) => ({
-                    type: "img",
-                    props: {
-                      key: i,
-                      src: url,
-                      width: arts.length <= 1 ? 300 : arts.length <= 4 ? 148 : 98,
-                      height: arts.length <= 1 ? 300 : arts.length <= 4 ? 148 : 98,
-                      style: { objectFit: "cover" },
-                    },
-                  }))
-                : [
-                    {
-                      type: "div",
-                      props: {
-                        style: {
-                          width: 300,
-                          height: 300,
-                          background: "#141414",
-                          display: "flex",
-                          alignItems: "center",
-                          justifyContent: "center",
-                          fontSize: 80,
-                          color: "#555",
-                        },
-                        children: "🎙",
-                      },
-                    },
-                  ],
             },
           },
-          // Right: text
+          // Top accent strip
+          {
+            type: "div",
+            props: {
+              style: {
+                position: "absolute",
+                top: 0,
+                left: 0,
+                right: 0,
+                height: 4,
+                background: "#ec4899",
+              },
+            },
+          },
+          // Main content
           {
             type: "div",
             props: {
@@ -113,48 +97,67 @@ export default async function handler(req) {
                 display: "flex",
                 flexDirection: "column",
                 justifyContent: "center",
+                padding: "60px 80px",
                 flex: 1,
-                marginLeft: 50,
               },
               children: [
+                // Label
                 {
                   type: "div",
                   props: {
                     style: {
-                      fontSize: 44,
-                      fontWeight: 800,
-                      color: "#e8e6e3",
-                      lineHeight: 1.1,
-                      marginBottom: 12,
+                      fontSize: 11,
+                      color: "#ec4899",
+                      letterSpacing: 3,
+                      marginBottom: 16,
+                      textTransform: "uppercase",
                     },
-                    children: profile.display_name.length > 25
-                      ? profile.display_name.slice(0, 25) + "..."
-                      : profile.display_name,
+                    children: "MUSIC RECOMMENDATION WALL",
                   },
                 },
+                // Name
+                {
+                  type: "div",
+                  props: {
+                    style: {
+                      fontSize: 56,
+                      fontWeight: 800,
+                      color: "#e8e6e3",
+                      lineHeight: 1.05,
+                      marginBottom: 10,
+                    },
+                    children:
+                      profile.display_name.length > 22
+                        ? profile.display_name.slice(0, 22) + "..."
+                        : profile.display_name,
+                  },
+                },
+                // Bio
                 profile.bio
                   ? {
                       type: "div",
                       props: {
                         style: {
                           fontSize: 18,
-                          color: "#777",
-                          marginBottom: 16,
+                          color: "#555",
+                          marginBottom: 12,
                           lineHeight: 1.4,
                         },
-                        children: profile.bio.length > 80
-                          ? profile.bio.slice(0, 80) + "..."
-                          : profile.bio,
+                        children:
+                          profile.bio.length > 70
+                            ? profile.bio.slice(0, 70) + "..."
+                            : profile.bio,
                       },
                     }
                   : null,
+                // Status
                 profile.status_text
                   ? {
                       type: "div",
                       props: {
                         style: {
-                          fontSize: 16,
-                          color: "#1DB954",
+                          fontSize: 14,
+                          color: "#ec4899",
                           fontStyle: "italic",
                           marginBottom: 16,
                         },
@@ -162,33 +165,133 @@ export default async function handler(req) {
                       },
                     }
                   : null,
+                // Stats row
                 {
                   type: "div",
                   props: {
                     style: {
-                      fontSize: 14,
-                      color: "#555",
-                      letterSpacing: 2,
+                      display: "flex",
+                      gap: 20,
+                      marginBottom: 28,
                     },
                     children: [
-                      subCount > 0 ? `${subCount}+ ALBUMS` : "NO ALBUMS YET",
-                      followerCount ? ` · ${followerCount} FOLLOWER${followerCount !== 1 ? "S" : ""}` : "",
-                    ].join(""),
+                      subCount > 0
+                        ? {
+                            type: "div",
+                            props: {
+                              style: {
+                                display: "flex",
+                                alignItems: "center",
+                                gap: 6,
+                              },
+                              children: [
+                                {
+                                  type: "div",
+                                  props: {
+                                    style: {
+                                      fontSize: 24,
+                                      fontWeight: 800,
+                                      color: "#e8e6e3",
+                                    },
+                                    children: String(subCount),
+                                  },
+                                },
+                                {
+                                  type: "div",
+                                  props: {
+                                    style: {
+                                      fontSize: 12,
+                                      color: "#555",
+                                      letterSpacing: 1,
+                                    },
+                                    children: subCount === 1 ? "ALBUM" : "ALBUMS",
+                                  },
+                                },
+                              ],
+                            },
+                          }
+                        : null,
+                      followerCount
+                        ? {
+                            type: "div",
+                            props: {
+                              style: {
+                                display: "flex",
+                                alignItems: "center",
+                                gap: 6,
+                              },
+                              children: [
+                                {
+                                  type: "div",
+                                  props: {
+                                    style: {
+                                      fontSize: 24,
+                                      fontWeight: 800,
+                                      color: "#e8e6e3",
+                                    },
+                                    children: String(followerCount),
+                                  },
+                                },
+                                {
+                                  type: "div",
+                                  props: {
+                                    style: {
+                                      fontSize: 12,
+                                      color: "#555",
+                                      letterSpacing: 1,
+                                    },
+                                    children:
+                                      followerCount === 1 ? "FOLLOWER" : "FOLLOWERS",
+                                  },
+                                },
+                              ],
+                            },
+                          }
+                        : null,
+                    ].filter(Boolean),
                   },
                 },
-                {
-                  type: "div",
-                  props: {
-                    style: {
-                      fontSize: 14,
-                      color: "#333",
-                      marginTop: 40,
-                      letterSpacing: 1,
-                    },
-                    children: "The Booth",
-                  },
-                },
+                // Album art row
+                arts.length > 0
+                  ? {
+                      type: "div",
+                      props: {
+                        style: {
+                          display: "flex",
+                          gap: 8,
+                        },
+                        children: arts.map((url, i) => ({
+                          type: "img",
+                          props: {
+                            key: i,
+                            src: url,
+                            width: 80,
+                            height: 80,
+                            style: {
+                              objectFit: "cover",
+                              borderRadius: 8,
+                            },
+                          },
+                        })),
+                      },
+                    }
+                  : null,
               ].filter(Boolean),
+            },
+          },
+          // Bottom branding
+          {
+            type: "div",
+            props: {
+              style: {
+                position: "absolute",
+                bottom: 30,
+                right: 60,
+                fontSize: 12,
+                color: "#252525",
+                letterSpacing: 2,
+              },
+              children: "THE BOOTH",
             },
           },
         ],

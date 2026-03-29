@@ -9,6 +9,7 @@ import Header from "./Header";
 import FollowButton from "./FollowButton";
 import TabToggle from "./TabToggle";
 import SubmitForm from "./SubmitForm";
+import ThankYou from "./ThankYou";
 import Wall from "./Wall";
 import Stats from "./Stats";
 import PlaylistBuilder from "./PlaylistBuilder";
@@ -27,6 +28,8 @@ export default function WallPage() {
   const [loading, setLoading] = useState(true);
   const [view, setView] = useState("wall");
   const [showSubmitDrawer, setShowSubmitDrawer] = useState(false);
+  const [drawerView, setDrawerView] = useState("form"); // "form" | "thankyou"
+  const [lastSubmitterName, setLastSubmitterName] = useState("");
   const [followerCount, setFollowerCount] = useState(0);
   const [showCelebration, setShowCelebration] = useState(false);
   const [newSubmissionCount, setNewSubmissionCount] = useState(0);
@@ -160,9 +163,11 @@ export default function WallPage() {
       }
     } catch (e) {
       console.error("Failed to save submission:", e);
+      setShowSubmitDrawer(false);
+      return;
     }
-    setShowSubmitDrawer(false);
-    showToast("Album dropped! 🎵");
+    setLastSubmitterName(submission.submitted_by || "");
+    setDrawerView("thankyou");
   };
 
   const handleFeedback = async (
@@ -436,7 +441,7 @@ export default function WallPage() {
       {/* Floating "Drop a rec" button — visitors only */}
       {!isOwner && !showSubmitDrawer && (
         <button
-          onClick={() => setShowSubmitDrawer(true)}
+          onClick={() => { setDrawerView("form"); setShowSubmitDrawer(true); }}
           style={{
             position: "fixed",
             bottom: 76,
@@ -468,7 +473,7 @@ export default function WallPage() {
         <>
           {/* Backdrop */}
           <div
-            onClick={() => setShowSubmitDrawer(false)}
+            onClick={() => { setShowSubmitDrawer(false); setDrawerView("form"); }}
             style={{
               position: "fixed",
               top: 0, left: 0, right: 0, bottom: 0,
@@ -497,7 +502,7 @@ export default function WallPage() {
               padding: "12px 0 16px",
               cursor: "pointer",
             }}
-              onClick={() => setShowSubmitDrawer(false)}
+              onClick={() => { setShowSubmitDrawer(false); setDrawerView("form"); }}
             >
               <div style={{
                 width: 36, height: 4,
@@ -506,7 +511,17 @@ export default function WallPage() {
               }} />
             </div>
             <div style={{ maxWidth: 560, margin: "0 auto" }}>
-              <SubmitForm onSubmit={addSubmission} ownerName={ownerName} accent={themeAccent} />
+              {drawerView === "thankyou" ? (
+                <ThankYou
+                  ownerName={ownerName}
+                  submitterName={lastSubmitterName}
+                  accent={themeAccent}
+                  onAnother={() => setDrawerView("form")}
+                  onViewWall={() => { setShowSubmitDrawer(false); setDrawerView("form"); }}
+                />
+              ) : (
+                <SubmitForm onSubmit={addSubmission} ownerName={ownerName} accent={themeAccent} />
+              )}
             </div>
           </div>
         </>

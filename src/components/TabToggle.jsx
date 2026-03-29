@@ -1,4 +1,5 @@
-import { useState, useEffect, useRef } from "react";
+import { useEffect } from "react";
+import { motion } from "framer-motion";
 import { injectAnimations } from "../lib/animations";
 
 function hexToRgb(hex = "#ec4899") {
@@ -10,11 +11,8 @@ function hexToRgb(hex = "#ec4899") {
 
 export default function TabToggle({ view, setView, tabs, accent = "#ec4899" }) {
   const accentRgb = hexToRgb(accent);
-  const activeIdx = tabs.findIndex((t) => t.key === view);
 
   useEffect(() => { injectAnimations(); }, []);
-
-  const pillWidth = `${100 / tabs.length}%`;
 
   return (
     <div
@@ -29,19 +27,6 @@ export default function TabToggle({ view, setView, tabs, accent = "#ec4899" }) {
         position: "relative",
       }}
     >
-      {/* Sliding pill */}
-      <div
-        style={{
-          position: "absolute",
-          top: 3, bottom: 3,
-          left: `calc(3px + ${activeIdx} * ${pillWidth})`,
-          width: `calc(${pillWidth} - 3px)`,
-          background: accent,
-          borderRadius: 8,
-          transition: "left 0.25s ease",
-          zIndex: 0,
-        }}
-      />
       {tabs.map((tab) => (
         <button
           key={tab.key}
@@ -64,6 +49,20 @@ export default function TabToggle({ view, setView, tabs, accent = "#ec4899" }) {
             whiteSpace: "nowrap",
           }}
         >
+          {/* Animated pill behind active tab */}
+          {view === tab.key && (
+            <motion.div
+              layoutId="tab-pill"
+              transition={{ type: "spring", stiffness: 400, damping: 30 }}
+              style={{
+                position: "absolute",
+                inset: 0,
+                background: accent,
+                borderRadius: 8,
+                zIndex: -1,
+              }}
+            />
+          )}
           {tab.icon} {tab.label}
         </button>
       ))}

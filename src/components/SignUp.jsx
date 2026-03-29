@@ -58,6 +58,8 @@ export default function SignUp() {
   const [searchParams] = useSearchParams();
   const { signUp } = useAuth();
   const prefillName = searchParams.get("name") || "";
+  const referralSource = searchParams.get("ref") || "";
+  const isReferred = referralSource === "wall";
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -132,7 +134,7 @@ export default function SignUp() {
             letterSpacing: "-0.02em",
             margin: "0 0 6px",
           }}>
-            Set Up Your Booth
+            {isReferred ? "Open Your Booth" : "Set Up Your Booth"}
           </h1>
           <p style={{
             fontFamily: "'Space Mono', monospace",
@@ -140,7 +142,9 @@ export default function SignUp() {
             letterSpacing: "0.08em",
             margin: 0,
           }}>
-            GET YOUR OWN ALBUM RECOMMENDATION WALL
+            {isReferred
+              ? "NOW IT'S YOUR TURN TO COLLECT RECS"
+              : "GET YOUR OWN ALBUM RECOMMENDATION WALL"}
           </p>
         </div>
 

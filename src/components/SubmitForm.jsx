@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { motion } from "framer-motion";
 import { palette } from "../lib/palette";
 import { TAGS } from "../lib/tags";
 import SpotifySearch from "./SpotifySearch";
@@ -295,10 +296,12 @@ export default function SubmitForm({ onSubmit, ownerName = "them", accent = pale
         </Field>
 
         {/* Submit */}
-        <button
+        <motion.button
           className="itb-submit-btn"
           onClick={handleSubmit}
           disabled={!canSubmit || submitting}
+          whileTap={canSubmit && !submitting ? { scaleY: 0.93, scaleX: 0.99 } : {}}
+          transition={{ type: "spring", stiffness: 400, damping: 20 }}
           style={{
             width: "100%",
             background: !canSubmit ? "#1a1a1a" : accent,
@@ -311,12 +314,11 @@ export default function SubmitForm({ onSubmit, ownerName = "them", accent = pale
             letterSpacing: "0.1em",
             padding: "13px",
             cursor: !canSubmit ? "not-allowed" : "pointer",
-            transition: "background 0.2s, color 0.2s, transform 0.1s",
-            transform: submitting ? "scale(0.98)" : "scale(1)",
+            transition: "background 0.2s, color 0.2s",
           }}
         >
           {submitting ? "DROPPING..." : `DROP IT IN THE BOOTH`}
-        </button>
+        </motion.button>
       </div>
     </div>
   );

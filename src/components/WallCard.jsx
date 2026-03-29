@@ -1,8 +1,10 @@
 import { useState, useEffect, useCallback } from "react";
+import { motion } from "framer-motion";
 import { palette } from "../lib/palette";
 import { inputStyle } from "../lib/styles";
 import { injectAnimations } from "../lib/animations";
 import { timeAgo } from "../lib/timeAgo";
+import { extractColor, hexToRgb as extractHexToRgb } from "../lib/colorExtract";
 import ReactionBar from "./ReactionBar";
 
 // ─── Global CSS (injected once) ───────────────────────────────────────────────
@@ -53,16 +55,26 @@ function getInitials(title = "") {
 // ─── StarRating ───────────────────────────────────────────────────────────────
 function StarRating({ rating, interactive, onRate, accent }) {
   const [hover, setHover] = useState(0);
+  const [justRated, setJustRated] = useState(null);
   const display = hover || rating || 0;
+
+  const handleRate = (star) => {
+    if (!interactive) return;
+    setJustRated(star);
+    onRate(star);
+    setTimeout(() => setJustRated(null), 400);
+  };
 
   return (
     <div style={{ display: "flex", gap: 2 }}>
       {[1, 2, 3, 4, 5].map((star) => (
-        <span
+        <motion.span
           key={star}
-          onClick={interactive ? (e) => { e.stopPropagation(); onRate(star); } : undefined}
+          onClick={interactive ? (e) => { e.stopPropagation(); handleRate(star); } : undefined}
           onMouseEnter={interactive ? () => setHover(star) : undefined}
           onMouseLeave={interactive ? () => setHover(0) : undefined}
+          animate={justRated === star ? { scale: [1, 1.4, 1] } : { scale: 1 }}
+          transition={{ type: "spring", stiffness: 500, damping: 15 }}
           style={{
             fontSize: 12,
             cursor: interactive ? "pointer" : "default",
@@ -70,8 +82,9 @@ function StarRating({ rating, interactive, onRate, accent }) {
             transition: "color 0.1s",
             userSelect: "none",
             lineHeight: 1,
+            display: "inline-block",
           }}
-        >★</span>
+        >★</motion.span>
       ))}
     </div>
   );
@@ -153,8 +166,20 @@ export default function WallCard({
   const [sending, setSending] = useState(false);
   const [showDelete, setShowDelete] = useState(false);
   const [imgError, setImgError] = useState(false);
+  const [artColor, setArtColor] = useState(null);
 
   useEffect(() => { injectAnimations(); injectWallCardCss(); }, []);
+
+  // Extract dominant color from album art
+  useEffect(() => {
+    if (sub.album_art_url) {
+      extractColor(sub.album_art_url).then((c) => { if (c) setArtColor(c); });
+    }
+  }, [sub.album_art_url]);
+
+  // Use extracted art color for visual tinting, fall back to theme accent
+  const tintColor = artColor || accent;
+  const tintRgb = artColor ? extractHexToRgb(artColor) : accentRgb;
 
   const hasArt = sub.album_art_url && !imgError;
 
@@ -173,29 +198,35 @@ export default function WallCard({
   }, [onDelete, sub.id]);
 
   return (
-    <div
+    <motion.div
+      initial={{ opacity: 0, y: 16 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{
+        type: "spring",
+        stiffness: 300,
+        damping: 24,
+        delay: entranceIndex != null ? Math.min(entranceIndex, 8) * 0.05 : 0,
+      }}
       onMouseEnter={() => setHovered(true)}
       onMouseLeave={() => { setHovered(false); }}
       style={{
         position: "relative",
         background: "#111",
         borderRadius: 12,
-        border: `1px solid ${hovered ? `rgba(${accentRgb},0.35)` : "#1e1e1e"}`,
+        border: `1px solid ${hovered ? `rgba(${tintRgb},0.35)` : "#1e1e1e"}`,
         overflow: "hidden",
         transition: "transform 0.18s ease, border-color 0.18s ease, box-shadow 0.18s ease",
         transform: hovered ? "translateY(-3px)" : "translateY(0)",
-        boxShadow: hovered ? `0 8px 24px rgba(${accentRgb},0.07)` : "none",
-        animation: "booth-fadeInUp 0.3s ease both",
-        animationDelay: entranceIndex != null ? `${Math.min(entranceIndex, 8) * 0.05}s` : undefined,
+        boxShadow: hovered ? `0 8px 24px rgba(${tintRgb},0.10)` : "none",
       }}
     >
-      {/* Listened: left border indicator */}
+      {/* Listened: left border indicator — uses album's dominant color */}
       <div style={{
         position: "absolute",
         top: 0, left: 0, bottom: 0,
         width: 3,
         borderRadius: "12px 0 0 12px",
-        background: sub.listened ? accent : "transparent",
+        background: sub.listened ? tintColor : "transparent",
         transition: "background 0.25s ease",
         zIndex: 3,
         pointerEvents: "none",
@@ -219,26 +250,26 @@ export default function WallCard({
         }}>PIN</div>
       )}
 
-      {/* Static trim (resting) */}
+      {/* Static trim (resting) — tinted by album art */}
       <div style={{
         position: "absolute",
         top: 0, left: 0, right: 0, height: 2,
-        background: `rgba(${accentRgb},0.35)`,
+        background: `rgba(${tintRgb},0.35)`,
         opacity: hovered ? 0 : 1,
         transition: "opacity 0.2s ease",
         zIndex: 1,
         pointerEvents: "none",
       }} />
 
-      {/* Shimmer trim (hover) */}
+      {/* Shimmer trim (hover) — tinted by album art */}
       <div style={{
         position: "absolute",
         top: 0, left: 0, right: 0, height: 2,
         background: `linear-gradient(90deg,
           transparent 0%,
-          rgba(${accentRgb},0.3) 20%,
-          rgba(${accentRgb},1) 50%,
-          rgba(${accentRgb},0.3) 80%,
+          rgba(${tintRgb},0.3) 20%,
+          rgba(${tintRgb},1) 50%,
+          rgba(${tintRgb},0.3) 80%,
           transparent 100%)`,
         backgroundSize: "200% 100%",
         opacity: hovered ? 1 : 0,
@@ -385,7 +416,7 @@ export default function WallCard({
         }}>
           <div style={{
             width: 16, height: 16, borderRadius: "50%", flexShrink: 0,
-            background: `linear-gradient(135deg, rgba(${accentRgb},0.7), #3b82f6)`,
+            background: `linear-gradient(135deg, rgba(${tintRgb},0.7), #3b82f6)`,
             display: "flex", alignItems: "center", justifyContent: "center",
             fontFamily: "'Space Mono', monospace",
             fontSize: 6, fontWeight: 700, color: "#fff",
@@ -555,6 +586,6 @@ export default function WallCard({
           </div>
         )}
       </div>
-    </div>
+    </motion.div>
   );
 }

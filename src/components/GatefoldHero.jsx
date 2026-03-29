@@ -1,19 +1,40 @@
+import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 
 import { formatMs } from "../hooks/useMixtapeData";
+import { extractColor, hexToRgb } from "../lib/colorExtract";
 import MixtapeCoverArt from "./MixtapeCoverArt";
 
 export default function GatefoldHero({ mixtape, tracks, collaborators, totalMs, accent }) {
-  const accentFaint = accent + "12";
+  const [artColor, setArtColor] = useState(null);
+
+  // Determine the cover art URL to extract color from
+  useEffect(() => {
+    let url = mixtape.custom_cover_url;
+    if (!url && mixtape.cover_art_index != null && tracks[mixtape.cover_art_index]?.album_art_url) {
+      url = tracks[mixtape.cover_art_index].album_art_url;
+    }
+    if (!url && tracks.length > 0) {
+      url = tracks.find((t) => t.album_art_url)?.album_art_url;
+    }
+    if (url) {
+      extractColor(url).then((c) => { if (c) setArtColor(c); });
+    }
+  }, [mixtape.custom_cover_url, mixtape.cover_art_index, tracks]);
+
+  // Use extracted color for ambient gradient, fall back to accent
+  const ambientColor = artColor || accent;
+  const ambientRgb = hexToRgb(ambientColor);
 
   return (
     <div
       style={{
         padding: "60px 20px 40px",
         textAlign: "center",
-        background: `linear-gradient(180deg, ${accentFaint} 0%, transparent 60%)`,
+        background: `radial-gradient(ellipse at 50% 30%, rgba(${ambientRgb},0.12) 0%, transparent 70%)`,
         borderBottom: "1px solid #1e1e1e",
         marginBottom: 32,
+        transition: "background 0.6s ease",
       }}
     >
       {/* Cover art with vinyl record peeking out */}
