@@ -2,8 +2,8 @@ import { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { useAuth } from "./AuthProvider";
 
-const ACCENT = "#ec4899";
-const ACCENT_RGB = "236,72,153";
+const ACCENT = "#f472b6";
+const ACCENT_RGB = "244,114,182";
 
 let loginCssInjected = false;
 function injectLoginCss() {
@@ -17,6 +17,7 @@ function injectLoginCss() {
     .itb-login-input:focus {
       outline: none;
       border-color: ${ACCENT} !important;
+      box-shadow: 0 0 0 2px rgba(${ACCENT_RGB},0.25) !important;
     }
     .itb-login-btn:active { transform: scale(0.97); }
   `;
@@ -27,14 +28,22 @@ function injectLoginCss() {
 const inputStyle = {
   width: "100%",
   padding: "11px 14px",
-  background: "#0e0e0e",
+  background: "#141414",
   border: "1px solid #1e1e1e",
   borderRadius: 8,
   color: "#e8e6e3",
   fontSize: 13,
   fontFamily: "'Syne', sans-serif",
   boxSizing: "border-box",
-  transition: "border-color 0.15s",
+  transition: "border-color 0.15s, box-shadow 0.15s",
+};
+
+const labelStyle = {
+  display: "block",
+  fontFamily: "'Space Mono', monospace",
+  fontSize: 9, letterSpacing: "0.1em",
+  textTransform: "uppercase",
+  color: ACCENT, marginBottom: 8,
 };
 
 export default function Login() {
@@ -108,13 +117,7 @@ export default function Login() {
 
         <form onSubmit={handleSubmit}>
           <div style={{ marginBottom: 16 }}>
-            <label style={{
-              display: "block",
-              fontFamily: "'Space Mono', monospace",
-              fontSize: 8, letterSpacing: "0.1em",
-              textTransform: "uppercase",
-              color: ACCENT, marginBottom: 6,
-            }}>Email</label>
+            <label style={labelStyle}>Email</label>
             <input
               className="itb-login-input"
               type="email"
@@ -128,13 +131,7 @@ export default function Login() {
           </div>
 
           <div style={{ marginBottom: 24 }}>
-            <label style={{
-              display: "block",
-              fontFamily: "'Space Mono', monospace",
-              fontSize: 8, letterSpacing: "0.1em",
-              textTransform: "uppercase",
-              color: ACCENT, marginBottom: 6,
-            }}>Password</label>
+            <label style={labelStyle}>Password</label>
             <input
               className="itb-login-input"
               type="password"

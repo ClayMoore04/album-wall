@@ -85,7 +85,7 @@ function BarChart({ items, maxValue }) {
               style={{
                 width: `${max > 0 ? (item.value / max) * 100 : 0}%`,
                 height: "100%",
-                background: item.color || "#ec4899",
+                background: item.color || "#f472b6",
                 borderRadius: 4,
                 minWidth: item.value > 0 ? 4 : 0,
                 transition: "width 0.3s ease",
@@ -138,7 +138,7 @@ export default function Stats({ submissions }) {
       });
     });
     const tagBreakdown = Object.entries(tagMap)
-      .map(([label, value]) => ({ label, value, color: "#ec4899" }))
+      .map(([label, value]) => ({ label, value, color: "#f472b6" }))
       .sort((a, b) => b.value - a.value);
 
     // Rating distribution

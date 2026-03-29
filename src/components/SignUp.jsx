@@ -3,8 +3,8 @@ import { useNavigate, Link, useSearchParams } from "react-router-dom";
 import { supabase } from "../lib/supabase";
 import { useAuth } from "./AuthProvider";
 
-const ACCENT = "#ec4899";
-const ACCENT_RGB = "236,72,153";
+const ACCENT = "#f472b6";
+const ACCENT_RGB = "244,114,182";
 
 const RESERVED_SLUGS = [
   "signup", "login", "dashboard", "callback", "api",
@@ -24,6 +24,7 @@ function injectSignupCss() {
     .itb-signup-input:focus {
       outline: none;
       border-color: ${ACCENT} !important;
+      box-shadow: 0 0 0 2px rgba(${ACCENT_RGB},0.25) !important;
     }
     .itb-signup-btn:active { transform: scale(0.97); }
   `;
@@ -34,22 +35,22 @@ function injectSignupCss() {
 const inputStyle = {
   width: "100%",
   padding: "11px 14px",
-  background: "#0e0e0e",
+  background: "#141414",
   border: "1px solid #1e1e1e",
   borderRadius: 8,
   color: "#e8e6e3",
   fontSize: 13,
   fontFamily: "'Syne', sans-serif",
   boxSizing: "border-box",
-  transition: "border-color 0.15s",
+  transition: "border-color 0.15s, box-shadow 0.15s",
 };
 
 const labelStyle = {
   display: "block",
   fontFamily: "'Space Mono', monospace",
-  fontSize: 8, letterSpacing: "0.1em",
+  fontSize: 9, letterSpacing: "0.1em",
   textTransform: "uppercase",
-  color: ACCENT, marginBottom: 6,
+  color: ACCENT, marginBottom: 8,
 };
 
 export default function SignUp() {

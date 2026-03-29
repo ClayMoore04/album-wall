@@ -2,14 +2,14 @@ import { useEffect } from "react";
 import { motion } from "framer-motion";
 import { injectAnimations } from "../lib/animations";
 
-function hexToRgb(hex = "#ec4899") {
+function hexToRgb(hex = "#f472b6") {
   const h = hex.replace("#", "");
   const full = h.length === 3 ? h.split("").map((c) => c + c).join("") : h;
   const n = parseInt(full, 16);
   return `${(n >> 16) & 255},${(n >> 8) & 255},${n & 255}`;
 }
 
-export default function TabToggle({ view, setView, tabs, accent = "#ec4899" }) {
+export default function TabToggle({ view, setView, tabs, accent = "#f472b6" }) {
   const accentRgb = hexToRgb(accent);
 
   useEffect(() => { injectAnimations(); }, []);

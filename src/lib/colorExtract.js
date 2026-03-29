@@ -91,7 +91,7 @@ function findDominant(data) {
     }
   }
 
-  if (buckets.size === 0) return "#ec4899"; // fallback accent
+  if (buckets.size === 0) return "#f472b6"; // fallback accent
 
   // Find bucket with highest count, weighted by saturation
   let best = null;
@@ -113,7 +113,7 @@ function findDominant(data) {
     }
   }
 
-  if (!best) return "#ec4899";
+  if (!best) return "#f472b6";
 
   const r = Math.round(best.r / best.count);
   const g = Math.round(best.g / best.count);
@@ -126,7 +126,7 @@ function findDominant(data) {
  * Convert hex to "r,g,b" string for use in rgba().
  */
 export function hexToRgb(hex) {
-  if (!hex) return "236,72,153";
+  if (!hex) return "244,114,182";
   const h = hex.replace("#", "");
   const full = h.length === 3 ? h.split("").map((c) => c + c).join("") : h;
   const n = parseInt(full, 16);

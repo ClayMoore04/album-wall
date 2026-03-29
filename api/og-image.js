@@ -103,7 +103,7 @@ export default async function handler(req) {
                 right: 0,
                 bottom: 0,
                 background:
-                  "radial-gradient(ellipse at 25% 50%, rgba(236,72,153,0.08) 0%, transparent 70%)",
+                  "radial-gradient(ellipse at 25% 50%, rgba(244,114,182,0.08) 0%, transparent 70%)",
               },
             },
           },
@@ -146,7 +146,7 @@ export default async function handler(req) {
                           width: 60,
                           height: 60,
                           borderRadius: "50%",
-                          background: "#ec4899",
+                          background: "#f472b6",
                           opacity: 0.7,
                         },
                       },
@@ -238,7 +238,7 @@ export default async function handler(req) {
                   props: {
                     style: {
                       fontSize: 11,
-                      color: "#ec4899",
+                      color: "#f472b6",
                       letterSpacing: 3,
                       marginBottom: 12,
                       textTransform: "uppercase",
@@ -270,7 +270,7 @@ export default async function handler(req) {
                       props: {
                         style: {
                           fontSize: 16,
-                          color: "#ec4899",
+                          color: "#f472b6",
                           marginBottom: 10,
                           fontStyle: "italic",
                         },
@@ -311,7 +311,7 @@ export default async function handler(req) {
                                   props: {
                                     style: {
                                       fontSize: 10,
-                                      color: "#ec4899",
+                                      color: "#f472b6",
                                       letterSpacing: 2,
                                       marginBottom: 8,
                                     },
@@ -355,7 +355,7 @@ export default async function handler(req) {
                                       props: {
                                         style: {
                                           fontSize: 10,
-                                          color: "#ec4899",
+                                          color: "#f472b6",
                                           letterSpacing: 2,
                                           marginBottom: 8,
                                         },

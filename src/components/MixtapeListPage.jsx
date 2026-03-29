@@ -419,7 +419,7 @@ export default function MixtapeListPage() {
                         border: `1px solid ${collabMode === mode ? palette.accent : "#1e1e1e"}`,
                         background:
                           collabMode === mode
-                            ? "rgba(236,72,153,0.1)"
+                            ? "rgba(244,114,182,0.1)"
                             : "transparent",
                         color:
                           collabMode === mode ? palette.accent : "#e8e6e3",
@@ -464,7 +464,7 @@ export default function MixtapeListPage() {
                         border: `1px solid ${maxCollaborators === n ? palette.accent : "#1e1e1e"}`,
                         background:
                           maxCollaborators === n
-                            ? "rgba(236,72,153,0.1)"
+                            ? "rgba(244,114,182,0.1)"
                             : "transparent",
                         color:
                           maxCollaborators === n
@@ -614,7 +614,7 @@ export default function MixtapeListPage() {
                       <span>{formatMs(mixtape.totalMs)}</span>
                     </div>
                   </div>
-                  <span style={{ color: "#ec4899", fontSize: 14, lineHeight: 1 }}>♥</span>
+                  <span style={{ color: "#f472b6", fontSize: 14, lineHeight: 1 }}>♥</span>
                 </Link>
               ))}
             </div>
