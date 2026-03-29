@@ -1,4 +1,5 @@
 import { useState, useEffect, useMemo } from "react";
+import { Link } from "react-router-dom";
 import { useAuth } from "./AuthProvider";
 import { supabase } from "../lib/supabase";
 import { palette } from "../lib/palette";
@@ -177,14 +178,15 @@ export default function DiscoverPage() {
                 onClick={() => setSort(opt.key)}
                 style={{
                   fontFamily: "'Space Mono', monospace",
-                  fontSize: 8,
+                  fontSize: 9,
                   letterSpacing: "0.08em",
                   textTransform: "uppercase",
-                  padding: "4px 10px",
+                  padding: "5px 12px",
                   borderRadius: 20,
-                  border: `1px solid ${active ? `rgba(${accentRgb},0.5)` : "#1e1e1e"}`,
-                  background: active ? `rgba(${accentRgb},0.1)` : "transparent",
-                  color: active ? accent : "#333",
+                  border: active ? `1px solid ${accent}` : "1px solid #1e1e1e",
+                  background: active ? accent : "transparent",
+                  color: active ? "#000" : "#555",
+                  fontWeight: active ? 700 : 600,
                   cursor: "pointer",
                   transition: "all 0.15s",
                 }}
@@ -259,14 +261,44 @@ export default function DiscoverPage() {
         ) : filtered.length === 0 ? (
           <div style={{
             textAlign: "center",
-            padding: "60px 20px",
-            fontFamily: "'Space Mono', monospace",
-            fontSize: 10,
-            color: "#2a2a2a",
-            letterSpacing: "0.1em",
-            textTransform: "uppercase",
+            padding: "48px 24px",
+            background: "#111",
+            border: "1px solid #1e1e1e",
+            borderRadius: 16,
           }}>
-            {search ? "No booths match your search." : "No discoverable booths yet. Be the first!"}
+            <div style={{ fontSize: 32, marginBottom: 12 }}>
+              {search ? "🔍" : "🎙"}
+            </div>
+            <div style={{
+              fontFamily: "'Syne', sans-serif",
+              fontSize: 16, fontWeight: 700,
+              color: "#e8e6e3",
+              marginBottom: 6,
+            }}>
+              {search ? "No booths found" : "No booths yet"}
+            </div>
+            <div style={{
+              fontFamily: "'Space Mono', monospace",
+              fontSize: 11, color: "#555",
+              marginBottom: 20,
+              lineHeight: 1.5,
+            }}>
+              {search ? "Try a different search term." : "Be the first to set up your booth."}
+            </div>
+            {!search && (
+              <Link to="/signup" style={{
+                display: "inline-block",
+                padding: "10px 24px",
+                background: accent,
+                borderRadius: 10,
+                color: "#000",
+                fontSize: 12, fontWeight: 700,
+                fontFamily: "'Space Mono', monospace",
+                textDecoration: "none",
+              }}>
+                Create your booth
+              </Link>
+            )}
           </div>
         ) : (
           <div style={{
