@@ -1,8 +1,9 @@
 import { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
+import { motion } from "framer-motion";
 import { useAuth } from "./AuthProvider";
 import { supabase } from "../lib/supabase";
-import { getColor } from "../lib/palette";
+import { palette, getColor } from "../lib/palette";
 import { timeAgo } from "../lib/timeAgo";
 import { injectAnimations } from "../lib/animations";
 import MixtapeCoverArt from "./MixtapeCoverArt";
@@ -77,8 +78,8 @@ export default function HomeFeed() {
       Date.now() - 7 * 24 * 60 * 60 * 1000
     ).toISOString();
 
-    // Fetch all three sources in parallel
-    const [subsResult, mixtapesResult, tradesResult] = await Promise.all([
+    // Fetch all four sources in parallel
+    const [subsResult, mixtapesResult, tradesResult, followersResult] = await Promise.all([
       // Submissions on followed users' walls
       supabase
         .from("submissions")
@@ -106,6 +107,15 @@ export default function HomeFeed() {
         .gte("created_at", sevenDaysAgo)
         .order("created_at", { ascending: false })
         .limit(10),
+
+      // New followers of the current user
+      supabase
+        .from("follows")
+        .select("id, follower_id, created_at")
+        .eq("following_id", user.id)
+        .gte("created_at", sevenDaysAgo)
+        .order("created_at", { ascending: false })
+        .limit(10),
     ]);
 
     // Gather all profile IDs we need to look up
@@ -113,6 +123,9 @@ export default function HomeFeed() {
     (tradesResult.data || []).forEach((t) => {
       profileIds.add(t.sender_id);
       profileIds.add(t.receiver_id);
+    });
+    (followersResult.data || []).forEach((f) => {
+      profileIds.add(f.follower_id);
     });
 
     // Fetch profiles for display names and slugs
@@ -183,6 +196,16 @@ export default function HomeFeed() {
         created_at: trade.completed_at || trade.created_at,
         sender,
         receiver,
+      });
+    });
+
+    (followersResult.data || []).forEach((follow) => {
+      const follower = profileMap[follow.follower_id];
+      items.push({
+        type: "follower",
+        id: `follow-${follow.id}`,
+        created_at: follow.created_at,
+        follower,
       });
     });
 
@@ -337,7 +360,6 @@ export default function HomeFeed() {
 
 function FeedCard({ item, entranceIndex }) {
   const [hovered, setHovered] = useState(false);
-  const delay = Math.min(entranceIndex, 10) * 0.05;
 
   const cardStyle = {
     background: "#111",
@@ -348,11 +370,27 @@ function FeedCard({ item, entranceIndex }) {
     gap: 14,
     textDecoration: "none",
     color: "#e8e6e3",
-    transition: "transform 0.2s, box-shadow 0.2s, border-color 0.2s",
-    transform: hovered ? "translateY(-1px)" : "translateY(0)",
+    transition: "border-color 0.2s, box-shadow 0.2s",
     boxShadow: hovered ? "0 4px 16px rgba(236,72,153,0.08)" : "none",
-    animation: `itb-fadeInUp 0.35s ease ${delay}s both`,
     cursor: "pointer",
+  };
+
+  const MotionWrapper = ({ children, linkTo }) => {
+    const inner = (
+      <motion.div
+        initial={{ opacity: 0, y: 14 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{
+          type: "spring",
+          stiffness: 300,
+          damping: 24,
+          delay: Math.min(entranceIndex, 10) * 0.05,
+        }}
+      >
+        {children}
+      </motion.div>
+    );
+    return linkTo ? inner : inner;
   };
 
   if (item.type === "submission") {
@@ -361,6 +399,11 @@ function FeedCard({ item, entranceIndex }) {
     const wallName = wallOwner?.display_name || "someone";
 
     return (
+      <motion.div
+        initial={{ opacity: 0, y: 14 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ type: "spring", stiffness: 300, damping: 24, delay: Math.min(entranceIndex, 10) * 0.05 }}
+      >
       <Link
         to={`/${wallSlug}`}
         style={cardStyle}
@@ -436,6 +479,7 @@ function FeedCard({ item, entranceIndex }) {
           </div>
         </div>
       </Link>
+      </motion.div>
     );
   }
 
@@ -445,6 +489,11 @@ function FeedCard({ item, entranceIndex }) {
     const ownerSlug = owner?.slug || "";
 
     return (
+      <motion.div
+        initial={{ opacity: 0, y: 14 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ type: "spring", stiffness: 300, damping: 24, delay: Math.min(entranceIndex, 10) * 0.05 }}
+      >
       <Link
         to={`/mixtape/${mix.id}`}
         style={cardStyle}
@@ -518,6 +567,7 @@ function FeedCard({ item, entranceIndex }) {
           </div>
         </div>
       </Link>
+      </motion.div>
     );
   }
 
@@ -527,12 +577,14 @@ function FeedCard({ item, entranceIndex }) {
     const receiverName = receiver?.display_name || "someone";
 
     return (
-      <div
+      <motion.div
+        initial={{ opacity: 0, y: 14 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ type: "spring", stiffness: 300, damping: 24, delay: Math.min(entranceIndex, 10) * 0.05 }}
         style={cardStyle}
         onMouseEnter={() => setHovered(true)}
         onMouseLeave={() => setHovered(false)}
       >
-        {/* Trade icon */}
         <div
           style={{
             width: 48,
@@ -551,40 +603,74 @@ function FeedCard({ item, entranceIndex }) {
         </div>
 
         <div style={{ flex: 1, minWidth: 0 }}>
-          <div
-            style={{
-              fontSize: 14,
-              fontWeight: 600,
-              lineHeight: 1.4,
-            }}
-          >
+          <div style={{ fontSize: 14, fontWeight: 600, lineHeight: 1.4 }}>
             <span style={{ fontWeight: 700 }}>{senderName}</span>
             <span style={{ color: "#555" }}> and </span>
             <span style={{ fontWeight: 700 }}>{receiverName}</span>
           </div>
           <div
             style={{
-              fontSize: 12,
-              color: "#ef4444",
-              marginTop: 4,
-              fontFamily: "'Space Mono', monospace",
-              fontWeight: 600,
+              fontSize: 12, color: "#ef4444", marginTop: 4,
+              fontFamily: "'Space Mono', monospace", fontWeight: 600,
             }}
           >
             completed a tape trade
           </div>
-          <div
-            style={{
-              fontSize: 11,
-              color: "#333",
-              marginTop: 4,
-              fontFamily: "'Space Mono', monospace",
-            }}
-          >
+          <div style={{ fontSize: 11, color: "#333", marginTop: 4, fontFamily: "'Space Mono', monospace" }}>
             {timeAgo(item.created_at)}
           </div>
         </div>
-      </div>
+      </motion.div>
+    );
+  }
+
+  if (item.type === "follower") {
+    const { follower } = item;
+    const name = follower?.display_name || "Someone";
+    const slug = follower?.slug || "";
+
+    return (
+      <motion.div
+        initial={{ opacity: 0, y: 14 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ type: "spring", stiffness: 300, damping: 24, delay: Math.min(entranceIndex, 10) * 0.05 }}
+      >
+        <Link
+          to={`/${slug}`}
+          style={cardStyle}
+          onMouseEnter={() => setHovered(true)}
+          onMouseLeave={() => setHovered(false)}
+        >
+          <div
+            style={{
+              width: 48,
+              height: 48,
+              borderRadius: "50%",
+              flexShrink: 0,
+              background: `linear-gradient(135deg, ${getColor(name)}, ${palette.accent})`,
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              fontSize: 18,
+              fontWeight: 800,
+              color: "rgba(255,255,255,0.9)",
+              fontFamily: "'Syne', sans-serif",
+            }}
+          >
+            {name[0]?.toUpperCase()}
+          </div>
+
+          <div style={{ flex: 1, minWidth: 0 }}>
+            <div style={{ fontSize: 14, fontWeight: 600, lineHeight: 1.4 }}>
+              <span style={{ fontWeight: 700 }}>{name}</span>
+              <span style={{ color: "#555" }}> started following you</span>
+            </div>
+            <div style={{ fontSize: 11, color: "#333", marginTop: 4, fontFamily: "'Space Mono', monospace" }}>
+              {timeAgo(item.created_at)}
+            </div>
+          </div>
+        </Link>
+      </motion.div>
     );
   }
 
