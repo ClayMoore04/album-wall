@@ -1,8 +1,42 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { palette } from "../lib/palette";
+import { supabase } from "../lib/supabase";
 import MixtapeCoverArt from "./MixtapeCoverArt";
 import TapeTradeButton from "./TapeTradeButton";
+
+function ChallengeQuickFill({ onSelect }) {
+  const [challenge, setChallenge] = useState(null);
+  useEffect(() => {
+    if (!supabase) return;
+    supabase.rpc("get_current_challenge").then(({ data }) => {
+      if (data && data.length > 0) setChallenge(data[0]);
+    });
+  }, []);
+  if (!challenge) return null;
+  const tag = `#challenge-${challenge.id} ${challenge.title}`;
+  return (
+    <button
+      onClick={() => onSelect(tag)}
+      style={{
+        display: "block",
+        marginBottom: 6,
+        padding: "4px 10px",
+        border: "1px solid rgba(239,68,68,0.3)",
+        borderRadius: 6,
+        background: "rgba(239,68,68,0.08)",
+        color: "#ef4444",
+        fontSize: 9,
+        fontWeight: 600,
+        fontFamily: "'Space Mono', monospace",
+        cursor: "pointer",
+        letterSpacing: "0.03em",
+      }}
+    >
+      Enter this week's challenge: {challenge.title}
+    </button>
+  );
+}
 
 function hexToRgb(hex = "#ec4899") {
   const h = hex.replace("#", "");
@@ -198,34 +232,37 @@ export default function MixtapeHeader({
 
             {/* Theme */}
             {editingTheme ? (
-              <div style={{ display: "flex", gap: 6, alignItems: "center", marginBottom: 6 }}>
-                <span style={{ fontSize: 13, color: accent, fontFamily: "'Space Mono', monospace" }}>for:</span>
-                <input
-                  value={themeValue}
-                  onChange={(e) => setThemeValue(e.target.value.slice(0, 50))}
-                  onKeyDown={(e) => e.key === "Enter" && handleSaveTheme()}
-                  placeholder="long drives, sunday morning..."
-                  autoFocus
-                  maxLength={50}
-                  style={{
-                    background: "#1a1a1a",
-                    border: `1px solid rgba(${accentRgb},0.25)`,
-                    borderRadius: 6,
-                    color: "#888",
-                    fontFamily: "'Syne', sans-serif",
-                    fontSize: 12, fontStyle: "italic",
-                    padding: "4px 8px",
-                    flex: 1,
-                    outline: "none",
-                  }}
-                />
-                <button onClick={handleSaveTheme} style={{
-                  background: accent, border: "none",
-                  borderRadius: 5, color: "#000",
-                  fontFamily: "'Space Mono', monospace",
-                  fontSize: 8, fontWeight: 700,
-                  padding: "5px 10px", cursor: "pointer",
-                }}>SAVE</button>
+              <div>
+                <div style={{ display: "flex", gap: 6, alignItems: "center", marginBottom: 6 }}>
+                  <span style={{ fontSize: 13, color: accent, fontFamily: "'Space Mono', monospace" }}>for:</span>
+                  <input
+                    value={themeValue}
+                    onChange={(e) => setThemeValue(e.target.value.slice(0, 50))}
+                    onKeyDown={(e) => e.key === "Enter" && handleSaveTheme()}
+                    placeholder="long drives, sunday morning..."
+                    autoFocus
+                    maxLength={50}
+                    style={{
+                      background: "#1a1a1a",
+                      border: `1px solid rgba(${accentRgb},0.25)`,
+                      borderRadius: 6,
+                      color: "#888",
+                      fontFamily: "'Syne', sans-serif",
+                      fontSize: 12, fontStyle: "italic",
+                      padding: "4px 8px",
+                      flex: 1,
+                      outline: "none",
+                    }}
+                  />
+                  <button onClick={handleSaveTheme} style={{
+                    background: accent, border: "none",
+                    borderRadius: 5, color: "#000",
+                    fontFamily: "'Space Mono', monospace",
+                    fontSize: 8, fontWeight: 700,
+                    padding: "5px 10px", cursor: "pointer",
+                  }}>SAVE</button>
+                </div>
+                <ChallengeQuickFill onSelect={(tag) => { setThemeValue(tag); }} />
               </div>
             ) : mixtape.theme ? (
               <div
