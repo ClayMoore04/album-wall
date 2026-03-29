@@ -85,6 +85,14 @@ export const pillBtnStyle = (active) => ({
   boxShadow: active ? "0 0 8px rgba(29,185,84,0.2)" : "none",
 });
 
+export const elevation = {
+  flat: { boxShadow: "none" },
+  raised: { boxShadow: "0 2px 8px rgba(0,0,0,0.3)" },
+  floating: (accentRgb = "236,72,153") => ({
+    boxShadow: `0 8px 32px rgba(0,0,0,0.5), 0 0 0 1px rgba(${accentRgb},0.08)`,
+  }),
+};
+
 export const toggleSwitchStyle = (on) => ({
   outer: {
     width: 36,

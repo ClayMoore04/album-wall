@@ -1,6 +1,8 @@
-import { useState, useMemo } from "react";
-import { palette } from "../lib/palette";
+import { useState, useMemo, useEffect } from "react";
+import { palette, noiseOverlay } from "../lib/palette";
+import { hexToRgb } from "../lib/colorExtract";
 import { TAGS } from "../lib/tags";
+import { injectAnimations } from "../lib/animations";
 import WallCard from "./WallCard";
 import { WallCardSkeleton } from "./Skeleton";
 
@@ -22,6 +24,17 @@ export default function Wall({
   const [filterTags, setFilterTags] = useState([]);
   const [showFilter, setShowFilter] = useState(false);
   const [listenedFilter, setListenedFilter] = useState("all"); // "all" | "listened" | "unlistened"
+
+  // Inject ambient pulse keyframes
+  useEffect(() => {
+    injectAnimations();
+    if (!document.getElementById("ambient-pulse-css")) {
+      const style = document.createElement("style");
+      style.id = "ambient-pulse-css";
+      style.textContent = `@keyframes ambientPulse { 0%, 100% { opacity: 0.03; } 50% { opacity: 0.07; } }`;
+      document.head.appendChild(style);
+    }
+  }, []);
   const [sortBy, setSortBy] = useState("newest"); // "newest" | "rating"
 
   const toggleTag = (tag) => {
@@ -222,27 +235,59 @@ export default function Wall({
 
       {/* Pinned albums section */}
       {pinnedSubmissions.length > 0 && (
-        <div style={{ marginBottom: 20 }}>
+        <div
+          style={{
+            position: "relative",
+            marginBottom: 20,
+            padding: 16,
+            borderRadius: 12,
+            background: `radial-gradient(ellipse at 50% 50%, rgba(${hexToRgb(palette.accent)},0.06) 0%, transparent 70%)`,
+            border: "1px solid #1a1a1a",
+            overflow: "hidden",
+          }}
+        >
+          {/* Pulsing ambient glow */}
           <div
             style={{
-              fontSize: 10,
-              fontWeight: 700,
-              fontFamily: "'Space Mono', monospace",
-              color: "#333",
-              textTransform: "uppercase",
-              letterSpacing: 1,
-              marginBottom: 8,
-              display: "flex",
-              alignItems: "center",
-              gap: 6,
+              position: "absolute",
+              inset: 0,
+              background: `radial-gradient(ellipse at 50% 50%, rgba(${hexToRgb(palette.accent)},0.12) 0%, transparent 60%)`,
+              animation: "ambientPulse 4s ease-in-out infinite",
+              pointerEvents: "none",
             }}
-          >
-            <span style={{ fontSize: 12 }}>📌</span> Pinned
-          </div>
-          <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
-            {pinnedSubmissions.map((sub, i) => (
-              <WallCard {...cardProps(sub, i)} />
-            ))}
+          />
+          {/* Noise texture */}
+          <div
+            style={{
+              position: "absolute",
+              inset: 0,
+              ...noiseOverlay,
+              pointerEvents: "none",
+              borderRadius: 12,
+            }}
+          />
+          <div style={{ position: "relative", zIndex: 1 }}>
+            <div
+              style={{
+                fontSize: 10,
+                fontWeight: 700,
+                fontFamily: "'Space Mono', monospace",
+                color: "#333",
+                textTransform: "uppercase",
+                letterSpacing: 1,
+                marginBottom: 8,
+                display: "flex",
+                alignItems: "center",
+                gap: 6,
+              }}
+            >
+              <span style={{ fontSize: 12 }}>📌</span> Pinned
+            </div>
+            <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+              {pinnedSubmissions.map((sub, i) => (
+                <WallCard {...cardProps(sub, i)} />
+              ))}
+            </div>
           </div>
         </div>
       )}

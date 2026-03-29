@@ -2,7 +2,57 @@ import { useState } from "react";
 import { Link } from "react-router-dom";
 import { formatMs } from "../hooks/useMixtapeData";
 import { useToast } from "./Toast";
+import { extractColor, hexToRgb } from "../lib/colorExtract";
 import TapeTradeButton from "./TapeTradeButton";
+
+// Load an image with crossOrigin support, returns null on failure
+function loadImage(url) {
+  return new Promise((resolve) => {
+    const img = new Image();
+    img.crossOrigin = "anonymous";
+    img.onload = () => resolve(img);
+    img.onerror = () => resolve(null);
+    img.src = url;
+  });
+}
+
+// Generate a small noise pattern canvas tile
+function createNoiseTile() {
+  const size = 128;
+  const canvas = document.createElement("canvas");
+  canvas.width = size;
+  canvas.height = size;
+  const ctx = canvas.getContext("2d");
+  const imageData = ctx.createImageData(size, size);
+  for (let i = 0; i < imageData.data.length; i += 4) {
+    const v = Math.random() * 255;
+    imageData.data[i] = v;
+    imageData.data[i + 1] = v;
+    imageData.data[i + 2] = v;
+    imageData.data[i + 3] = 10; // ~4% opacity
+  }
+  ctx.putImageData(imageData, 0, 0);
+  return canvas;
+}
+
+// Draw rounded-rect clipped image
+function drawRoundedImage(ctx, img, x, y, w, h, r) {
+  ctx.save();
+  ctx.beginPath();
+  ctx.moveTo(x + r, y);
+  ctx.lineTo(x + w - r, y);
+  ctx.quadraticCurveTo(x + w, y, x + w, y + r);
+  ctx.lineTo(x + w, y + h - r);
+  ctx.quadraticCurveTo(x + w, y + h, x + w - r, y + h);
+  ctx.lineTo(x + r, y + h);
+  ctx.quadraticCurveTo(x, y + h, x, y + h - r);
+  ctx.lineTo(x, y + r);
+  ctx.quadraticCurveTo(x, y, x + r, y);
+  ctx.closePath();
+  ctx.clip();
+  ctx.drawImage(img, x, y, w, h);
+  ctx.restore();
+}
 
 export default function GatefoldFooter({ mixtape, mixtapeId, tracks, totalMs, user, isOwner, isCollaborator, accent }) {
   const { showToast } = useToast();
@@ -34,104 +84,165 @@ export default function GatefoldFooter({ mixtape, mixtapeId, tracks, totalMs, us
     try {
       const canvas = document.createElement("canvas");
       const ctx = canvas.getContext("2d");
-      const W = 1080, H = 1920; // Instagram story size
+      const W = 1080, H = 1920;
       canvas.width = W;
       canvas.height = H;
 
-      // Background
-      ctx.fillStyle = "#0a0a0a";
-      ctx.fillRect(0, 0, W, H);
-
-      // Accent gradient
-      const grad = ctx.createLinearGradient(0, 0, W, H);
-      grad.addColorStop(0, (accent || "#ec4899") + "18");
-      grad.addColorStop(1, "transparent");
-      ctx.fillStyle = grad;
-      ctx.fillRect(0, 0, W, H);
-
-      // Cover art (load first album art if available)
-      const coverArts = tracks.filter(t => t.album_art_url).slice(0, 4);
-      if (coverArts.length > 0) {
-        const artSize = 400;
-        const artX = (W - artSize) / 2;
-        const artY = 200;
-
-        if (coverArts.length >= 4) {
-          const half = artSize / 2 - 2;
-          for (let i = 0; i < 4; i++) {
-            try {
-              const img = new Image();
-              img.crossOrigin = "anonymous";
-              await new Promise((resolve, reject) => {
-                img.onload = resolve;
-                img.onerror = reject;
-                img.src = coverArts[i].album_art_url;
-              });
-              const dx = artX + (i % 2) * (half + 4);
-              const dy = artY + Math.floor(i / 2) * (half + 4);
-              ctx.drawImage(img, dx, dy, half, half);
-            } catch { /* skip failed images */ }
-          }
-        } else {
-          try {
-            const img = new Image();
-            img.crossOrigin = "anonymous";
-            await new Promise((resolve, reject) => {
-              img.onload = resolve;
-              img.onerror = reject;
-              img.src = coverArts[0].album_art_url;
-            });
-            ctx.drawImage(img, artX, artY, artSize, artSize);
-          } catch { /* skip */ }
-        }
+      // Determine cover art URL
+      let coverUrl = mixtape.custom_cover_url;
+      if (!coverUrl && mixtape.cover_art_index != null && tracks[mixtape.cover_art_index]?.album_art_url) {
+        coverUrl = tracks[mixtape.cover_art_index].album_art_url;
+      }
+      if (!coverUrl) {
+        coverUrl = tracks.find((t) => t.album_art_url)?.album_art_url;
       }
 
-      // Title
+      // Extract dominant color
+      const dominantColor = coverUrl ? await extractColor(coverUrl) : null;
+      const tintHex = dominantColor || accent || "#ec4899";
+      const tintRgb = hexToRgb(tintHex);
+
+      // 1. Full-bleed blurred background
+      const coverImg = coverUrl ? await loadImage(coverUrl) : null;
+      if (coverImg) {
+        ctx.save();
+        ctx.filter = "blur(60px) brightness(0.4)";
+        // Scale to fill
+        const scale = Math.max(W / coverImg.width, H / coverImg.height);
+        const sw = coverImg.width * scale;
+        const sh = coverImg.height * scale;
+        ctx.drawImage(coverImg, (W - sw) / 2, (H - sh) / 2, sw, sh);
+        ctx.restore();
+      } else {
+        ctx.fillStyle = "#0a0a0a";
+        ctx.fillRect(0, 0, W, H);
+      }
+
+      // 2. Dark overlay to ensure readability
+      ctx.fillStyle = "rgba(10,10,10,0.55)";
+      ctx.fillRect(0, 0, W, H);
+
+      // 3. Dominant color gradient overlay
+      const colorGrad = ctx.createLinearGradient(0, 0, 0, H);
+      colorGrad.addColorStop(0, `rgba(${tintRgb},0.25)`);
+      colorGrad.addColorStop(0.5, "transparent");
+      colorGrad.addColorStop(1, `rgba(${tintRgb},0.10)`);
+      ctx.fillStyle = colorGrad;
+      ctx.fillRect(0, 0, W, H);
+
+      // 4. Grain texture overlay
+      const noise = createNoiseTile();
+      const pattern = ctx.createPattern(noise, "repeat");
+      ctx.fillStyle = pattern;
+      ctx.fillRect(0, 0, W, H);
+
+      // 5. Cover art (sharp, centered, rounded corners)
+      const artSize = 420;
+      const artX = (W - artSize) / 2;
+      const artY = 220;
+      if (coverImg) {
+        // Shadow behind cover
+        ctx.save();
+        ctx.shadowColor = `rgba(${tintRgb},0.3)`;
+        ctx.shadowBlur = 40;
+        ctx.shadowOffsetY = 12;
+        ctx.fillStyle = "#000";
+        ctx.beginPath();
+        ctx.roundRect(artX, artY, artSize, artSize, 16);
+        ctx.fill();
+        ctx.restore();
+        drawRoundedImage(ctx, coverImg, artX, artY, artSize, artSize, 16);
+      }
+
+      // 6. Title
+      const titleY = artY + artSize + 60;
       ctx.fillStyle = "#e8e6e3";
-      ctx.font = "bold 52px sans-serif";
+      ctx.font = "bold 48px sans-serif";
       ctx.textAlign = "center";
-      const title = mixtape.title.length > 30 ? mixtape.title.slice(0, 30) + "..." : mixtape.title;
-      ctx.fillText(title, W / 2, 700);
+      const title = mixtape.title.length > 28 ? mixtape.title.slice(0, 28) + "..." : mixtape.title;
+      ctx.fillText(title, W / 2, titleY);
 
-      // Theme
+      // 7. Theme
+      let nextY = titleY + 10;
       if (mixtape.theme) {
-        ctx.fillStyle = accent || "#ec4899";
-        ctx.font = "italic 24px sans-serif";
-        ctx.fillText(`for: ${mixtape.theme}`, W / 2, 750);
+        nextY += 40;
+        ctx.fillStyle = `rgba(${tintRgb},0.9)`;
+        ctx.font = "italic 22px sans-serif";
+        ctx.fillText(`for: ${mixtape.theme}`, W / 2, nextY);
       }
 
-      // Creator
-      ctx.fillStyle = "#777";
-      ctx.font = "20px sans-serif";
+      // 8. Creator + stats
+      nextY += 40;
       const creator = mixtape.profiles?.display_name || "Unknown";
-      ctx.fillText(`by ${creator}`, W / 2, mixtape.theme ? 790 : 750);
-
-      // Tracklist
-      ctx.textAlign = "left";
+      ctx.fillStyle = "#777";
       ctx.font = "18px sans-serif";
-      const startY = mixtape.theme ? 860 : 820;
-      const maxTracks = Math.min(tracks.length, 14);
-      tracks.slice(0, maxTracks).forEach((t, i) => {
-        const y = startY + i * 34;
-        ctx.fillStyle = "#555";
-        ctx.fillText(`${String(i + 1).padStart(2, "0")}`, 120, y);
-        ctx.fillStyle = "#e8e6e3";
-        const trackText = `${t.track_name} — ${t.artist_name}`;
-        ctx.fillText(trackText.length > 45 ? trackText.slice(0, 45) + "..." : trackText, 170, y);
-      });
-      if (tracks.length > maxTracks) {
-        ctx.fillStyle = "#555";
-        ctx.fillText(`+ ${tracks.length - maxTracks} more`, 170, startY + maxTracks * 34);
+      ctx.fillText(`by ${creator}  ·  ${tracks.length} tracks  ·  ${formatMs(totalMs)}`, W / 2, nextY);
+
+      // 9. Side A / Side B tracklist columns
+      nextY += 60;
+      const colX = { a: 100, b: W / 2 + 40 };
+      const maxPerSide = 7;
+
+      // Compute side split (same as og-image.js: 60min threshold)
+      let sideAMs = 0;
+      let splitIdx = tracks.length;
+      for (let i = 0; i < tracks.length; i++) {
+        if (sideAMs + tracks[i].duration_ms > 60 * 60000) {
+          splitIdx = i;
+          break;
+        }
+        sideAMs += tracks[i].duration_ms;
       }
 
-      // Stats
-      ctx.textAlign = "center";
-      ctx.fillStyle = "#555";
-      ctx.font = "16px sans-serif";
-      ctx.fillText(`${tracks.length} tracks · ${formatMs(totalMs)}`, W / 2, H - 140);
+      const sideATracks = tracks.slice(0, Math.min(splitIdx, maxPerSide));
+      const sideBTracks = tracks.slice(splitIdx, splitIdx + maxPerSide);
 
-      // Branding
-      ctx.fillStyle = "#333";
+      // Side A header
+      ctx.textAlign = "left";
+      ctx.fillStyle = `rgba(${tintRgb},0.8)`;
+      ctx.font = "bold 14px sans-serif";
+      ctx.letterSpacing = "2px";
+      ctx.fillText("SIDE A", colX.a, nextY);
+
+      if (sideBTracks.length > 0) {
+        ctx.fillText("SIDE B", colX.b, nextY);
+      }
+
+      // Track rows
+      ctx.font = "16px sans-serif";
+      const rowH = 32;
+      sideATracks.forEach((t, i) => {
+        const y = nextY + 30 + i * rowH;
+        ctx.fillStyle = "#555";
+        ctx.fillText(String(i + 1).padStart(2, "0"), colX.a, y);
+        ctx.fillStyle = "#ccc";
+        const name = `${t.track_name} — ${t.artist_name}`;
+        ctx.fillText(name.length > 35 ? name.slice(0, 35) + "..." : name, colX.a + 36, y);
+      });
+      if (splitIdx > maxPerSide) {
+        const y = nextY + 30 + sideATracks.length * rowH;
+        ctx.fillStyle = "#555";
+        ctx.fillText(`+ ${splitIdx - maxPerSide} more`, colX.a + 36, y);
+      }
+
+      sideBTracks.forEach((t, i) => {
+        const y = nextY + 30 + i * rowH;
+        const num = splitIdx + i + 1;
+        ctx.fillStyle = "#555";
+        ctx.fillText(String(num).padStart(2, "0"), colX.b, y);
+        ctx.fillStyle = "#ccc";
+        const name = `${t.track_name} — ${t.artist_name}`;
+        ctx.fillText(name.length > 35 ? name.slice(0, 35) + "..." : name, colX.b + 36, y);
+      });
+      if (tracks.length - splitIdx > maxPerSide) {
+        const y = nextY + 30 + sideBTracks.length * rowH;
+        ctx.fillStyle = "#555";
+        ctx.fillText(`+ ${tracks.length - splitIdx - maxPerSide} more`, colX.b + 36, y);
+      }
+
+      // 10. Branding watermark
+      ctx.textAlign = "center";
+      ctx.fillStyle = `rgba(${tintRgb},0.4)`;
       ctx.font = "14px sans-serif";
       ctx.fillText("inthebooth.vercel.app", W / 2, H - 80);
 
